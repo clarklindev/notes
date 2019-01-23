@@ -138,7 +138,9 @@ git config --global user.email "clark.cookie@gmail.com"
 - to 'notepad.exe' and instructs to wait at line 1
 
 ```
-git config --global core.editor "notepad.exe -wl1"
+git config --global core.editor "notepad.exe -wl1"   
+
+-wl1 means wait at line 1
 ```
 
 ### use colors when outputting to command line
@@ -212,6 +214,7 @@ Basic cycle
 - then blank line
 - then more complete description (72 chars limit per line)
 - write commit messages in present tense (what this commit does)
+- say problem, then how it fixes the bug
 - can add ticket tracking numbers from bug or support requests
 - can develop shorthand message conventions
 
@@ -229,7 +232,7 @@ lists logs made up till now
 git log
 ```
 
-each commit has - unique id
+### each commit has - unique id
 
 - author (thats why user.name & email NB!!)
 - date
@@ -417,8 +420,9 @@ Adding to staging tracks text edits
 
 #### COMMAND:
 
+eg. adds file second_file.txt to staging
 ```
-git add second_file.txt eg. adds file second_file.txt to staging
+git add second_file.txt 
 ```
 
 ---
@@ -429,8 +433,9 @@ Once commiting, GIT does not report those changes anymore, only reports differen
 
 #### COMMAND:
 
+files in staging gets commited
 ```
-git commit -m "add second file to project" files in staging gets commited
+git commit -m "add second file to project" 
 ```
 
 ---
@@ -1613,7 +1618,177 @@ source ~/.bash_profile
 
 ## 11. MERGING BRANCHES
 
+* git branch
+```
+git branch
+```
+
+### lists the branches
+```
+master   
+*seo_title           <- current branch
+shorten_title
+```
+
+* merging seo_title back into master to see the difference
+
+```
+git diff master..seo_title
+```
+
+* first checkout branch things are being merged into (receiver branch)   
+ie. master is going to receive the changes in seo_title
+```
+git checkout master   
+git merge seo_title
+```
+
+---
+## Fast-forward merge vs true-merge
+
+# Fast-forward mege
+   * make your branch from master
+   * make a commit on branch (note: no change has been made to master)
+
+* What happens, GIT takes thing you're merging in, and starts at end of it
+* looks back at all of its ancestors, all way back to begining
+* and along the way, looks to see whether it has the HEAD pointer of the current master branch (whether master has changed),
+* if it does, it does a fast-forward merge (moves the commit up into my timeline and moves HEAD along)
+* there was no need to make a new commit, could just fast-forward along the chain and merge that way
+  (forces git to make a commit, don't do fast forward)
+```
+   git merge --no-ff <branch>   
+```
+# True Merge
+
+* Process is the same
+* when both the branch and the master have had commits and head has moved to new commit NOT in the branch
+```
+   git merge <shorten_title>
+```
+
+<picture>
+
+* true merge create a new commit to merge
+* should shorten_title have eg. an updated index.html compared to master, the merge should be okay because the change to shorten_title was made after
+
+---
+
+# Merge Conflicts
+
+* GIT sees and recognises changes within same file if at two separate parts of the file.
+* Conflict when two changes for same line/set of lines in two different commits (GIT cant decide which to use) this is a merge conflict
+* Git marks the conflict and waits for you to solve it.
+* On a conflict, GIT tells us of CONFLICT in file, branch says (master | MERGING) ie in middle of merge
+
+results of call: unmerged paths, and both modified
+```
+git status 
+```
+* git marks conflicts with <<<<<<, ========, >>>>>> symbols
+
+# Resolving Conflicts
+   3 choices 
+   * abort merge
+   * resolve manually
+   * use a merge tool
+
+---
+
+# Aborting merge
+
+```
+git merge --abort
+```
+
+---
+# Resolving manually
+
+* resolve by hand, then add and commit results
+* can check what the commits were about
+```
+   git log --oneline -3   
+   git show 432e8c6
+```
+* compare and make changes, then remove marker symbols <<<<<, =====, >>>>>
+* once satisfied add to staging    
+```
+   git add <filename>
+```
+standard message for merging auto created (message not necessary for commit)
+```
+   git commit 
+```   
+
+show nice graphical representation of branching and merging:
+```
+git log --graph --oneline --all --decorate
+```
+
+show merge tools available for resolving conflicts
+```
+git mergetool   
+git mergetool --tool=<name of mergetool>   
+```
+---
+# Strategies to reduce merge conflicts
+* Keep lines short (git can then show error lines)
+* keep commits small and focused
+* beware stray edits to whitespace (space, tabs, line return)
+* merge often back to master branch because each time you do, these changes will be smaller and more isolated)
+* track changes to master - as changes continue to happen in master, bring those changes into your branch so you branch stays mostly in sync with master (process tracking)
+
 ## 12. STASHING CHANGES
+
+* stashing is a place to temporarily store changes without having to commit them to the repository (not part of repository, staging index or working directory)
+* work like commits (still snapshots) but dont have SHA values
+* most often used when you need to switch branches and you have some change to a file(s) and not ready to turn them into commits yet. so we stash
+```
+git stash save "stash name"
+```
+* git tells you where HEAD is at
+* so after stash, it ran git reset hard HEAD, gets repo and puts it into index and working dir
+
+## Viewing Stash changes
+* stash is available at all times
+shows list, position of item in stash, and on which branch   
+'branch' : stash@{0} on 'branch'
+```
+git stash list
+```
+shows changes to file
+``` 
+git stash show stash@{0}
+```
+shows as patch section of code
+```
+git stash show -p stash@{0}
+```
+
+## retrieving stash items
+* brings stashed changes back into working directory for whichever branch we are on
+* possibility of conflicts on pulling items out of stack
+* 2 commands we can use to retrieve from stash
+```
+git stash pop <stash item>   
+git stash apply
+```
+* git stash pop removes from stash
+* git stash apply leave a copy in stash
+
+* git stash pop - have to speficy which item to remove if we dont specify, it removes the first one
+```
+   git stash op stash@{0}
+```
+
+## Deleting items in stash
+```
+   git stash drop stash@{0}
+```
+## Deleting everything in stash at once
+```
+   git stash clear
+```
 
 ### Git SQUASHING commits
 
@@ -1984,4 +2159,15 @@ git push origin --delete non_tracking
 * you submit a message with your request
   maybe considered for incorporation into project for merge-in
 
+---
+# Password Caching
+* to connect to remote server
+* using SSH Keys
+* file resides on computer (bit a code)
+* take complimentary part of code, put it up on github
+* then when I go make a request, GIT automatically sends that bit of code along with the request to authenticate
+
+[generating ssh keys](https://help.github.com/articles/generating-ssh-keys)
+
+* if using SSH key, you need to select this option on github and get its respective URL link
 ---

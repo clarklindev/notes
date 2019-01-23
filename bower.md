@@ -21,7 +21,8 @@ bower search PACKAGE
 ```
 
 ```
-bower install PACKAGE --save
+bower install PACKAGE --save   
+bower install PACKAGE --save-dev
 ```
 
 ```
