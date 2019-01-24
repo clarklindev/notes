@@ -451,3 +451,112 @@ gulp.task('images', function() {
 		.pipe(gulpdest('dist/images'));
 });
 ```
+gulp-cache plugin to help with optimizing images
+
+```
+npm install gulp-cache --save-dev
+```
+```js
+var cache = require('gulp-cache');
+gulp.task('images', function(){
+	return gulp.src('app/images/**/*.+(jpg|png|jpeg|gif|svg)')
+	.pipe(cache(imagemin({interlaced:true})))
+	.pipe(gulp.dest('dist/images'));
+});
+```
+
+## Copying fonts to dest
+
+* fonts are already optimised, just copy over to 'dist' folder
+
+```
+gulp.task('fonts', function(){
+	return gulp.src('app/fonts/**/*')
+	.pipe(gulp.dest('dist/fonts'))
+});
+```
+## Cleaning dist/cache
+
+### cleaning up generated files automatically
+
+```
+npm install del --save-dev
+```
+```js
+var del = require('del');
+```
+dell function takes in an array of node globs which tell it what folders to delete.
+```js
+gulp.task('clean:dist', function(){
+	return del.sync('dist');
+});
+
+```
+```
+command: gulp clean:dist
+```
+cleaning cache off local system:
+```
+gulp.task('cache:clear', function(callback){
+	return cache.clearAll(callback)
+})
+```
+---
+## Combining Gulp tasks
+
+so far we have created 2 sets of gulp tasks
+1. develop processes
+	* compiles sass to css
+	* watch for changes
+	* reload browser when changes occur
+
+2. optimization processes
+	* where we optimize css
+	* js
+	* images
+	* fonts copied over
+	* clean:dist
+
+```
+<!-- Group 1 tasks -->
+gulp.task('watch', ['browserSync', 'sass'], function(){
+	//watchers
+})
+```
+
+### using run-sequence
+
+```
+npm install run-sequence --save-dev
+```
+
+syntax:
+
+```js
+var runSequence = require('run-sequence');
+gulp.task('task-name', function(callback){
+	runSequence('task-one', 'task-two', 'task-three', callback);
+	//OR
+	runSequence('task-one', ['task-two','task-three'], 'task-four', callback);
+});
+```
+---
+creating a task that ensures 'clean:dist' runs first and allows tasks running in parallel with use of array syntax
+
+```js
+gulp.task('build', function(callback){
+	runSequence('clean:dist', ['sass', 'useref', 'images', 'fonts'], callback)
+});
+```
+
+---
+
+# Running gulp
+
+1. npm install
+2. gulp build
+3. gulp / gulp default
+
+*can use gulp in conjunction with bower
+
+---
