@@ -9,6 +9,7 @@
 - typescript uses lowercase types whereas Javascript uses uppercase
 - access variables in a strings via
   `` `${variablename}` ``
+- 'this' keyword is in the context from which it is called, the parent object
 - union type allows options, 1 | 2 | 3
 - OPTIONAL argument eg. quantity?:number
 - object type eg. pizza:{name:string, price:number; getName():string }
