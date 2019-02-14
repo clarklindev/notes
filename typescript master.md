@@ -1,6 +1,8 @@
 # Typescript master class
 
 - this keyword is in the context of from where it is called
+* with 'const', we can mutate the value but cannot reassign the value
+* Object.freeze() returns an object that can no longer be changed
 
 ## call, apply, bind
 
@@ -66,3 +68,97 @@ elem.addEventListener('click', handleClick, false);
 ```
 
 ## Type Queries
+
+### typeof type queries
+
+* type query is a 'typeof' operator used with type declarations
+* its like saying create a Person which is a typeof a specific structure
+* it 'copies' the DNA structure of another structure and uses it as its type
+```
+const person = {
+  name: 'Todd',
+  age: 27
+};
+
+type Person = typeof person;
+
+const anotherPerson:Person = {
+  name: 'John',
+  age: 30
+};
+
+```
+<!-- also valid -->
+```
+const anotherPerson: typeof person = {
+  name: 'John',
+  age: 30
+};
+```
+### keyof index type queries
+
+* returns keys made up of another structure
+```
+const person = {
+  name: 'Todd',
+  age: 27
+};
+
+type Person = typeof person;
+type PersonKeys = keyof Person;   //type PersonKeys = "name" | "age"
+```
+
+```
+<!-- allows us to use the union keys of PersonKeys and looks up their type in Person-->
+type PersonTypes = Person[PersonKeys]     //type PersonTypes = string | number
+```
+* PersonTypes takes the values of the keys (PersonKeys) which are string literals "name" | "age" and looks at keys in 'Person' and takes those actual types for PersonTypes.
+* so "name" is associated with a string and "age" is associated with a number
+* type PersonTypes return a new union type of real types string | number
+
+### keyof generics and lookup types
+* following the above theory,
+* demonstrating power of generic types
+* asking for the property from an object
+* K extends keyof T, means K has to exist in T, k is a subtype of T (lookup type)
+```
+const person = {
+  name: 'Todd',
+  age: 27
+};
+
+type Person = typeof person;
+type PersonKeys = keyof Person;   //type PersonKeys = "name" | "age"
+type PersonTypes = Person[PersonKeys]     //type PersonTypes = string | number
+```
+* keyof T returns 'name' | 'age', K extends this means K must be one of the two
+* returns type for obj[key]
+```
+function getProperty<T, K extends keyof T>(obj: T, key: K){ 
+  return obj[key];    //returns type
+}
+
+const personName = getProperty(person, 'name');
+//personName is a type of 'string' as Typescript picks it up
+
+```
+### mapped types
+
+* transforming one type into another type
+```
+interface Person{
+  name: string;
+  age: number;
+}
+
+interface ReadonlyPerson{
+  readonly name: string;
+  readonly age: number;
+}
+
+const person: Person = {
+  name: 'Todd',
+  age: 27
+};
+
+```
