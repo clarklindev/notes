@@ -782,3 +782,101 @@ ngOnInit(){
 ---
 
 ## Todd Motto - Angular Fundamentals - 08. Template-driven forms, Inputs and Validation
+
+* passenger.viewer.component.ts
+
+<!-- passenger-viewer.component.ts -->
+```ts
+
+```
+
+### form stateless component
+
+<!-- passenger-viewer.component.ts snippet-->
+```ts
+@Component({
+  template:`<passenger-form [detail]="passenger">
+  </passenger-form>`
+})
+```
+
+<!-- passenger-form.component.ts -->
+
+```ts
+import { Component, Input } from '@angular/core';
+import { Passenger} from '../../models/passenger.interface';
+
+@Component({
+  selector:'passenger-form',
+  template:`<form>Form! <div>detail | json </div></form>`
+})
+export class PassengerFormComponent{
+  @Input()
+  detail: Passenger;
+
+}
+```
+
+<!-- passenger-dashboard.module.ts -->
+```ts
+import { FormsModule } from '@angular/forms';
+import { PassengerFormComponent } from './components/passenger-form/passenger-form.component';
+
+
+@NgModule({
+  imports:[CommonModule, HttpModule,  FormsModule],
+  declarations:[
+    PassengerFormComponent
+  ]
+})
+```
+## ngForm / ngModel
+
+* forms elements get #form="ngForm" which keeps track of state changes. #form is a template ref to the form
+* novalidate tells form not to validate as we want to use angular validation
+* input name="" is needed in template driven forms, the name value becomes a property on an object representing the form
+* add ngModel as a standalone attribute
+* create a one way binding to [ngModel]="detail.fullname" which takes the detail object and create a one-way binding from ngModel
+
+
+<!-- passenger-form.component.ts -->
+
+```ts
+@Component({
+  selector:'passenger-form',
+  template:`
+  <form #form="ngForm" novalidate>
+    {{detail | json}}
+    <div>
+      Passenger name:
+      <input type="text" name="fullname" [ngModel]="detail?.fullname">
+    </div>
+
+    <div>
+      Passenger ID:
+      <input type="number" name="id" [ngModel]="detail?.id">
+    </div>
+    {{form.value | json }}
+
+  </form>
+  `,
+})
+export class PassengerFormComponent{
+  @Input()
+  detail:Pasenger;
+}
+```
+
+## binding to radio buttons
+```ts
+<div>
+  <label>
+    <input type="radio" [value]="true" name="checkedIn" [ngModel]="detail?.checkedIn" (ngModelChange)="toggleCheckIn()">
+    yes
+  </label>
+  <label>
+    <input type="radio" [value]="false" name="checkedIn" [ngModel]="detail?.checkedIn">
+    no
+  </label>
+</div>
+```
