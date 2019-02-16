@@ -782,3 +782,57 @@ ngOnInit(){
 ---
 
 ## Todd Motto - Angular Fundamentals - 08. Template-driven forms, Inputs and Validation
+
+### setting up for forms
+
+- create a smart component (containers folder) called passenger-viewer.component.ts
+
+  <!-- app.components.ts -->
+
+```ts
+template: `<div class="app"><passenger-viewer></passenger-viewer></div>`;
+```
+
+  <!-- !pasenger-dashboard.module.ts -->
+
+```ts
+import { PassengerViewerComponent } from './containers/passenger-viewer/passenger-viewer.component';
+
+@NgModule({
+  declarations:[PassengerViewerComponent],
+  exports:[PassengerViewerComponent]
+})
+```
+
+  <!-- passenger-viewer.component.ts -->
+
+```ts
+import { Component, OnInit } from '@angular/core';
+import { PassengerDashboardService } from '../../passenger-dashboard.service';
+import { Passenger } from '../../models/passenger-interface';
+
+@Component({
+	selector: 'passenger-viewer',
+	styleUrls: ['passenger-viewer.component.scss'],
+	template: `
+		<div>{{ passenger | json }}</div>
+	`
+})
+export class PassengerViewerComponent implements OnInit {
+	passenger: Passenger;
+	constructor(private passengerService: PassengerDashboardService) {}
+	ngOnInit() {
+		this.passengerService
+			.getPassenger(1)
+			.subscribe((data: Passenger) => (this.passenger = data));
+	}
+}
+```
+
+<!-- passenger-dashboard.service snippet-->
+
+```ts
+  getPassenger(id:number):Observable<Passenger>{
+    return this.http.get(`${PASSENGER_API}/${id}`).map((response:Response)=> response.json()).catch((error:any)=> Observable.throw(error.json()));
+  }
+```
