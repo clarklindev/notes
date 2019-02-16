@@ -922,16 +922,233 @@ export class PassengerFormComponent {
 ## binding to radio buttons
 
 - the linked up radio selection buttons all get the same name
+- bind to [ngModel] in input element type="radio"
+- NOTE: AHA!! MOMENT.. [ngModel] binding is for existing default values that already exist in the class property, like if the radio is supposed to start off saying "true" thats why it is check what is the current value already there. and [value] binds to the current value of the input
 
 ```ts
 <div>
   <label>
-    <input type="radio" [value]="true" name="checkedIn" [ngModel]="detail?.checkedIn" (ngModelChange)="toggleCheckIn()">
+    <input type="radio" [value]="true" name="checkedIn" [ngModel]="detail?.checkedIn" (ngModelChange)="toggleCheckIn($event)">
     yes
   </label>
   <label>
-    <input type="radio" [value]="false" name="checkedIn" [ngModel]="detail?.checkedIn">
+    <input type="radio" [value]="false" name="checkedIn" [ngModel]="detail?.checkedIn" (ngModelChange)="toggleCheckIn($event)">
     no
   </label>
 </div>
 ```
+
+<!-- passenger-form.component.ts -->
+
+```ts
+export class PassengerFormComponent {
+	@Input()
+	detail: Pasenger;
+	toggleCheckIn(checkedIn: boolean) {
+		if (checkedIn) {
+			this.detail.checkInDate = Date.now();
+		}
+	}
+}
+```
+
+## binding to checkbox
+
+- checkbox returns checked (true) or unchecked (false) value
+- input type="checkbox", it does not need [value]="true"
+
+```ts
+<div>
+  <label>
+    <input type="checkbox" name="checkedIn" [ngModel]="detail?.checkedIn" (ngModelChange)="toggleCheckIn($event)">
+    yes
+  </label>
+```
+
+<!-- passenger-form.component.ts -->
+
+```ts
+export class PassengerFormComponent {
+	@Input()
+	detail: Pasenger;
+	toggleCheckIn(checkedIn: boolean) {
+		if (checkedIn) {
+			this.detail.checkInDate = Date.now();
+		}
+	}
+}
+```
+
+## select element with dynamic option ngValue
+
+- using \*ngFor for select
+
+* [ngModel] binds any existing model data that is in the class to the select
+* [selected] checks which one is selected in initial data model
+
+<!-- baggage.interface -->
+
+```ts
+export interface Baggage {
+	key: string;
+	value: string;
+}
+```
+
+  <!-- passenger-form.component -->
+
+```ts
+import { Baggage } from '../../models/baggage.interface';
+@Component({
+
+template: `
+  <select name="baggage" [ngModel]="detail?.baggage">
+    <option *ngFor="let item of baggage" [value]="item.key" [selected]="item.key === detail?.baggage">
+      {{item.value}}
+    </option>
+  </select>
+
+  <!-- select with ngValue -->
+  <select name="baggage" [ngModel]="detail?.baggage">
+    <option *ngFor="let item of baggage" [ngValue]="item.key">
+      {{item.value}}
+    </option>
+  </select>
+`;
+
+})
+export class PassengerFormComponent{
+  baggage: Baggage[] = [
+  {
+    key: 'none',
+    value: 'No Baggage'
+  },
+  {
+    key: 'hand-only',
+    value: 'Hand Baggage'
+  },
+  {
+    key: 'hold-only',
+    value: 'Hold Baggage'
+  },
+  {
+    key: 'hand-hold',
+    value: 'Hand and Hold Baggage'
+  }]
+}
+```
+
+# form validation
+
+- use template reference # to track form property
+
+* {{ fullname.errors | json }} access the .errors of the element
+
+* required attribute
+
+* #id="ngModel" binds to [ngModel] value of the current element
+* by using template ref #, we are gaining access to the ngModel and have access to validation properties
+
+* form.value property to check all values of the form
+* form.valid property checks if value
+* form.invalid property checks if invalid
+
+* use .dirty on input element checks to see when user has interacted
+  \*ngIf="fullname.errors?.required && fullname.dirty"
+
+* can also use .touched for validation
+
+  <!-- passenger-form.component.scss -->
+
+```scss
+div {
+	margin: 0 0 20px;
+}
+.error {
+	color: #da6969;
+	font-size: 10px;
+}
+```
+
+  <!-- passenger-form.component.ts -->
+
+```ts
+<input type="text" name="fullname" #fullname="ngModel" required [ngModel]="detail?.fullname">
+{{ fullname.errors | json }}
+<div *ngIf="fullname.errors?.required && fullname.dirty" class="error">
+  passenger name is required
+</div>
+
+<input type="number" name="id" #id="ngModel" required [ngModel]="detail?.id">
+{{ id.errors | json }}
+
+//print out form
+{{form.value | json}}
+{{form.valid | json}}
+{{form.invalid | json}}
+```
+
+## Dynamically disable submit
+
+- disable button if form is invalid by binding [disabled]="form.invalid"
+
+* button does not need binding to click as it is type 'submit' which causes event to bubble up to the form and calls the forms' submit handler
+
+<!-- passenger-form.component.ts -->
+
+```ts
+<button type="submit" [disabled]="form.invalid">Update Passenger</button>
+```
+
+## ngSubmit and stateless @Output (submitting our form)
+
+- (ngSubmit) is prefered over (event), as it also tells form that it has been submitted
+
+* form.valid is the second parameter we pass to our handling submit function because you can inspect element and remove a disabled attribute from a button, with js, we add a second level of control which helps make sure of validation
+
+* create an output event property from stateless component to fire event on submit to parent smart container
+* here in our example, we are going to emit an EventEmitter<Passenger> type,
+
+* the forms' handle submit function which checks if form is valid then emits the event this.update.emit(passenger);
+
+* passenger-viewer.component is the parent container of passenger-form.component
+  which handles the output event and calls its update OnUpdatePassenger(\$event) function
+
+* the passenger-viewer.component calls the update method of the service, and we then subscribe to the callback
+
+  <!-- passenger-form.component.ts -->
+
+```ts
+import { Input, Output, EventEmitter} from '@angular/core';
+@Input()
+detail: Passenger;
+
+@Output()
+update:EventEmitter<Passenger> = new EventEmitter<Passenger>();
+
+<form (ngSubmit)="handleSubmit(form.value, form.valid)">
+</form>
+
+handleSubmit(passenger:Passenger, isValid:boolean){
+  if(isValid){
+    this.update.emit(passenger);
+  }
+}
+```
+
+<!-- passenger-viewer.components.ts -->
+
+```ts
+<passenger-form [detail]="passenger" (update)="OnUpdatePassenger($event)"></passenger-form>
+
+OnUpdatePassenger(event:Passenger){
+  console.log(event);
+  this.passengerService.updatePassenger(event).subscribe((data:Passenger)=>{
+    this.passenger = Object.assign({}, this.passenger, event);
+  })
+}
+```
+
+---
+
+# Component routing
