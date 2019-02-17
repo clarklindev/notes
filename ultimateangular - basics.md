@@ -1152,3 +1152,387 @@ OnUpdatePassenger(event:Passenger){
 ---
 
 # Component routing
+
+## Base href and RouterModule
+
+- to use the Router,
+  required: in index.html head, base element href="/"
+- in app.module.ts import { RouterModule, Routes } from '@angular/router';
+
+  <!-- index.html -->
+
+```html
+<base href="/" />
+```
+
+<!-- app.module.ts -->
+
+```ts
+import { RouterModule } from '@angular/router';
+```
+
+### Route module and route outlet
+
+### Wildcard routes for 404handling
+
+- in app.module.ts NgModule({}) decorator, imports:[RouterModule.forRoot(routes)]
+- define routes:Routes = [] which is an array of objects
+- the default route is path:'' and needs a pathMatch:'full' that says only when the path is completely empty '' then, route to default
+- app.component changes to using `<router-outlet>`
+- wildcards use double star ** {path:'**', component:'NotFoundComponent'}
+
+<!-- app.module.ts -->
+
+```ts
+import { RouterModule } from '@angular/router';
+import { HomeComponent } from './home.component';
+import { NotFoundComponent } from './not-found.component';
+
+const routes:Routes = [
+  { path: '', component:HomeComponent, patchMatch:'full'}
+  { path: '**', component:NotFoundComponent}
+];
+@NgModule({
+  imports:[
+    RouterModule.forRoot(routes, {useHash:true}),
+  ],
+  declarations:[HomeComponent, NotFoundComponent],
+  bootstap:[AppComponent]
+})
+```
+
+<!-- home-component.ts -->
+
+```ts
+@Component({
+	selector: `app-home`,
+	template: `
+		<div>Airline Passenger App!</div>
+	`
+})
+export class HomeComponent {}
+```
+
+<!-- not-found.component.ts -->
+
+```ts
+@Component({
+	selector: `not-found`,
+	template: `
+		<div>not-found</div>
+	`
+})
+export class NotFoundComponent {}
+```
+
+<!-- app.component.ts -->
+
+```ts
+@Component({
+	template: `
+		<div class="app">
+			<router-outlet> </router-outlet>
+		</div>
+	`
+})
+export class AppComponent {}
+```
+
+## Understanding routerLink
+
+- navigation via angular
+
+- routerLink is angular way of handling a element href=""
+
+```ts
+  <a routerLink="/">home</a>
+  <a routerlink="/oops">goes to 404</a>
+```
+
+## styling active routes
+
+- routerLinkActive="" takes on a class of what to apply when the link is the active one as its value
+
+* the home button stays active even when we hit the 404, this is because its technally still matching the empty route when it hits the base match, the routerLink="/" needs [routerLinkActiveOptions]="{exact:true}" which binds to the expression
+
+<!-- app.component.ts -->
+
+```ts
+  <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">home</a>
+  <a routerLink="/oops" routerLinkActive="active">404</a>
+```
+
+<!-- app.component.scss -->
+
+```scss
+.nav {
+	margin: 0 0 10px;
+	padding: 0 0 20px;
+	border-bottom: 1px solid #dce5f2;
+
+	a {
+		background: #3a4250;
+		color: #fff;
+		padding: 4px 10px;
+		margin: 0 2px;
+		border-radius: 2px;
+		&.active {
+			color: #b690f1;
+			background: #363c48;
+		}
+	}
+}
+```
+
+## dynamic navigation with \*ngFor
+
+- dynamically constructing our navigation with ngFor
+
+* create a nav property which is an array of objects
+* use an interface to describe the navigation,
+* in dynamic nav, use [routerLinkActiveOptions] to bind to the route that is active
+
+<!-- app.component.ts -->
+
+```ts
+interface Nav {
+	link: string;
+	name: string;
+	exact: boolean;
+}
+@Component({
+	template: `
+		<div class="app">
+			<nav class="nav">
+				<a
+					*ngFor="let item of nav"
+					[routerLink]="item.link"
+					routerLinkActive="active"
+					[routerLinkActiveOptions]="{ exact: item.exact }"
+				>
+					{{ item.name }}
+				</a>
+			</nav>
+			<router-link></router-link>
+		</div>
+	`
+})
+export class AppComponent {
+	nav: Nav[] = [
+		{
+			link = '/',
+			name: 'Home',
+			exact: true
+		},
+		{
+			link = '/oops',
+			name: '404',
+			exact: false
+		}
+	];
+}
+```
+
+## Feature module routes with forChild()
+
+- hooking up sub module Passenger.module into application root
+
+* all feature modules need to still import the right modules so import RouterModule
+
+* imports:[RouterModule.forChild(routes)]
+
+* declare routes note the path doesnt include the /
+
+* change the decorator by removing the exports, everything gets pulled into the root module
+
+  <!-- passenger-dashboard.module -->
+
+```ts
+import { RouterModule,Routes } from '@angular/router';
+
+const routes:Routes = [{
+  {path: 'passengers', component: PassengerDashboardComponent}
+}]
+
+@NgModule({
+  imports:[RouterModule.forChild(routes)]
+})
+
+```
+
+<!-- app.component.ts -->
+
+```ts
+export class AppComponent {
+	nav: Nav[] = [
+		{
+			link = '/',
+			name: 'Home',
+			exact: true
+		},
+		{
+			link = '/oops',
+			name: '404',
+			exact: false
+		},
+		{
+			link = '/passengers',
+			name: 'passengers',
+			exact: false
+		}
+	];
+}
+```
+
+## visiting child routes
+
+- create an array on the route object called children:[] that is child routes based off the parent path 'passengers'
+
+- the default path would be '' which is the default
+
+- adding dynamic route, we create a new object, and path:':id'
+
+  <!-- passenger-dashboard.module -->
+
+```ts
+import { RouterModule,Routes } from '@angular/router';
+
+const routes:Routes = [{
+  path: 'passengers',
+  children:[
+    {path:'', component:PassengerDashboardComponent},
+    {path:':id', component:PassengerViewerComponent}
+  ]
+}]
+
+@NgModule({
+  imports:[RouterModule.forChild(routes)]
+})
+
+```
+
+## Route params, data-fetching with switchMap
+
+- subscribe to the route params so when location on url changes, we call pull correct data
+- implement the behavior to fetch the right passenger based off the id
+- the passenger-viewer.component currently has hardcoded the value .getPassenger(1), we make this dynamic by importing the router which can give us the active route (based off url)
+
+- import {Router, ActivatedRoute, Params} from '@angular/router'
+- import in the contstructor(private router:Router, private route:ActivatedRoute)
+- we can now subscribe to the changes of the route, and read the rpute params that come back and pass them dynamically into our service
+- ngOnInit() we access this.route.params which will give us access to the params which we can subscribe to
+  .subscribe((data:Params))
+- import 'rxjs/add/operator/switchMap'; which subscribes but then cancels an observable and new observable is subscribed 'switch to a new observable'
+
+1. we have this.route.params which gets the route data,
+2. switchMap switches the subscribe from route to service
+3. we pass this data into our service
+4. subscribe to the service,
+5. the data we get back we assign to a local variable passenger
+
+<!-- passenger-viewer.component -->
+
+```ts
+import { Router, ActivatedRoute } from '@angular/router';
+import 'rxjs/add/operator/switchMap';
+
+export class PassengerViewerComponent {
+	passenger: Passenger;
+	constructor(
+		private router: Router,
+		private route: ActivatedRoute,
+		private passengerService: PassengerDashboardService
+	) {}
+
+	ngOnInit() {
+		// this.route.params.subscribe((data: Params) => console.log(data));
+		// this.passengerService
+		// 	.getPassenger(1)
+		// 	.subscribe((data: Passenger) => (this.passenger = data));
+
+		//merging the above with switchMap we, change the data type from Params to Passenger
+
+		this.route.params.switchMap((data: Passenger) =>
+			this.passengerService
+				.getPassenger(data.id))
+				.subscribe((data: Passenger) => this.passenger = data);
+		);
+	}
+}
+```
+
+## Imperative routing API
+
+- using native API to direct routes this.router.navigate(['/passengers']);
+- passenger-detail.component.ts is a stateless component, and it needs to emit event to parent to notify parent to go visit that passenger
+- the parent component is passenger-dashboard.component, and `<passenger-detail (view)="handleView($event)"></passenger-detail>` listens for the view event
+- inject router into the parent component,
+- navigate with the event id, this.router.navigate(['/passengers', event.id]);
+
+<!-- passenger-viewer.component.ts -->
+
+```ts
+  @Component({
+    template:`<button (click)="goBack()">&lsaquo; go back</button>`,
+  })
+
+  goBack(){
+    this.router.navigate(['/passengers']);
+  }
+```
+
+<!-- passenger-detail.component.ts -->
+
+```ts
+@Component({
+	template: `
+		<button (click)="goToPassenger()">view</button>
+	`
+})
+export class PassengerDetailComponent implements OnChanges {
+	@Input()
+	detail: Passenger;
+
+	@Output()
+	view: EventEmitter<Passenger> = new EventEmitter<Passenger>();
+
+	gotoPassenger() {
+		this.view.emit(this.detail);
+	}
+}
+```
+
+<!-- passenger-dashboard.component.ts -->
+
+```ts
+import { Router } from '@angular/router';
+
+@Component({
+	template: `
+		<passenger-detail (view)="handleView($event)"></passenger-detail>
+	`
+})
+export class PassengerDashboardComponent {
+	constructor(private router: Router) {}
+	handleView(event: Passenger) {
+		this.router.navigate(['/passengers', event.id]);
+	}
+}
+```
+
+## Hash location strategy's
+
+- Angular provides different url strategies (location strategies),
+- adding #/ to url RouterModule.forRoot(routes, {useHash: true}) NOTE:this method supports older browsers
+- normal mode (more modern) is just / (without hash) it uses history api, which has benefit of server side rendering
+
+## applying redirects
+
+implementing a redirect, using a redirectTo
+
+```ts
+const routes: Routes = [
+	// {path:'', component:HomeComponent,pathMatch:'full'}
+	{ path: '', redirectTo: 'passengers', pathMatch: 'full' }
+];
+```
