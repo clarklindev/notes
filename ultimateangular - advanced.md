@@ -104,3 +104,12 @@ export class AuthFormComponent implements AfterContentInit {
 	}
 }
 ```
+
+## viewchild / afterviewinit
+
+- viewChild queries a component from the Class that it is in
+
+* import { ViewChild, AfterViewInit }
+
+```ts
+```

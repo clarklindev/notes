@@ -99,14 +99,14 @@ webpack.config.js
 
 ---
 
-```
+```js
 module.exports = {
-    entry:'./src/script1.js',
-    output:{
-        path:'dist',
-        filename:'bundle.js'
-    }
-}
+	entry: './src/script1.js',
+	output: {
+		path: 'dist',
+		filename: 'bundle.js'
+	}
+};
 ```
 
 then TO RUN...  
@@ -162,34 +162,34 @@ npm install babel-core babel-loader babel-preset-es2015 --save-dev
 - adding module property
 - tell it, we want to use some loaders (an array) or all the different loaders we want to use in our project
 - each loader is an object
-- test- chooses the extension (reg expression), eg. /\.js$/ tests for .js files
+- test- chooses the extension (reg expression), eg. /\.js\$/ tests for .js files
 - exclude- tell webpack to exclude certain js files
 - loader- which loader to use
 - query-(object) and inside we list which presets to use
 - presets-(array) of presets we going to use
 
-```
+```js
 module.exports = {
-    entry:'./src/script1.js',
+	entry: './src/script1.js',
 
-    output:{
-        path:'dist',
-        filename:'bundle.js'
-    },
+	output: {
+		path: 'dist',
+		filename: 'bundle.js'
+	},
 
-    module:{
-        loaders:[
-            {
-                test:/\.js$/,
-                exclude:/(node_modules)/,
-                loader:'babel-loader',
-                query:{
-                    presets:['es2015']
-                }
-            }
-        ]
-    }
-}
+	module: {
+		loaders: [
+			{
+				test: /\.js$/,
+				exclude: /(node_modules)/,
+				loader: 'babel-loader',
+				query: {
+					presets: ['es2015']
+				}
+			}
+		]
+	}
+};
 ```
 
 ---
@@ -223,28 +223,30 @@ npm install style-loader css-loader --save-dev
 - style-loader AND css-loader
 - use '!' to say we want to use multiple loaders
 
-```
+```js
 module.exports = {
-    entry:'./src/script1.js',
-    output:{
-        path:'dist',
-        filename:'bundle.js'
-    },
-    module:{
-        loaders:[{
-            test:/\.js$/,
-            exclude:/(node_modules)/,
-            loader:'babel-loader',
-            query:{
-            presets:['es2015']
-            }
-        },
-        {
-            test:/\.css$/,
-            loader:'style-loader!css-loader'
-        }]
-    }
-}
+	entry: './src/script1.js',
+	output: {
+		path: 'dist',
+		filename: 'bundle.js'
+	},
+	module: {
+		loaders: [
+			{
+				test: /\.js$/,
+				exclude: /(node_modules)/,
+				loader: 'babel-loader',
+				query: {
+					presets: ['es2015']
+				}
+			},
+			{
+				test: /\.css$/,
+				loader: 'style-loader!css-loader'
+			}
+		]
+	}
+};
 ```
 
 ### css/introComponent.css
@@ -282,18 +284,18 @@ npm install node-sass sass-loader --save-dev
 
 # css/introComponent.scss
 
-```
+```scss
 $mainColour: #7777bb;
 
-.intro-component{
-    padding:20px;
-    background:$mainColour;
-    color:#FFF;
-    font-family:arial;
+.intro-component {
+	padding: 20px;
+	background: $mainColour;
+	color: #fff;
+	font-family: arial;
 
-    h1{
-        text-transform:uppercase;
-    }
+	h1 {
+		text-transform: uppercase;
+	}
 }
 ```
 
@@ -308,32 +310,32 @@ require('./css/introComponent.scss');
 
 ### webpack.config.js
 
-add on test for SASS /\.scss$/
+add on test for SASS /\.scss\$/
 
-```
+```js
 module.exports = {
-    entry:'./src/script1.js',
-    output:{
-        path:'dist',
-        filename:'bundle.js'
-    },
-    module:{
-        loaders:[
-            {
-                test:/\.js$/,
-                exclude:/(node_modules)/,
-                loader:'babel-loader',
-                query:{
-                    presets:['es2015']
-                }
-            },
-            {
-                test:/\.scss$/,
-                loader:'style-loader!css-loader!sass-loader'
-            }
-        ]
-    }
-}
+	entry: './src/script1.js',
+	output: {
+		path: 'dist',
+		filename: 'bundle.js'
+	},
+	module: {
+		loaders: [
+			{
+				test: /\.js$/,
+				exclude: /(node_modules)/,
+				loader: 'babel-loader',
+				query: {
+					presets: ['es2015']
+				}
+			},
+			{
+				test: /\.scss$/,
+				loader: 'style-loader!css-loader!sass-loader'
+			}
+		]
+	}
+};
 ```
 
 ---
@@ -343,9 +345,10 @@ module.exports = {
 - ES2009/ES5
 - ES2015/ES6
 
-```
+```html
 <head>
-    <script type=‘text/babel’ src=‘.js’></script>//react babel
+	<script type="text/babel" src=".js"></script>
+	//react babel
 </head>
 ```
 
@@ -374,7 +377,7 @@ npm install webpack webpack-dev-server —save-dev
 
 - \*\*dirname is current directory
 
-```
+```js
 var path = require(‘path’);
 
 module.exports = {
@@ -413,7 +416,7 @@ use package.json to run script
 
 - content -base is where the index file is
 
-```
+```json
 "scripts" : {
 "start": "npm run build",
 "build": "webpack -d && webpack-dev-server -content -base src/ -inline -hot -port 1234"
