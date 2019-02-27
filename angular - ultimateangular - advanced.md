@@ -107,9 +107,144 @@ export class AuthFormComponent implements AfterContentInit {
 
 ## viewchild / afterviewinit
 
-- viewChild queries a component from the Class that it is in
+- ViewChild because it lives inside the existing view of the component.
+
+- ViewChild queries a component from the Class that it is in
 
 * import { ViewChild, AfterViewInit }
 
+* import the component that we associate with the viewChild
+
+* pass @ViewChild(AuthMessageComponent)
+
+* use ngAfterContentInit() for ssetting properties before view has been initialized
+
 ```ts
+import { ViewChild, AfterViewInit } from '@angular/core';
+import { AuthMessageComponent } from '';
+export class AuthFormComponent implements AfterViewInit {
+	@ViewChild(AuthMessageComponent) message: AuthMessageComponent;
+	ngAfterViewInit() {}
+}
+```
+
+## viewChildren querylist
+
+- QueryList is a live collection and will update when add/remove components from that queryList
+
+- viewChildren is only available inside ngAfterViewInit()
+
+* can assign value in ngAfterViewInit() with setTimeOut because of Angular's change detection (only problem in development mode)
+* using change detection to tell angular that something updated, can fix setTimeout with ChangeDetectorRef (and remove setTimeOut)
+
+```js
+import { ViewChildren, AfterViewInit, QueryList } from '@angular/core';
+
+@Component({
+	template: `<auth-message [style.display]="(showMessage ? 'inherit' | 'none')"></auth-message>
+	<auth-message [style.display]="(showMessage ? 'inherit' | 'none')"></auth-message>
+	<auth-message [style.display]="(showMessage ? 'inherit' | 'none')"></auth-message>`
+})
+export class AuthFormComponent implements AfterContentInit, AfterViewInit {
+	@ViewChildren(AuthMessageComponent) message: QueryList<AuthMessageComponent>;
+
+	constructor(cd: ChangeDetectorRef) {}
+
+	ngAfterViewInit() {
+		if (message) {
+			// setTimeOut(() => {
+			// 	this.message.forEach(message => {
+			// 		//message
+			// 		message.days = 30;
+			// 	});
+			// });
+
+			this.message.forEach(message => {
+				//message
+				message.days = 30;
+			});
+			this.cd.detectChanges();
+		}
+	}
+}
+```
+
+## viewChild template ref
+
+- ElementRef allows us to query an element directly
+- import { ViewChild, ElementRef} from '@angular/core';
+- attach the #ref to the template element:`<input type="email" name="email" ngModel #email>`
+- reference with @ViewChild('email') email:ElementRef
+
+```js
+import { ViewChild, ElementRef} from '@angular/core';
+
+@Component({
+	template:`<input type="email" name="email" ngModel #email>`
+})
+export clas AuthFormComponent{
+	@ViewChild('email') email:ElementRef
+}
+```
+
+## elementref nativeelement
+
+- using ElementRef, we get access to the dom element,
+- email:ElementRef gives us access to the native DOM api's .nativeElement
+
+* this method is good if building just for the web, else use renderer
+
+```ts
+@Component({
+	styles:[`
+		.email{ border-color:red; }
+		`]
+})
+ngAfterViewInit(){
+	this.email.nativeElement.setAttribute('placeholder', 'enter your email address');
+	this.email.nativeElement.classList.add('email');
+	this.email.nativeElement.focus();
+}
+
+```
+
+## platform renderer
+
+- used for distribution to various different platforms
+- rendering native elements
+- inject renderer into constructor
+- import { Renderer} from '@angular/core';
+- this.renderer.setElementAttribute()
+- this.renderer.setElementClass()
+- this.renderer.invokeElementMethod()
+
+```ts
+import { Renderer} from '@angular/core';
+
+constructor(private renderer:Renderer){}
+ngAfterViewInit(){
+	this.renderer.setElementAttribute(this.email.nativeElement, 'placeholder', 'enter your email address');
+	this.renderer.setElementClass(this.email.nativeElement, 'email', true);
+	this.renderer.invokeElementMethod(this.email.nativeElement, 'focus');
+}
+```
+
+## dynamic components
+
+- create a placeholder div which acts as a container that we inject the component into
+- import the component, import { AuthFormComponent } from './auth-form/auth-form.component'
+- use resolver to dynamically create a factory for the component and inject into the div
+- give div a template ref `<div #entry></div>`
+
+<!-- app.component.ts -->
+
+```ts
+import { AuthFormComponent } from './auth-form/auth-form.component';
+
+@Component({
+	template: `
+		<div #entry></div>
+	`
+})
+export class AppComponent {}
 ```
