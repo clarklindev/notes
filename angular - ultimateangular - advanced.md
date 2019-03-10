@@ -45,9 +45,9 @@ export class AuthRememberComponent {
 @Component({
   template: `<div>
   <auth-form>
-    <h3>heading</h3>
-    <auth-remember (checked)="rememberUser($event)"></auth-remember>
-    <button type="submit">click me</button>
+	<h3>heading</h3>
+	<auth-remember (checked)="rememberUser($event)"></auth-remember>
+	<button type="submit">click me</button>
   </auth-form>
   </div>`;
 })
@@ -234,17 +234,159 @@ ngAfterViewInit(){
 - create a placeholder div which acts as a container that we inject the component into
 - import the component, import { AuthFormComponent } from './auth-form/auth-form.component'
 - use resolver to dynamically create a factory for the component and inject into the div
-- give div a template ref `<div #entry></div>`
+- give div a template ref `<div #entry></div>` that acts as a container that we will inject the component into
+- use viewchild to communicate directly with DOM
+- use ViewContainerRef to create the component and inject into #entry
+- import AfterContentInit, because then we can import our component, subscribe to the outputs and change the data, before actual view has been initialised in ngAfterContentInit()
+- import ComponentFactoryResolver from angular/core
+- in constructor, inject resolver of type ComponentFactoryResolver
+- in ngAfterContentInit() creates a variable authFormFactory which is a result of the factory call
+- call .createComponent()
+- create the component `const component = this.entry.createComponent(authFormFactory);`
+- ERROR? with dynamically created components, needs to be imported in the .module under entryComponents:[AuthFormComponent] which tells angular these components might not
+  as well as declarations:[AuthFormComponent]
 
-<!-- app.component.ts -->
+    <!-- app.component.ts -->
 
 ```ts
 import { AuthFormComponent } from './auth-form/auth-form.component';
+import { Component, ViewContainerRef, ViewChild } from 'angular/core';
 
 @Component({
 	template: `
 		<div #entry></div>
 	`
 })
-export class AppComponent {}
+export class AppComponent {
+	@ViewChild('entry', { read: ViewContainerRef }) entry: ViewContainerRef;
+	constructor(private resolver: ComponentFactoryResolver) {}
+
+	ngAfterContentInit() {
+		const authFormFactory = this.resolver.resolveComponentFactory(
+			AuthFormComponent
+		);
+
+		const component = this.entry.createComponent(authFormFactory);
+	}
+}
 ```
+
+<!-- auth-form.component.ts -->
+
+```ts
+export class AuthFormComponent {
+	title = 'Login';
+	@Output() submitted: EventEmitter<User> = new EventEmitter<User>();
+}
+```
+
+<!-- auth-form.module.ts -->
+
+```ts
+@NgModule({
+	declarations:[
+		AuthFormComponent
+	],
+	entryComponents:[
+		AuthFormComponent
+	]
+})
+```
+
+## dynamic input data
+
+- dynamic components cannot access data in the class with @Input()
+- dynamic components can access the public properties via .instance
+- .instance exposes the public properties
+
+```ts
+	ngAfterContentInit(){
+		const component = this.entry.createComponent(authFormFactory);
+		console.log(component.instance);
+		component.instance.title = "new header";
+	}
+```
+
+## dynamic output subscriptions
+
+- subscribing to the outputs of the component instance using .subscribe()
+- in our example, we subscribe to the Output() event emitter of the component
+- use .destroy(); on the copmonent
+
+<!-- auth-form.component.ts -->
+
+```ts
+@Output() submitted:EventEmitter<User> = new EventEmitter<User>();
+```
+
+<!-- app.component.ts -->
+
+```ts
+	ngAferContentInit(){
+		component.instance.submitted.subscribe(this.loginUser);
+	}
+```
+
+## destroy dynamic component
+
+<!-- app.component.ts -->
+
+```ts
+template: `
+	<div>
+		<button (click)="destroyComponent()">
+		</button>
+	</div>
+`
+component: ComponentRef<AuthFormComponent>;
+
+ngAfterContentInit(){
+
+}
+
+destroyComponent(){
+	this.component.destroy();
+}
+```
+
+## reorder component
+
+- in the .createComponent() method, pass the order as the second parameter (0-indexed)
+- call .move() on the component passing in the ref this.component.hostView, and then new index
+
+```ts
+<button (click)="moveComponent()">move</button>
+
+this.entry.createComponent(authFormFactory, 0);
+this.component = this.entry.createComponent(authFormFactory, 0);
+
+moveComponent(){
+	this.entry.move(this.component.hostView, 1);
+}
+```
+
+## Todd Motto - template viewcontainerRef
+
+- using `<template>`tag instead of dynamic component
+- import {TemplateRef} from '@angular/core'
+- give it a templateref # eg. `<template #tmpl></template>`
+- with components, we called .createComponent / BUT with templates, we call .createEmbeddedView
+- GOAL: inject template into `<div #entry></div>` which puts dynamic content under placeholder div
+
+```ts
+	<template #tmpl>
+		Todd Motto : England, UK
+	</template>
+
+	@ViewChild('tmpl') tmpl:TemplateRef<any>
+	export class AppComponent implements AfterContentInit{
+		ngAfterContentInit(){
+			this.entry.createEmbeddedView(this.tmpl);
+		}
+	}
+```
+
+## template context
+
+- how to pass a context to a particular `<template>`
+- with a `<template let-name>{{name}}</template>`, here angular asigns the variable name to {{name}}
