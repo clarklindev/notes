@@ -2,34 +2,32 @@
 
 ## Content projection
 
--   injecting content into the component by placing content between the component tags,
--   the content inside the component is displayed in the `<ng-content></ng-content>` area
+- injecting content into the component by placing content between the component tags,
+- the content inside the component is displayed in the `<ng-content></ng-content>` area
 
 ## projection slots
 
--   putting content from outside (by the html DOM level) into a specific area inside the component
--   the content is still displayed inside the `<ng-content>` element but with the addition of select attribute `<ng-content select=""></ng-content>` and select syntax is css selectors of what to select from the DOM.
+- putting content from outside (by the html DOM level) into a specific area inside the component
+- the content is still displayed inside the `<ng-content>` element but with the addition of select attribute `<ng-content select=""></ng-content>` and select syntax is css selectors of what to select from the DOM.
 
 ## projecting components
 
--   auth-remember.component.ts is a simple class that emits theinput checkbox event when checked.
--   app.component.ts just uses the auth-remember component by projecting it inside
--   inside app.component.ts, there is a var rememberMe which keeps track of the boolean status of checked or not
--   app.component.ts has auth-form component with auth-remember component inside
--   the auth-form.component ng-content projects auth-remember inside itself
+- auth-remember.component.ts is a simple class that emits theinput checkbox event when checked.
+- app.component.ts just uses the auth-remember component by projecting it inside
+- inside app.component.ts, there is a var rememberMe which keeps track of the boolean status of checked or not
+- app.component.ts has auth-form component with auth-remember component inside
+- the auth-form.component ng-content projects auth-remember inside itself
 
 <!-- auth-remember.component.ts -->
 
 ```ts
-import { Component, Output, EventEmitter } from "@angular/core";
+import { Component, Output, EventEmitter } from '@angular/core';
 @Component({
-	selector: "auth-remember",
+	selector: 'auth-remember',
 	template: `
 		<label
-			><input
-				type="checkbox"
-				(change)="onChecked($event.target.checked)"
-			/>Keep me logged in</label
+			><input type="checkbox" (change)="onChecked($event.target.checked)" />Keep
+			me logged in</label
 		>
 	`
 })
@@ -73,20 +71,20 @@ template: `
 
 ##contentchild
 
--   contentchild - definition is all html content projected into a component element and how angular allows us to listen to this with aftercontentinit()
+- contentchild - definition is all html content projected into a component element and how angular allows us to listen to this with aftercontentinit()
 
--   we want to gain access to this projected content, frpm the inside of the component class
+- we want to gain access to this projected content, frpm the inside of the component class
 
-*   import the component as a class to the component using it to reference it import { AuthRememberComponent } from './auth-remember.component';
-*   import { ContentChild, AfterContentInit } from '@angular/core';
+* import the component as a class to the component using it to reference it import { AuthRememberComponent } from './auth-remember.component';
+* import { ContentChild, AfterContentInit } from '@angular/core';
 
-*   we create an @ContentChild() and reference it by passing it the class name of the component we imported AND assign a local variable called 'remember'
-*   we safeguard that the component is actually injected in and we have access by using if(){}
-    <!-- auth-form.component.ts -->
+* we create an @ContentChild() and reference it by passing it the class name of the component we imported AND assign a local variable called 'remember'
+* we safeguard that the component is actually injected in and we have access by using if(){}
+  <!-- auth-form.component.ts -->
 
 ```ts
-import { ContentChild, AfterContentInit } from "@angular/core";
-import { AuthRememberComponent } from "./auth-remember.component";
+import { ContentChild, AfterContentInit } from '@angular/core';
+import { AuthRememberComponent } from './auth-remember.component';
 
 @Component({
 	template: `
@@ -109,9 +107,9 @@ export class AuthFormComponent implements AfterContentInit {
 
 ## contentchildren querylist
 
--   import { ContentChildren, QueryList } from '@angular/core';
--   @ContentChildren(SomeComponent) type is QueryList<SomeComponent>
--   the list (eg. remember) is a QueryList array which you can subscribe to during ngAfterContentInit(){} call
+- import { ContentChildren, QueryList } from '@angular/core';
+- @ContentChildren(SomeComponent) type is QueryList<SomeComponent>
+- the list (eg. remember) is a QueryList array which you can subscribe to during ngAfterContentInit(){} call
 
 <!-- app.component.ts -->
 
@@ -142,21 +140,21 @@ export class AuthFormComponent implements AfterContentInit{
 
 ## viewchild / afterviewinit
 
--   ViewChild because it lives inside the existing view of the component.
+- ViewChild because it lives inside the existing view of the component.
 
--   ViewChild queries a component from the Class that it is in
+- ViewChild queries a component from the Class that it is in
 
-*   import { ViewChild, AfterViewInit }
+* import { ViewChild, AfterViewInit }
 
-*   import the component that we associate with the viewChild
+* import the component that we associate with the viewChild
 
-*   pass @ViewChild(AuthMessageComponent)
+* pass @ViewChild(AuthMessageComponent)
 
-*   use ngAfterContentInit() for ssetting properties before view has been initialized
+* use ngAfterContentInit() for ssetting properties before view has been initialized
 
 ```ts
-import { ViewChild, AfterViewInit } from "@angular/core";
-import { AuthMessageComponent } from "";
+import { ViewChild, AfterViewInit } from '@angular/core';
+import { AuthMessageComponent } from '';
 export class AuthFormComponent implements AfterViewInit {
 	@ViewChild(AuthMessageComponent) message: AuthMessageComponent;
 	ngAfterViewInit() {}
@@ -165,15 +163,15 @@ export class AuthFormComponent implements AfterViewInit {
 
 ## viewChildren querylist
 
--   QueryList is a live collection and will update when add/remove components from that queryList
+- QueryList is a live collection and will update when add/remove components from that queryList
 
--   viewChildren is only available inside ngAfterViewInit()
+- viewChildren is only available inside ngAfterViewInit()
 
-*   can assign value in ngAfterViewInit() with setTimeOut because of Angular's change detection (only problem in development mode)
-*   using change detection to tell angular that something updated, can fix setTimeout with ChangeDetectorRef (and remove setTimeOut)
+* can assign value in ngAfterViewInit() with setTimeOut because of Angular's change detection (only problem in development mode)
+* using change detection to tell angular that something updated, can fix setTimeout with ChangeDetectorRef (and remove setTimeOut)
 
 ```js
-import { ViewChildren, AfterViewInit, QueryList } from "@angular/core";
+import { ViewChildren, AfterViewInit, QueryList } from '@angular/core';
 
 @Component({
 	template: `<auth-message [style.display]="(showMessage ? 'inherit' | 'none')"></auth-message>
@@ -207,10 +205,10 @@ export class AuthFormComponent implements AfterContentInit, AfterViewInit {
 
 ## viewChild template ref
 
--   ElementRef allows us to query an element directly
--   import { ViewChild, ElementRef} from '@angular/core';
--   attach the #ref to the template element:`<input type="email" name="email" ngModel #email>`
--   reference with @ViewChild('email') email:ElementRef
+- ElementRef allows us to query an element directly
+- import { ViewChild, ElementRef} from '@angular/core';
+- attach the #ref to the template element:`<input type="email" name="email" ngModel #email>`
+- reference with @ViewChild('email') email:ElementRef
 
 ```js
 import { ViewChild, ElementRef} from '@angular/core';
@@ -225,10 +223,10 @@ export clas AuthFormComponent{
 
 ## elementref nativeelement
 
--   using ElementRef, we get access to the dom element,
--   email:ElementRef gives us access to the native DOM api's .nativeElement
+- using ElementRef, we get access to the dom element,
+- email:ElementRef gives us access to the native DOM api's .nativeElement
 
-*   this method is good if building just for the web, else use renderer
+* this method is good if building just for the web, else use renderer
 
 ```ts
 @Component({
@@ -246,13 +244,13 @@ ngAfterViewInit(){
 
 ## platform renderer
 
--   used for distribution to various different platforms
--   rendering native elements
--   inject renderer into constructor
--   import { Renderer} from '@angular/core';
--   this.renderer.setElementAttribute()
--   this.renderer.setElementClass()
--   this.renderer.invokeElementMethod()
+- used for distribution to various different platforms
+- rendering native elements
+- inject renderer into constructor
+- import { Renderer} from '@angular/core';
+- this.renderer.setElementAttribute()
+- this.renderer.setElementClass()
+- this.renderer.invokeElementMethod()
 
 ```ts
 import { Renderer} from '@angular/core';
@@ -267,26 +265,26 @@ ngAfterViewInit(){
 
 ## dynamic components
 
--   create a placeholder div which acts as a container that we inject the component into
--   import the component, import { AuthFormComponent } from './auth-form/auth-form.component'
--   use resolver to dynamically create a factory for the component and inject into the div
--   give div a template ref `<div #entry></div>` that acts as a container that we will inject the component into
--   use viewchild to communicate directly with DOM
--   use ViewContainerRef to create the component and inject into #entry
--   import AfterContentInit, because then we can import our component, subscribe to the outputs and change the data, before actual view has been initialised in ngAfterContentInit()
--   import ComponentFactoryResolver from angular/core
--   in constructor, inject resolver of type ComponentFactoryResolver
--   in ngAfterContentInit() creates a variable authFormFactory which is a result of the factory call
--   call .createComponent()
--   create the component `const component = this.entry.createComponent(authFormFactory);`
--   ERROR? with dynamically created components, needs to be imported in the .module under entryComponents:[AuthFormComponent] which tells angular these components might not
-    as well as declarations:[AuthFormComponent]
+- create a placeholder div which acts as a container that we inject the component into
+- import the component, import { AuthFormComponent } from './auth-form/auth-form.component'
+- use resolver to dynamically create a factory for the component and inject into the div
+- give div a template ref `<div #entry></div>` that acts as a container that we will inject the component into
+- use viewchild to communicate directly with DOM
+- use ViewContainerRef to create the component and inject into #entry
+- import AfterContentInit, because then we can import our component, subscribe to the outputs and change the data, before actual view has been initialised in ngAfterContentInit()
+- import ComponentFactoryResolver from angular/core
+- in constructor, inject resolver of type ComponentFactoryResolver
+- in ngAfterContentInit() creates a variable authFormFactory which is a result of the factory call
+- call .createComponent()
+- create the component `const component = this.entry.createComponent(authFormFactory);`
+- ERROR? with dynamically created components, needs to be imported in the .module under entryComponents:[AuthFormComponent] which tells angular these components might not
+  as well as declarations:[AuthFormComponent]
 
-        		<!-- app.component.ts -->
+      		<!-- app.component.ts -->
 
 ```ts
-import { AuthFormComponent } from "./auth-form/auth-form.component";
-import { Component, ViewContainerRef, ViewChild } from "angular/core";
+import { AuthFormComponent } from './auth-form/auth-form.component';
+import { Component, ViewContainerRef, ViewChild } from 'angular/core';
 
 @Component({
 	template: `
@@ -294,7 +292,7 @@ import { Component, ViewContainerRef, ViewChild } from "angular/core";
 	`
 })
 export class AppComponent {
-	@ViewChild("entry", { read: ViewContainerRef }) entry: ViewContainerRef;
+	@ViewChild('entry', { read: ViewContainerRef }) entry: ViewContainerRef;
 	constructor(private resolver: ComponentFactoryResolver) {}
 
 	ngAfterContentInit() {
@@ -311,7 +309,7 @@ export class AppComponent {
 
 ```ts
 export class AuthFormComponent {
-	title = "Login";
+	title = 'Login';
 	@Output() submitted: EventEmitter<User> = new EventEmitter<User>();
 }
 ```
@@ -331,9 +329,9 @@ export class AuthFormComponent {
 
 ## dynamic input data
 
--   dynamic components cannot access data in the class with @Input()
--   dynamic components can access the public properties via .instance
--   .instance exposes the public properties
+- dynamic components cannot access data in the class with @Input()
+- dynamic components can access the public properties via .instance
+- .instance exposes the public properties
 
 ```ts
 	ngAfterContentInit(){
@@ -345,9 +343,9 @@ export class AuthFormComponent {
 
 ## dynamic output subscriptions
 
--   subscribing to the outputs of the component instance using .subscribe()
--   in our example, we subscribe to the Output() event emitter of the component
--   use .destroy(); on the copmonent
+- subscribing to the outputs of the component instance using .subscribe()
+- in our example, we subscribe to the Output() event emitter of the component
+- use .destroy(); on the copmonent
 
 <!-- auth-form.component.ts -->
 
@@ -387,8 +385,8 @@ destroyComponent(){
 
 ## reorder component
 
--   in the .createComponent() method, pass the order as the second parameter (0-indexed)
--   call .move() on the component passing in the ref this.component.hostView, and then new index
+- in the .createComponent() method, pass the order as the second parameter (0-indexed)
+- call .move() on the component passing in the ref this.component.hostView, and then new index
 
 ```ts
 <button (click)="moveComponent()">move</button>
@@ -403,11 +401,11 @@ moveComponent(){
 
 ## Todd Motto - template viewcontainerRef
 
--   using `<template>`tag instead of dynamic component
--   import {TemplateRef} from '@angular/core'
--   give it a templateref # eg. `<template #tmpl></template>`
--   with components, we called .createComponent / BUT with templates, we call .createEmbeddedView
--   GOAL: inject template into `<div #entry></div>` which puts dynamic content under placeholder div
+- using `<template>`tag instead of dynamic component
+- import {TemplateRef} from '@angular/core'
+- give it a templateref # eg. `<template #tmpl></template>`
+- with components, we called .createComponent / BUT with templates, we call .createEmbeddedView
+- GOAL: inject template into `<div #entry></div>` which puts dynamic content under placeholder div
 
 ```ts
 	<template #tmpl>
@@ -424,11 +422,11 @@ moveComponent(){
 
 ## template context
 
--   how to pass a context to a particular `<template>`
--   we use let-property eg. let-name `<template let-name>{{name}}</template>`, here angular asigns the variable name to {{name}}
--   context is the second argument to createEmbeddedView() and it is optional
--   we can dynamically create properties, by creating an \$implicit inside createEmbeddedView()
--   \$implicit will bind to any let- we pass in from the template that doesnt have a value here we called it let-name (but it could be anything)
+- how to pass a context to a particular `<template>`
+- we use let-property eg. let-name `<template let-name>{{name}}</template>`, here angular asigns the variable name to {{name}}
+- context is the second argument to createEmbeddedView() and it is optional
+- we can dynamically create properties, by creating an \$implicit inside createEmbeddedView()
+- \$implicit will bind to any let- we pass in from the template that doesnt have a value here we called it let-name (but it could be anything)
 
 <!-- app.component.ts -->
 
@@ -436,12 +434,12 @@ moveComponent(){
 template: `<template #tmpl let-name let-location="location">{{name}} - {{location}}</template>`;
 
 export class AppComponent implements AfterContentInit {
-	@ViewChild("tmpl") tmpl: TemplateRef<any>;
+	@ViewChild('tmpl') tmpl: TemplateRef<any>;
 
 	ngAfterContentInit() {
 		this.entry.createEmbeddedView(this.tmpl, {
-			$implicit: "Todd Motto",
-			location: "England, UK"
+			$implicit: 'Todd Motto',
+			location: 'England, UK'
 		});
 	}
 }
@@ -449,12 +447,12 @@ export class AppComponent implements AfterContentInit {
 
 ##ng-template outlet
 
--   instead of injecting template into dom element with the api to create view like so, this.entry.createEmbeddedView(),
--   we use a declarative way to do the same thing by creating a placeholder container called `<ng-container></ng-container>`, and this does not get rendered to DOM
--   use directive ngTemplateOutlet which references the template (removes the need to use api methods)
--   template gets renderered to `<ng-container>`
+- instead of injecting template into dom element with the api to create view like so, this.entry.createEmbeddedView(),
+- we use a declarative way to do the same thing by creating a placeholder container called `<ng-container></ng-container>`, and this does not get rendered to DOM
+- use directive ngTemplateOutlet which references the template (removes the need to use api methods)
+- template gets renderered to `<ng-container>`
 
-        	<!-- app.component.ts -->
+      	<!-- app.component.ts -->
 
 ```ts
 template: `
@@ -467,9 +465,9 @@ export class AppComponent {}
 
 #ng-template outlet context
 
--   if we want to pass data dynamically into the template, we use context
--   create an object ctx that we bind to
--   using [ngTemplateOutletContext] on `<ng-container>`
+- if we want to pass data dynamically into the template, we use context
+- create an object ctx that we bind to
+- using [ngTemplateOutletContext] on `<ng-container>`
 
 <!-- app.component.ts -->
 
@@ -489,33 +487,33 @@ export class AppComponent {}
 })
 export class AppComponent {
 	ctx = {
-		$implicit: "todd motto",
-		location: "England, UK"
+		$implicit: 'todd motto',
+		location: 'England, UK'
 	};
 }
 ```
 
 ## view encapsulation
 
--   3 types (Emulated, Native, None)
--   encapsulation: ViewEncapsulation.Emulated (default)
--   encapsulation: ViewEncapsulation.Native
--   encapsulation: ViewEncapsulation.None
+- 3 types (Emulated, Native, None)
+- encapsulation: ViewEncapsulation.Emulated (default)
+- encapsulation: ViewEncapsulation.Native
+- encapsulation: ViewEncapsulation.None
 
--   Emulated has a random hash after component, it emulates the effect of shadow dom,
+- Emulated has a random hash after component, it emulates the effect of shadow dom,
 
--   Native allows you to create a dom tree inside a dom tree, it creates a #shadow-root, it copies styles across from example 1. has no random hash
+- Native allows you to create a dom tree inside a dom tree, it creates a #shadow-root, it copies styles across from example 1. has no random hash
 
--   None - opens up component to pass and inherit styles to other components, can get quite messy to manage, all components get the same shared style
+- None - opens up component to pass and inherit styles to other components, can get quite messy to manage, all components get the same shared style
 
 ## change detection strategy
 
--   how it works and how to make it faster
--   change detection runs everytime we change something
--   we can change the strategy to .OnPush
--   with Default angular checks each property and notifies DOM when property changes
--   the idea is to use immutable data structures as it is faster with .OnPush when a new object is swapped out
--   onPush is good for stateless components/dumb components faster rendering and calculations
+- how it works and how to make it faster
+- change detection runs everytime we change something
+- we can change the strategy to .OnPush
+- with Default angular checks each property and notifies DOM when property changes
+- the idea is to use immutable data structures as it is faster with .OnPush when a new object is swapped out
+- onPush is good for stateless components/dumb components faster rendering and calculations
 
 <!-- app.component.ts -->
 
