@@ -488,3 +488,134 @@ changeDetection: ChangeDetectionStrategy.Default;
 or;
 changeDetection: ChangeDetectionStrategy.OnPush;
 ```
+
+# Directives
+
+## Directives - attribute directives
+
+- how to make custom directives
+- eg. formatting the credit card numbers to insert space automatically after every 4th number and cap at 16 digits
+- similar to creating a component, a component can have a template BUT a directive cannot have a template
+- use @Directive({})
+- we are using an attribute ('credit-card') to bind the directive to the input DOM element, so selector:'' uses query selector []
+- inject access to the DOM element in the constructor: constructor(private element: ElementRef) {}
+  <!-- app.module -->
+
+```ts
+import { CreditCardDirective } from './credit-card/credit-card.directive';
+
+@NgModule({
+	declarations: [CreditCardDirective]
+})
+export class AppModule {}
+```
+
+<!-- app.component.ts -->
+
+```ts
+import { Component } from '@angular/core';
+@Component({
+	selector:'app-root',
+	template: `<div><label>Credit card number<input name="credit-card" type="text" placeholder="Enter your 16 digit card number" credit-card></label></div>`
+})
+```
+
+<!-- credit-card.directive.ts
+ -->
+
+```ts
+import { Directive, ElementRef } from '@angular/core';
+
+@Directive({
+	selector: `[credit-card]`
+})
+export class CreditCardDirective {
+	constructor(private element: ElementRef) {
+		console.log(this.element);
+	}
+}
+```
+
+## Directives - host listeners
+
+- import HostListener
+- we pass in the name of the event we want to listen to
+- its an event listener for the host (the element we have bound the directive to)
+- say what we want to listen to: @HostListener('input'), ie. an event listener for the host. here..input event
+- if we want to listen to the $event we put it in an array like ['$event']
+- then we create our function that gets called when the even happens
+
+<!-- credit-card.directive.ts
+ -->
+
+```ts
+import { Directive, HostListener, ElementRef } from '@angular/core';
+
+@Directive({
+	selector: `[credit-card]`
+})
+export class CreditCardDirective {
+	@HostListener('input', ['$event'])
+	onKeyDown(event: KeyboardEvent) {
+		console.log(event);
+		const input = event.target as HTMLInputElement;
+
+		// regular expression removes white space and apply globally and replace with empty string, this removes white space
+		let trimmed = input.value.replace(/\s+/g, '');
+		if (trimmed.length > 16) {
+			trimmed = trimmed.substr(0, 16);
+		}
+
+		let numbers = [];
+		for (let i = 0; i < trimmed.length; i += 4) {
+			numbers.push(trimmed.substr(1, 4));
+		}
+		//reasign value back
+		input.value = numbers.join(' ');
+	}
+}
+```
+
+## host binding
+
+- binding to a specific property on the host
+- import HostBinding
+- @HostBinding() allows us to communicate with host node and change a property via this directive, pass it what we want to bind to
+- if we wanted to bind classes @HostBinding('class') classes = 'a b c';
+
+<!-- app.component -->
+
+```ts
+@Component({
+	selector:'app-root',
+	template:`<div><label>Credit card number<input name="credit-card" [value]="foo" type="text" credit-card></label></div>`
+})
+```
+
+<!-- credit-card.directive.ts -->
+
+```ts
+import {
+	Directive,
+	HostListener,
+	HostBinding,
+	ElementRef
+} from '@angular/core';
+
+@Directive({
+	selector: '[credit-card]'
+})
+export class CreditCardDirective {
+	@HostBinding('style.border')
+	border: string;
+
+	@HostListener('input', ['$event'])
+	onKeyDown(event: KeyboardEvent) {
+		this.border = '';
+		//check that it only contains numbers
+		if (/[^\d]/.test(trimmed)) {
+			this.border = '1px solid red';
+		}
+	}
+}
+```
