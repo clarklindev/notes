@@ -653,3 +653,67 @@ export class CreditCardDirective {
 	}
 }
 ```
+
+## 'exportAs' property of a directive
+
+- using @Input() 'set' we allow assigning a value to the directive from the outside
+- eg. app.component.ts `<label tooltip="3 digits, back of your card">`
+- exportAs a name we want to export our public directive as
+- which allows us to use this alongside a templateRef
+- in app.component.ts, can give a template ref (#myTooltip) to the label
+- now because we used 'exportAs' on the directive, we can assign this to the templateRef (#myTooltip="tooltip")
+- now everything inside directive is accessible via #myTooltip
+- we can now create and listen to events and call the directive methods (mouseover)="myTooltip.show()" (mouseout)="myTooltip.hide()"
+
+<!-- tooltip.directive.ts -->
+
+```ts
+@Directive({
+	selector: '[tooltip]',
+	exportAs: 'tooltip'
+})
+export class TooltipDirective implements OnInit {
+	tooltipElement = document.createElement('div');
+	visible = false;
+
+	@Input()
+	set tooltip(value) {
+		this.tooltipElement.textContent = value;
+	}
+
+	hide() {
+		this.tooltipElement.classList.remove('tooltip--active');
+	}
+
+	show() {
+		this.tooltipElement.classList.add('tooltip--active');
+	}
+
+	constructor(private element: ElementRef) {}
+
+	ngOnInit() {
+		this.tooltipElement.className = 'tooltip';
+		this.element.nativeElement.appendChild(this.tooltipElement);
+		this.element.nativeElement.classList.add('tooltip-container');
+	}
+}
+```
+
+<!-- app.component.ts -->
+
+```ts
+template: `<div>
+	<label>
+		Credit card number
+		<input name="credit-card" type="text" placeholder="Enter your 16 digit card number" credit-card>
+	</label>
+	<label tooltip="3 digits, back of your card" #myTooltip="tooltip">
+		Enter your security code
+		<span 
+			(mouseover)="myTooltip.show()"
+			(mouseout)="myTooltip.hide()"
+		>(?)</span>
+		<input type="text">
+	</label>
+</div>`;
+```
