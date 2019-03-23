@@ -717,3 +717,169 @@ template: `<div>
 	</label>
 </div>`;
 ```
+
+## Todd Motto - Angular Pro - 27 - custom structural directives
+
+- everything resides in template element
+- making our own directive by replacing ngFor by replacing with something like 'myFor' and 'myForOf'
+- create the directive and import Directive from @angular/core
+- selector syntax for attribute selector '[myFor][myforof]'
+- in constructor import ViewContainerRef and TemplateRef<any>, and import from @angular/core allows us to create our own instances of template using ViewContainerRef
+- for each item inside our input, we want to embed a view inside our templateRef
+- note [MyForOf] the Of part comes from let item of items, if it was let item in items, then it will read [MyForIn] as it is set by Angular
+- in our example below, we use a setTimeout then add another item to the items list
+- remember to call this.view.clear(); first when setting myForOf(collection)
+  <!-- app.component.ts -->
+
+```ts
+template: `
+	<li *ngFor="let item of items"; let i = index;">
+	{{i}} Member: {{item.name | json}}
+	</li>
+
+	<template myFor [myForOf]="items" let-item let-i="index">
+		<li>{{i}} Member of: {{item.name | json}}
+		</li>
+	</template>
+	`
+export class AppComponent{
+	items = [{
+		name:'',
+		age:,
+		location: ''
+	}];
+	constructor(){
+		setTimeout(()=>{
+			this.items = [...this.items, {name:'Clark', age:22, location:'California'}]
+		}, 2000);
+	}
+}
+```
+
+<!-- my-for.directive.ts -->
+
+```ts
+import { Directive, Input, ViewContainerRef } from '@angular/core';
+
+@Directive({
+	selector: '[myFor][myForOf]'
+})
+export class MyForDirective {
+	@Input()
+	set myForOf(collection) {
+		this.view.clear();
+		collection.forEach((item, index) => {
+			this.view.createEmbeddedView(this.template, {
+				$implicit: item,
+				index
+			});
+		});
+	}
+
+	constructor(
+		private view: ViewContainerRef,
+		private template: TemplateRef<any>
+	) {}
+}
+```
+
+---
+
+## Custom Pipes
+
+- | json
+- | date
+
+- creating a custom pipe | filesize
+- import {Pipe, PipeTransform } from '@angular/core'
+- custom class implements PipeTransform
+- implement function called transform(value){} where 'value' parameter corresponds to anything we pass before the pipe
+- to register the pipe, we give it a name @Pipe({name:''})
+- in app.module.ts import the Class, and add to declarations
+- to pass a second parameter into the pipe, after the name of the pipe, we add : then what we want to pass in,'megabytes'
+  <!-- filesize.pipe.ts / filesize pipe -->
+
+```ts
+import { Pipe, PipeTransform } from '@angular/core';
+
+@Pipe({
+	name: 'filesize'
+})
+export class FileSizePipe implements PipeTransform {
+	transform(size: number, extension: string = 'MB') {
+		return (size / (1024 * 1024)).toFixed(2) + extension;
+	}
+}
+```
+
+<!-- app.module.ts -->
+
+```ts
+import { FileSizePipe } from './filesize.pipe';
+@NgModule({
+	declarations:[FileSizePipe]
+})
+```
+
+<!-- app.component.ts -->
+
+```ts
+@Component({
+	selector:'app-root',
+	template:`
+	<div>
+		<div *ngFor="let file of files">
+			<p>{{file.name}}</p>
+			<p>{{file.size | filesize:'megabytes'}}
+		</div>
+	</div>
+	`
+})
+```
+
+## pipe providers
+
+- allows us to use pipe inside our component class rather than inside the dom
+- this allows us to manipulate data in iteration before it gets to DOM
+- register pipe to the component using providers:[FileSizePipe]
+- we iterate through collection and update with pipe to return new data
+- note how template iternates with ngFor through 'mapped' and not 'files' as before
+- we can access the pipe through .transform() eg. this.fileSizePipe.transform(file.size, 'mb')
+  <!-- app.component.ts -->
+
+```ts
+import { Component, OnInit } from '@angular/core';
+import { FileSizePipe } from './filesize.pipe';
+
+interface File {
+	name: string;
+	size: any;
+	type: string;
+}
+
+@Component({
+	template: `<div>
+		<div *ngFor="let file of mapped">
+			<p>{{file.name}}</p>
+			<p>{{file.size}}</size>
+		</div>
+	</div>`,
+	providers: [FileSizePipe]
+})
+export class AppComponent implements OnInit {
+	files: File[];
+	mapped: File[];
+	constructor(private fileSizePipe: FileSizePipe) {}
+
+	ngOnInit() {
+		this.files = [{ name: 'logo.svg', size: 21232313, type: 'image/svg' }];
+		this.mapped = this.files.map(file => {
+			return {
+				name: file.name,
+				type: file.type,
+				size: this.fileSizePipe.transform(file.size, 'mb')
+			};
+		});
+	}
+}
+```
