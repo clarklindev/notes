@@ -883,3 +883,55 @@ export class AppComponent implements OnInit {
 	}
 }
 ```
+
+---
+
+## reactive angular forms
+
+### setup
+
+- create a new module that will hold our reactive form
+- import CommonModule, ReactiveFormsModule
+- import the component into the module
+- to use the component in our app-component, we exports:[StockInventoryComponent]
+
+<!-- app.module.ts -->
+
+```ts
+import { StockInventoryModule } from './stock-inventory/stock-inventory.module';
+@Component({
+	selector:'app-root',
+	template:`<div><stock-inventory></stock-inventory></div>`
+})
+```
+
+<!-- app/stock-inventory/stock-inventory.module.ts -->
+
+```ts
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+
+import { StockInventoryComponent } from './containers/stock-inventory/stock-inventory.component';
+@NgModule({
+	declarations: [StockInventoryComponent],
+	imports: [CommonModule, ReactiveFormsModule],
+	exports: [StockInventoryComponent]
+})
+export class StockInventoryModule {}
+```
+
+<!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.scss -->
+<!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.ts -->
+
+```ts
+import { Component } from '@angular/core';
+@Component({
+	selector: 'stock-inventory',
+	styleUrls: ['stock-inventory.component.scss'],
+	template: `
+		<div class="stock-inventory">Hello World!</div>
+	`
+})
+export class StockInventoryComponent {}
+```
