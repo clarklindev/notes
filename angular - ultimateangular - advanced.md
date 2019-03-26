@@ -895,13 +895,43 @@ export class AppComponent implements OnInit {
 - import the component into the module
 - to use the component in our app-component, we exports:[StockInventoryComponent]
 
+## formcontrol formgroup
+
+- template driven, bind to ng-model, the template generates the source of truth (model)
+- reactive driven, the javascript in the reactive class is the source of truth
+- import FormControl, FormGroup, FormArray from @angular/forms
+- create ```<form>``` element
+- create property on component class called 'form' and assign to FormGroup
+- inside FormGroup, we can create other FormGroup
+- FormGroups contain FormControl
+- bind the form property in the class to the DOM form element [formGroup]="form"
+- the correlation gets tied in when you assign a FormGroupName to the class
+- the formControls get formControlName binding to the class properties, 
+- the class contructor gets the default value
+- hooking up submit functionality create a ```<button>``` element inside the form with a type='submit'
+- we can preview what is inside the form by ```<pre>{{form.value | json }}</pre>```
+
+
 <!-- app.module.ts -->
 
 ```ts
 import { StockInventoryModule } from './stock-inventory/stock-inventory.module';
 @Component({
 	selector:'app-root',
-	template:`<div><stock-inventory></stock-inventory></div>`
+	template:`<div><stock-inventory>
+	<form [formGroup]="form" (ngSubmit)="onSubmit()">
+		<div formGroupName="store">
+			<input type="text" placeholder="branch id" formControlName="branch">
+			<input type="text" placeholder="manager code" formControlName="code">
+		</div>
+
+		<div class="stock-inventory__buttons">
+			<button type="submit" [disabled]="form.invalid">Order Stock</button>
+		</div>
+
+		<pre>{{form.value | json }}</pre>
+	</form>
+	</stock-inventory></div>`
 })
 ```
 
@@ -918,7 +948,14 @@ import { StockInventoryComponent } from './containers/stock-inventory/stock-inve
 	imports: [CommonModule, ReactiveFormsModule],
 	exports: [StockInventoryComponent]
 })
-export class StockInventoryModule {}
+export class StockInventoryModule {
+	form = new FormGroup({
+		store: new FormGroup({
+			branch: new FormControl(''),
+			code: new FormControl('')
+		})
+	})
+}
 ```
 
 <!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.scss -->
@@ -935,3 +972,9 @@ import { Component } from '@angular/core';
 })
 export class StockInventoryComponent {}
 ```
+
+
+
+
+
+- 
