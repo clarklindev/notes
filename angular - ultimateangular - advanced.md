@@ -888,52 +888,39 @@ export class AppComponent implements OnInit {
 
 ## reactive angular forms
 
-### setup
+### setup stock-inventory
 
-- create a new module that will hold our reactive form
+- create a new module that will hold our reactive form (stock-inventory.module.ts)
 - import CommonModule, ReactiveFormsModule
 - import the component into the module
 - to use the component in our app-component, we exports:[StockInventoryComponent]
 
-## formcontrol formgroup
-
-- template driven, bind to ng-model, the template generates the source of truth (model)
-- reactive driven, the javascript in the reactive class is the source of truth
-- import FormControl, FormGroup, FormArray from @angular/forms
-- create ```<form>``` element
-- create property on component class called 'form' and assign to FormGroup
-- inside FormGroup, we can create other FormGroup
-- FormGroups contain FormControl
-- bind the form property in the class to the DOM form element [formGroup]="form"
-- the correlation gets tied in when you assign a FormGroupName to the class
-- the formControls get formControlName binding to the class properties, 
-- the class contructor gets the default value
-- hooking up submit functionality create a ```<button>``` element inside the form with a type='submit'
-- we can preview what is inside the form by ```<pre>{{form.value | json }}</pre>```
-
-
-<!-- app.module.ts -->
-
+<!-- app/stock-inventory/app.module.ts -->
 ```ts
-import { StockInventoryModule } from './stock-inventory/stock-inventory.module';
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
+import {StockInventoryModule} from './stock-inventory/stock-inventory.module';
+import {AppComponent} from './app.component';
+@NgModule({
+	declarations:[AppComponent],
+	imports:[BrowserModule, StockInventoryModule],
+	bootstrap:[AppComponent]
+})
+export class AppModule{}
+```
+
+<!-- app.component.ts -->
+```ts
+import {Component} from '@angular/core';
 @Component({
 	selector:'app-root',
-	template:`<div><stock-inventory>
-	<form [formGroup]="form" (ngSubmit)="onSubmit()">
-		<div formGroupName="store">
-			<input type="text" placeholder="branch id" formControlName="branch">
-			<input type="text" placeholder="manager code" formControlName="code">
-		</div>
-
-		<div class="stock-inventory__buttons">
-			<button type="submit" [disabled]="form.invalid">Order Stock</button>
-		</div>
-
-		<pre>{{form.value | json }}</pre>
-	</form>
-	</stock-inventory></div>`
+	template:`<div>
+		<stock-inventory></stock-inventory>
+	</div>`
 })
+export class AppComponent{}
 ```
+
 
 <!-- app/stock-inventory/stock-inventory.module.ts -->
 
@@ -949,32 +936,190 @@ import { StockInventoryComponent } from './containers/stock-inventory/stock-inve
 	exports: [StockInventoryComponent]
 })
 export class StockInventoryModule {
-	form = new FormGroup({
-		store: new FormGroup({
-			branch: new FormControl(''),
-			code: new FormControl('')
-		})
-	})
+	
 }
 ```
 
 <!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.scss -->
 <!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.ts -->
-
 ```ts
 import { Component } from '@angular/core';
+import {FormControl, FormGroup, FormArray} from '@angular/forms';
+
 @Component({
 	selector: 'stock-inventory',
 	styleUrls: ['stock-inventory.component.scss'],
 	template: `
-		<div class="stock-inventory">Hello World!</div>
+		<div class="stock-inventory">
+			<form [formGroup]="form" (ngSubmit)="onSubmit()">
+				<div formGroupName="store">
+					<input type="text" placeholder="branch id" formControlName="branch">
+					<input type="text" placeholder="manager code" formControlName="code">
+				</div>
+				<div class="stock-inventory__buttons">
+					<button type="submit" [disabled]="form.invalid">Order Stock</button>
+				</div>
+
+				<pre>{{ form.value | json }}</pre>
+			</form>
+		</div>
 	`
 })
-export class StockInventoryComponent {}
+
+export class StockInventoryComponent {
+	form = new FormGroup({
+		store: new FormGroup({
+			branch: new FormControl(''),
+			code: new FormControl('')
+		}),
+		selector: new FormGroup({
+			product_id: new FormControl(''),
+			quantity: new FormControl(10)
+		}),
+		stock: new FormArray([])
+	})
+
+	onSubmit(){
+		console.log('Submit: ', this.form.value);
+	}
+}
+```
+
+## formcontrol formgroup (NOTE: later, FORMGROUPS GET BROKEN DOWN INTO FORM COMPONENTS) (see above code)
+
+- template driven, bind ng-model and the template generates the source of truth (model)
+- reactive driven, the javascript in the reactive class is the source of truth
+- import FormControl, FormGroup, FormArray from @angular/forms 
+- stock-inventory.component.ts create ```<form>``` element
+- create property on component class called 'form' and assign to FormGroup
+- inside FormGroup, we can create other FormGroup
+- FormGroups contain FormControl
+- bind the form property in the class to the DOM form element [formGroup]="form"
+- the correlation gets tied in when you assign a FormGroupName to the class
+- the formControls get formControlName binding to the FormGroup class properties, 
+- the class contructor for FormControl gets the default value
+- hooking up submit functionality create a ```<button>``` element inside the form with a type='submit'
+- (ngSubmit)="OnSubmit()" allows us to gain access to all the whole form in 'this.form.value'
+- we can preview what is inside the form by ```<pre>{{form.value | json }}</pre>```
+
+## componentizing formgroups
+- making a selector component, array
+- selector is a dropdown
+- FormArray allows us to create a collection of FormGroups or FormControls
+
+- create a component 'stock-branch' from formGroupName="store" 
+- create a component 'stock-selector' from formGroupName="selector"
+- create a component 'stock-products' from formGroupName="products"
+
+- we pass down the 
+
+<!-- app/stock-inventory/stock-inventory.module.ts -->
+
+```ts
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+
+import { StockInventoryComponent } from './containers/stock-inventory/stock-inventory.component';
+
+import {StockBranchComponent } from './components/stock-branch/stock-branch.component';
+import {StockProductsComponent} from './components/stock-products/stock-products.component';
+import {StockSelectorComponent} from './components/stock-selector/stock-selector.component';
+
+@NgModule({
+	declarations: [StockInventoryComponent, StockBranchComponent, StockProductsComponent, StockSelectorComponent],
+	imports: [CommonModule, ReactiveFormsModule],
+	exports: [StockInventoryComponent]
+})
+export class StockInventoryModule {
+}
+```
+
+- in stock-inventory.component.ts we group the dom into components and replace the current dom 
+<!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.ts -->
+```ts
+	template:`
+	<div class="stock-inventory">
+	<form [formGroup]="form" (ngSubmit)="onSubmit()">
+		<stock-branch></stock-branch>
+		<stock-selector></stock-selector>
+		<stock-products></stock-products>
+
+		<div class="stock-inventory__buttons">
+			<button
+				type="submit"
+				[disabled]="form.invalid">
+				Order Stock
+			</button>
+		</div>
+	</form>
+	`
+```
+
+- the below becomes a component 
+---
+<!-- html -->
+```html
+<div formGroupName="store">
+	<input type="text" placeholder="branch id" formControlName="branch">
+	<input type="text" placeholder="manager code" formControlName="code">
+</div>
+```
+<!-- becomes -->
+```html
+<stock-branch></stock-branch>
+```
+<!-- app/stock-inventory/components/stock-branch/stock-branch.component.ts -->
+```ts
+import {Component} from '@angular/core';
+@Component({
+	selector:'stock-branch',
+	styleUrls:['stock-branch.component.scss'],
+	template:`<div>
+		<div formGroupName="store">
+			<input type="text" placeholder="branch id" formControlName="branch">
+			<input type="text" placeholder="manager code" formControlName="code">
+		</div>
+	</div>`
+})
+export class StockBranchComponent{}
 ```
 
 
+---
+<!-- html -->
+```html
+```
+<!-- becomes -->
+```html
+<stock-selector></stock-selector>
+```
+<!-- app/stock-inventory/components/stock-selector/stock-selector.component.ts -->
+```ts
+import {Component} from '@angular/core';
+@Component({
+	selector:'stock-selector',
+	styleUrls:['stock-selector.component.scss'],
+	template:`<div></div>`
+})
+export class StockSelectorComponent{}
+```
 
 
+---
+<!-- becomes -->
+```html
+<stock-products></stock-products>
+```
+<!-- app/stock-inventory/components/stock-products/stock-products.component.ts -->
+```ts
+import {Component} from '@angular/core';
+@Component({
+	selector:'stock-products',
+	styleUrls:['stock-products.component.scss'],
+	template:`<div></div>`
+})
+export class StockProductsComponent{}
+```
 
-- 
+
