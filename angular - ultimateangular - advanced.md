@@ -1011,7 +1011,11 @@ export class StockInventoryComponent {
 - create a component 'stock-selector' from formGroupName="selector"
 - create a component 'stock-products' from formGroupName="products"
 
-- we pass down the 
+- we create a binding called parent and pass down the form, as the [parent]="form", this tells this component that its part of 
+the entire form eg. <!-- stock-inventory.component.ts-->template: `<form [formGroup]="form"><stock-branch [parent]="form"></stock-branch></form>`
+- we go into the component and import { FormGroup } from '@angular/forms' / on the Class, 
+- create an @Input() parent:FormGroup / import { Component, Input } from '@angular/core'
+- we need to bind the component to the parent so in the component, `<div [formGroup]="parent">`
 
 <!-- app/stock-inventory/stock-inventory.module.ts -->
 
@@ -1041,9 +1045,14 @@ export class StockInventoryModule {
 	template:`
 	<div class="stock-inventory">
 	<form [formGroup]="form" (ngSubmit)="onSubmit()">
-		<stock-branch></stock-branch>
-		<stock-selector></stock-selector>
-		<stock-products></stock-products>
+		<stock-branch [parent]="form">
+		</stock-branch>
+
+		<stock-selector [parent]="form">
+		</stock-selector>
+		
+		<stock-products [parent]="form">
+		</stock-products>
 
 		<div class="stock-inventory__buttons">
 			<button
@@ -1052,6 +1061,7 @@ export class StockInventoryModule {
 				Order Stock
 			</button>
 		</div>
+
 	</form>
 	`
 ```
