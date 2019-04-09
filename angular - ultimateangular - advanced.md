@@ -1054,6 +1054,19 @@ the entire form eg. <!-- stock-inventory.component.ts-->template: `<form [formGr
 * because we are in the parent we can gain access to the 'stock' FormArray
 * const control = this.form.get('stock') as FormArray which allows us access to FormArray, then we can push to it via createStock()
 
+## form array remove
+
+* using index to remove an item
+* we are already in the loop of the FormArray so we pass item and the index(i).
+* add onRemove() function to stock-products.component `<button type="button" (click)="onRemove(item, i)">Remove</button>`
+* import Output and EventEmitter from '@angular/core'
+* add to the component `@Output() removed: new EventEmitter<any>()`
+* use the child component to emit the data that the parent needs to handle
+* in stock-inventory.component, listen to 'removed' event ```<stock-products [parent]="form" (removed)="removeStock($event)"></stock-products>```
+* removeStock() function calls control = this.form.get('stock') as FormArray and then in angular reactive forms, control.removeAt(index); which is same as splice(index, 1)
+* 
+
+use object destructuring removeStock({group, index})
 
 <!-- app/stock-inventory/stock-inventory.module.ts -->
 ```ts
@@ -1100,7 +1113,7 @@ import { Product } from '../../models/product.interface';
 			<stock-selector [parent]="form" [products]="products" (added)="addStock($event)">
 			</stock-selector>
 			
-			<stock-products [parent]="form">
+			<stock-products [parent]="form" (removed)="removeStock($event)">
 			</stock-products>
 
 			<div class="stock-inventory__buttons">
@@ -1145,6 +1158,11 @@ import { Product } from '../../models/product.interface';
 		addStock(stock){
 			const control = this.form.get('stock') as FormArray;
 			this.control.push(this.createStock(stock));
+		}
+
+		removeStock({group, index}){
+			const control = this.form.get('stock') as FormArray;
+			control.removeAt(index);
 		}
 
 		onSubmit(){
@@ -1245,7 +1263,7 @@ export class StockSelectorComponent{
 ```
 <!-- app/stock-inventory/components/stock-products/stock-products.component.ts -->
 ```ts
-import {Component} from '@angular/core';
+import {Component, Output, EventEmitter } from '@angular/core';
 @Component({
 	selector:'stock-products',
 	styleUrls:['stock-products.component.scss'],
@@ -1257,7 +1275,7 @@ import {Component} from '@angular/core';
 					{{ item.value.product_id }}
 				</div>
 				<input type="number" step="10" min="10" max="1000" formControlName="quantity">
-				<button type="button">
+				<button type="button" (click)="onRemove(item, i)">
 				Remove
 				</button>
 			</div>
@@ -1271,6 +1289,13 @@ export class StockProductsComponent{
 
 	@Input()
 	products: Product[];
+
+	@Output()
+	removed: new EventEmitter<any>();
+	
+	onRemove(group, index){
+		this.removed.emit({group, index});
+	}
 
 	get stocks() {
 		return (this.parent.get('stock') as FormArray).controls;
