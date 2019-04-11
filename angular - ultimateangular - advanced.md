@@ -1064,7 +1064,15 @@ the entire form eg. <!-- stock-inventory.component.ts-->template: `<form [formGr
 * use the child component to emit the data that the parent needs to handle
 * in stock-inventory.component, listen to 'removed' event ```<stock-products [parent]="form" (removed)="removeStock($event)"></stock-products>```
 * removeStock() function calls control = this.form.get('stock') as FormArray and then in angular reactive forms, control.removeAt(index); which is same as splice(index, 1)
-* 
+
+## form builder
+
+* Formbuilder is a wrapper for FormGroup, FormControl, FormArray and removes the need for boilder-plate declaration
+* import { FormBuilder } from '@angular/forms'
+* create a fb:FormBuilder instance in the constructor
+* replace declarations of new FormGroup() with this.fb.group
+* replace declarations of new FormArray() with this.fb.array
+* replace declarations of new FormControl() with this.fb.control
 
 use object destructuring removeStock({group, index})
 
@@ -1303,4 +1311,125 @@ export class StockProductsComponent{
 }
 ```
 
+## http service observables
+
+* replacing static products list with db.json (db json entries are like endpoints with array as value)
+* make api requests
+* setup service allows us to inject it into our component, 
+* angular service gets the data from .json
+* use observables to merge api request
+* refactor by removing data out of stock-inventory.component and moving to db.json
+* "stock" becomes an empty array in the component and the data moves to db.json
+* import {HttpModule} @angular/http into stock-inventory.module then we can use http api
+* register in the module the service under 'providers' 
+* import {Injectable } in the service @Injectable says we can inject this into another component
+* import {Http, Response } from '@angular/http'
+* the angular is set up so end point points to api/ and anything after is the property from the .json
+* import service in the module into the component `import {StockInventoryService } from '../services/stock-inventory.service'`
+* in the component, import 'rxjs/add/observable/forkJoin'
+* in the constructor create an instance of the service
+
+<!-- db.json -->
+```json
+{
+	"cart":[
+		{"product_id": 1, "quantity": 10},
+		{"product_id": 3, "quantity": 50 }
+	],
+	"products":
+	[
+		{"id": 1, "price": 400, "name": "macbook pro"},
+		{"id": 2, "price": 100, "name": "ipod"},
+		{"id": 3, "price": 60, "name": "iphone"},
+	]
+}
+```
+<!-- models/product.interface -->
+```ts
+export interface Product{
+	id: number,
+	price: number,
+	name: string
+}
+export interface Item{
+	product_id: number,
+	quantity: number
+}
+```
+
+
+<!-- services/stock-inventory.module -->
+```ts
+import {StockInventoryService } from '../services/stock-inventory.service'
+
+@NgModule({
+	imports: [ HttpModule],
+	providers: [StockInventoryService]
+})
+```
+
+<!-- services/stock-inventory.service -->
+```ts
+import {Injectable} from '@angular/core';
+import {Http, Response} from '@angular/http';
+import {Observable} from 'rxjs/Observable';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/observable/thow';
+
+import { Product, Item } from '../models/product.interface';
+
+@Injectable()
+export class StockInventoryService{
+	constructor(
+		private http: Http
+	){}
+
+	getCartItems():Observable<Item[]>{
+		return this.http
+		.get('/api/cart')
+		.map((response:Response))
+		.catch((error:any) => Observable.throw(error.json()));
+	}
+
+	getProducts():Observable<Product[]>{
+		return this.http
+		.get('/api/products')
+		.map((response:Response))
+		.catch((error:any)=> Observable.throw(error.json()));
+	}
+}
+```
+
+<!-- stock-inventory.component -->
+```ts
+
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/forkJoin';
+
+import { StockInventoryService } from '../../services/stock-inventory.service';
+
+@Component({
+
+})
+export class StockInventoryComponent implements OnInit{
+
+	products: Product[];
+	productMap: Map<number, Product>
+
+	constructor(private stockService:StockInventoryService){}
+
+	ngOnInit(){
+		const cart = this.stockService.getCartItems();
+		const products = this.stockService.getProducts();
+
+		Observable.forkJoin(cart, products)
+		.subscribe( [cart, products]: [Item[], Product[]] ) => {
+			const myMap = products.map(product)
+		}
+	}
+
+}
+
+```
 
