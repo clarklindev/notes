@@ -1339,7 +1339,7 @@ export class StockProductsComponent{
 
 ## http service observables
 
-- replacing static products list with db.json (db json entries are like endpoints with array as value)
+- replacing static products list to the db.json (db json entries are like endpoints with array as value)
 - make api requests
 - setup service allows us to inject it into our component,
 - angular service gets the data from .json
@@ -1352,8 +1352,16 @@ export class StockProductsComponent{
 - import {Http, Response } from '@angular/http'
 - the angular is set up so end point points to api/ and anything after is the property from the .json
 - import service in the module into the component `import {StockInventoryService } from '../services/stock-inventory.service'`
-- in the component, import 'rxjs/add/observable/forkJoin'
+- in the component, import 'rxjs/add/observable/forkJoin', forkJoin joins multiple services
 - in the constructor create an instance of the service
+- using a map uses key/value lookup, ```productMap: Map<number, Product>```
+- each product returns [product.id, product], `const myMap = products.map<[number, Product]>(product => [product.id, product]);`
+the above says .map<[number, Product]> means type returning an array with number
+- `this.productMap = new Map<number, Product>(myMap);`  //returns something like {1: {product details}}
+- then assign `this.products = products;`
+- pass map down into `<stock-products>`
+- in stock products, `@Input() map: Map<number, Product>;`
+- add `getProduct(id){return this.map.get(id);}`
 
 <!-- db.json -->
 
@@ -1417,14 +1425,14 @@ export class StockInventoryService{
 	getCartItems():Observable<Item[]>{
 		return this.http
 		.get('/api/cart')
-		.map((response:Response))
+		.map((response:Response) => response.json() )
 		.catch((error:any) => Observable.throw(error.json()));
 	}
 
 	getProducts():Observable<Product[]>{
 		return this.http
 		.get('/api/products')
-		.map((response:Response))
+		.map((response:Response) => response.json() )
 		.catch((error:any)=> Observable.throw(error.json()));
 	}
 }
@@ -1440,7 +1448,9 @@ import 'rxjs/add/observable/forkJoin';
 import { StockInventoryService } from '../../services/stock-inventory.service';
 
 @Component({
-
+	template:`
+		<stock-products [map]="productMap" [parent]="form" (removed)="removeStock($event)"></stock-products>
+	`
 })
 export class StockInventoryComponent implements OnInit{
 
@@ -1449,15 +1459,23 @@ export class StockInventoryComponent implements OnInit{
 
 	constructor(private stockService:StockInventoryService){}
 
+	// any bindings will be fully available here...
 	ngOnInit(){
 		const cart = this.stockService.getCartItems();
 		const products = this.stockService.getProducts();
 
 		Observable.forkJoin(cart, products)
 		.subscribe( [cart, products]: [Item[], Product[]] ) => {
-			const myMap = products.map(product)
+			const myMap = products.map<[number, product]>(product => [product.id, product]);
+
+			this.productMap = new Map<number, Product>(myMap);
+			this.products = products;
+			cart.forEach(item => this.addStock(item));
 		}
 	}
+	createStock(stock){}
+	addStock(stock){}
+	removeStock({group, index}){}
 
 }
 
@@ -1479,5 +1497,12 @@ import { FormGroup } from '@angular/forms';
 export class StockProductsComponent {
 	@Input()
 	parent: FormGroup;
+
+	@Input()
+	map: Map<number, Product>;
+
+	getProduct(id){
+		return this.map.get(id);
+	}
 }
 ```
