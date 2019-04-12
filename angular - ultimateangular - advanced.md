@@ -1371,6 +1371,11 @@ the above says .map<[number, Product]> means type returning an array with number
 * .valueChanges() observable, we subscribe to it
 * to set an initial value, call the calculateTotal 
 
+## reset update form controls
+
+* reseting a form or a particular control
+* call .reset({}) pass in an object and tell it which properties we want to reset
+
 <!-- db.json -->
 
 ```json
