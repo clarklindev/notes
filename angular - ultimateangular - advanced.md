@@ -1344,6 +1344,7 @@ export class StockProductsComponent{
 - setup service allows us to inject it into our component,
 - angular service gets the data from .json
 - use observables to merge api request
+- Observable.subscribe(()=>{ //do the stuff you want to observer here });
 - refactor by removing data out of stock-inventory.component and moving to db.json
 - "stock" becomes an empty array in the component and the data moves to db.json
 - import {HttpModule} @angular/http into stock-inventory.module then we can use http api
@@ -1362,6 +1363,13 @@ the above says .map<[number, Product]> means type returning an array with number
 - pass map down into `<stock-products>`
 - in stock products, `@Input() map: Map<number, Product>;`
 - add `getProduct(id){return this.map.get(id);}`
+
+## value change observers
+
+* create a total with calculation and value change observable
+* subscribing to the changes of our form
+* .valueChanges() observable, we subscribe to it
+* to set an initial value, call the calculateTotal 
 
 <!-- db.json -->
 
@@ -1450,12 +1458,18 @@ import { StockInventoryService } from '../../services/stock-inventory.service';
 @Component({
 	template:`
 		<stock-products [map]="productMap" [parent]="form" (removed)="removeStock($event)"></stock-products>
+
+		<div class="stock-inventory__price">total: {{ total | currency: 'USD': true}}</div>
+		
+		<div class="stock-inventory__buttons"><button type="submit" [disabled]="form.invalid">Order stock</button></div>
 	`
 })
 export class StockInventoryComponent implements OnInit{
 
 	products: Product[];
-	productMap: Map<number, Product>
+	productMap: Map<number, Product>;
+
+	total: number;
 
 	constructor(private stockService:StockInventoryService){}
 
@@ -1471,8 +1485,23 @@ export class StockInventoryComponent implements OnInit{
 			this.productMap = new Map<number, Product>(myMap);
 			this.products = products;
 			cart.forEach(item => this.addStock(item));
+
+			this.calculateTotal(this.form.get('stock').value);
+			this.form.get('stock')
+			.valueChanges.subscribe(value=> {
+				console.log(value);
+				return this.calculateTotal(value);
+			});
 		}
 	}
+	
+	calculateTotal(value:Item[]){
+		const total = value.reduce((prev, next)=>{
+			return prev + (next.quantity * this.produceMap.get(next.product_id).price);
+		}, 0); //sets inital value of reduce to 0 
+		this.total = total;
+	}
+
 	createStock(stock){}
 	addStock(stock){}
 	removeStock({group, index}){}
@@ -1506,3 +1535,5 @@ export class StockProductsComponent {
 	}
 }
 ```
+
+
