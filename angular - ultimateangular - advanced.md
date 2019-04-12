@@ -896,31 +896,34 @@ export class AppComponent implements OnInit {
 - to use the component in our app-component, we exports:[StockInventoryComponent]
 
 <!-- app/stock-inventory/app.module.ts -->
+
 ```ts
-import {NgModule} from '@angular/core';
-import {BrowserModule} from '@angular/platform-browser';
-import {StockInventoryModule} from './stock-inventory/stock-inventory.module';
-import {AppComponent} from './app.component';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { StockInventoryModule } from './stock-inventory/stock-inventory.module';
+import { AppComponent } from './app.component';
 @NgModule({
-	declarations:[AppComponent],
-	imports:[BrowserModule, StockInventoryModule],
-	bootstrap:[AppComponent]
+	declarations: [AppComponent],
+	imports: [BrowserModule, StockInventoryModule],
+	bootstrap: [AppComponent]
 })
-export class AppModule{}
+export class AppModule {}
 ```
 
 <!-- app.component.ts -->
-```ts
-import {Component} from '@angular/core';
-@Component({
-	selector:'app-root',
-	template:`<div>
-		<stock-inventory></stock-inventory>
-	</div>`
-})
-export class AppComponent{}
-```
 
+```ts
+import { Component } from '@angular/core';
+@Component({
+	selector: 'app-root',
+	template: `
+		<div>
+			<stock-inventory></stock-inventory>
+		</div>
+	`
+})
+export class AppComponent {}
+```
 
 <!-- app/stock-inventory/stock-inventory.module.ts -->
 
@@ -935,16 +938,15 @@ import { StockInventoryComponent } from './containers/stock-inventory/stock-inve
 	imports: [CommonModule, ReactiveFormsModule],
 	exports: [StockInventoryComponent]
 })
-export class StockInventoryModule {
-	
-}
+export class StockInventoryModule {}
 ```
 
 <!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.scss -->
 <!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.ts -->
+
 ```ts
 import { Component } from '@angular/core';
-import {FormControl, FormGroup, FormArray} from '@angular/forms';
+import { FormControl, FormGroup, FormArray } from '@angular/forms';
 
 @Component({
 	selector: 'stock-inventory',
@@ -953,8 +955,12 @@ import {FormControl, FormGroup, FormArray} from '@angular/forms';
 		<div class="stock-inventory">
 			<form [formGroup]="form" (ngSubmit)="onSubmit()">
 				<div formGroupName="store">
-					<input type="text" placeholder="branch id" formControlName="branch">
-					<input type="text" placeholder="manager code" formControlName="code">
+					<input type="text" placeholder="branch id" formControlName="branch" />
+					<input
+						type="text"
+						placeholder="manager code"
+						formControlName="code"
+					/>
 				</div>
 				<div class="stock-inventory__buttons">
 					<button type="submit" [disabled]="form.invalid">Order Stock</button>
@@ -965,7 +971,6 @@ import {FormControl, FormGroup, FormArray} from '@angular/forms';
 		</div>
 	`
 })
-
 export class StockInventoryComponent {
 	form = new FormGroup({
 		store: new FormGroup({
@@ -977,9 +982,9 @@ export class StockInventoryComponent {
 			quantity: new FormControl(10)
 		}),
 		stock: new FormArray([])
-	})
+	});
 
-	onSubmit(){
+	onSubmit() {
 		console.log('Submit: ', this.form.value);
 	}
 }
@@ -989,94 +994,95 @@ export class StockInventoryComponent {
 
 - template driven, bind ng-model and the template generates the source of truth (model)
 - reactive driven, the javascript in the reactive class is the source of truth
-- import FormControl, FormGroup, FormArray from @angular/forms 
-- stock-inventory.component.ts create ```<form>``` element
+- import FormControl, FormGroup, FormArray from @angular/forms
+- stock-inventory.component.ts create `<form>` element
 - create property on component class called 'form' and assign to FormGroup
 - inside FormGroup, we can create other FormGroup
 - FormGroups contain FormControl
 - bind the form property in the class to the DOM form element [formGroup]="form"
 - the correlation gets tied in when you assign a FormGroupName to the class
-- the formControls get formControlName binding to the FormGroup class properties, 
+- the formControls get formControlName binding to the FormGroup class properties,
 - the class contructor for FormControl gets the default value
-- hooking up submit functionality create a ```<button>``` element inside the form with a type='submit'
+- hooking up submit functionality create a `<button>` element inside the form with a type='submit'
 - (ngSubmit)="OnSubmit()" allows us to gain access to all the whole form in 'this.form.value'
-- we can preview what is inside the form by ```<pre>{{form.value | json }}</pre>```
+- we can preview what is inside the form by `<pre>{{form.value | json }}</pre>`
 
 ## componentizing formgroups
+
 - making a selector component, array
 - selector is a dropdown
 - FormArray allows us to create a collection of FormGroups or FormControls
 
-- create a component 'stock-branch' from formGroupName="store" 
-- create a component 'stock-selector' from formGroupName="selector"
-- create a component 'stock-products' from formGroupName="products"
+- create a component 'stock-branch' which has a template `<div formGroupName="store"></div>`
+- create a component 'stock-selector' which has a template `<div formGroupName="selector"></div>`
+- create a component 'stock-products' which has a template `<div formGroupName="products"></div>`
 
-- we create a binding called parent and pass down the form, as the [parent]="form", this tells this component that its part of 
-the entire form eg. <!-- stock-inventory.component.ts-->template: `<form [formGroup]="form"><stock-branch [parent]="form"></stock-branch></form>`
-- we go into the component and import { FormGroup } from '@angular/forms' / on the Class, 
+- we create a binding called 'parent' and pass down the form, as the [parent]="form", this tells this component that its part of the entire form eg. <!-- stock-inventory.component.ts-->template: `<form [formGroup]="form"><stock-branch [parent]="form"></stock-branch></form>`
+- we go into the component and import { FormGroup } from '@angular/forms' / on the Class,
 - create an @Input() parent:FormGroup / import { Component, Input } from '@angular/core'
 - we need to bind the component to the parent so in the component, `<div [formGroup]="parent">`
 
 ## binding formcontrols select
 
-* creat a nested formGroup, allows user to select one of our products
-* building out 'stock-selector' that allows user to choose a particular product
-* and then add it to the form list when user has selected it
-* note we create the product.interface
-* import into stock-inventory.component.ts
-* in Stock-inventory.component we create a products array
-* bind to stock-selector `<stock-selector [parent]="form" [products]="products">` here we pass down the products into the component
-* inside the component stock-inventory.component, 'selector' which is part of formGroup, 
-* inside stock-selector, bind formGroupName `<div formGroupName="selector">`, we have 2 controls product_id and quantity
-* allow the user to select product `<select formControlName="product_id">`
-* iterate through options using ngFor, binding id to the value `<options *ngFor="let product of products" [value]="product.id">{{ product.name }}`
-* default with `<option value="">Select stock</option>`
-* allow user to choose quantity `<input type="number" step="10" min="10" max="1000" formControlName="quantity">`
+- creat a nested formGroup, allows user to select one of our products
+- building out 'stock-selector' that allows user to choose a particular product
+- and then add it to the form list when user has selected it
+- note we create the product.interface
+- import into stock-inventory.component.ts
+- in Stock-inventory.component we create a products array
+- bind to stock-selector `<stock-selector [parent]="form" [products]="products">` here we pass down the products into the component
+- inside the component stock-inventory.component, 'selector' which is part of formGroup,
+- inside stock-selector, bind formGroupName `<div formGroupName="selector">`, we have 2 controls product_id and quantity
+- allow the user to select product `<select formControlName="product_id">`
+- iterate through options using ngFor, binding id to the value `<options *ngFor="let product of products" [value]="product.id">{{ product.name }}`
+- default with `<option value="">Select stock</option>`
+- allow user to choose quantity `<input type="number" step="10" min="10" max="1000" formControlName="quantity">`
 
 ## form array
 
-* hooking up FormArray, and iterate over it and render out each item in the FormArray, 
-* show what the user has selected as a stock item
-* stock-products.components
-* inside *ngFor, we use it to iterate through the array, we need to bind to a `[formGroupName]`
-* use parseInt(stock.product_id, 10) makes string a number with base 10
+- hooking up FormArray, and iterate over it and render out each item in the FormArray,
+- show what the user has selected as a stock item
+- stock-products.components
+- inside \*ngFor, we use it to iterate through the array, we need to bind to a `[formGroupName]`
+- use parseInt(stock.product_id, 10) makes string a number with base 10
 
 ## form array add
 
-* here we want to be able to add the item to the array
-* also add ability to remove item
-* emit event from inside the component to the parent, import { Output, EventEmitter } from '@angular/core'
-* create an `@Output() added = new EventEmitter<any>();`
-* when the button is clicked, `this.added.emit(this.parent.get('selector').value);`, the parent 'selector' is accessed to gain access to the whole FormGroup
-* on the parent stock-inventory.component.ts listen for (added) event, then the parent component can push it into the stock-products components
-	`<stock-selector [parent]="form" [products]="products" (added)="addStock($event)"></stock-selector>`
-* stock-inventory.component.ts create addStock()
-* because we are in the parent we can gain access to the 'stock' FormArray
-* const control = this.form.get('stock') as FormArray which allows us access to FormArray, then we can push to it via createStock()
+- here we want to be able to add the item to the array
+- also add ability to remove item
+- emit event from inside the component to the parent, import { Output, EventEmitter } from '@angular/core'
+- create an `@Output() added = new EventEmitter<any>();`
+- when the button is clicked, `this.added.emit(this.parent.get('selector').value);`, the parent 'selector' is accessed to gain access to the whole FormGroup
+- on the parent stock-inventory.component.ts listen for (added) event, then the parent component can push it into the stock-products components
+  `<stock-selector [parent]="form" [products]="products" (added)="addStock($event)"></stock-selector>`
+- stock-inventory.component.ts create addStock()
+- because we are in the parent we can gain access to the 'stock' FormArray
+- const control = this.form.get('stock') as FormArray which allows us access to FormArray, then we can push to it via createStock()
 
 ## form array remove
 
-* using index to remove an item
-* we are already in the loop of the FormArray so we pass item and the index(i).
-* add onRemove() function to stock-products.component `<button type="button" (click)="onRemove(item, i)">Remove</button>`
-* import Output and EventEmitter from '@angular/core'
-* add to the component `@Output() removed: new EventEmitter<any>()`
-* use the child component to emit the data that the parent needs to handle
-* in stock-inventory.component, listen to 'removed' event ```<stock-products [parent]="form" (removed)="removeStock($event)"></stock-products>```
-* removeStock() function calls control = this.form.get('stock') as FormArray and then in angular reactive forms, control.removeAt(index); which is same as splice(index, 1)
+- using index to remove an item
+- we are already in the loop of the FormArray so we pass item and the index(i).
+- add onRemove() function to stock-products.component `<button type="button" (click)="onRemove(item, i)">Remove</button>`
+- import Output and EventEmitter from '@angular/core'
+- add to the component `@Output() removed: new EventEmitter<any>()`
+- use the child component to emit the data that the parent needs to handle
+- in stock-inventory.component, listen to 'removed' event `<stock-products [parent]="form" (removed)="removeStock($event)"></stock-products>`
+- removeStock() function calls control = this.form.get('stock') as FormArray and then in angular reactive forms, control.removeAt(index); which is same as splice(index, 1)
 
 ## form builder
 
-* Formbuilder is a wrapper for FormGroup, FormControl, FormArray and removes the need for boilder-plate declaration
-* import { FormBuilder } from '@angular/forms'
-* create a fb:FormBuilder instance in the constructor
-* replace declarations of new FormGroup() with this.fb.group
-* replace declarations of new FormArray() with this.fb.array
-* replace declarations of new FormControl() with this.fb.control
+- Formbuilder is a wrapper for FormGroup, FormControl, FormArray and removes the need for boilder-plate declaration
+- import { FormBuilder } from '@angular/forms'
+- create a fb:FormBuilder instance in the constructor
+- replace declarations of new FormGroup() with this.fb.group
+- replace declarations of new FormArray() with this.fb.array
+- replace declarations of new FormControl() with this.fb.control
 
 use object destructuring removeStock({group, index})
 
 <!-- app/stock-inventory/stock-inventory.module.ts -->
+
 ```ts
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -1084,30 +1090,36 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { StockInventoryComponent } from './containers/stock-inventory/stock-inventory.component';
 
-import {StockBranchComponent } from './components/stock-branch/stock-branch.component';
-import {StockProductsComponent} from './components/stock-products/stock-products.component';
-import {StockSelectorComponent} from './components/stock-selector/stock-selector.component';
+import { StockBranchComponent } from './components/stock-branch/stock-branch.component';
+import { StockProductsComponent } from './components/stock-products/stock-products.component';
+import { StockSelectorComponent } from './components/stock-selector/stock-selector.component';
 
 @NgModule({
-	declarations: [StockInventoryComponent, StockBranchComponent, StockProductsComponent, StockSelectorComponent],
+	declarations: [
+		StockInventoryComponent,
+		StockBranchComponent,
+		StockProductsComponent,
+		StockSelectorComponent
+	],
 	imports: [CommonModule, ReactiveFormsModule],
 	exports: [StockInventoryComponent]
 })
-export class StockInventoryModule {
-}
+export class StockInventoryModule {}
 ```
 
 <!-- models/product.interface.ts -->
+
 ```ts
-	export interface Product{
-		id: number,
-		price: number,
-		name: string
-	}
+export interface Product {
+	id: number;
+	price: number;
+	name: string;
+}
 ```
 
-- in stock-inventory.component.ts we group the dom into components and replace the current dom 
-<!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.ts -->
+- in stock-inventory.component.ts we group the dom into components and replace the current dom
+  <!-- app/stock-inventory/containers/stock-inventory/stock-inventory.component.ts -->
+
 ```ts
 import { Product } from '../../models/product.interface';
 
@@ -1120,7 +1132,7 @@ import { Product } from '../../models/product.interface';
 
 			<stock-selector [parent]="form" [products]="products" (added)="addStock($event)">
 			</stock-selector>
-			
+
 			<stock-products [parent]="form" (removed)="removeStock($event)">
 			</stock-products>
 
@@ -1137,11 +1149,11 @@ import { Product } from '../../models/product.interface';
 	})
 	export class StockInventoryComponent{
 		products:Product[] = [
-			{"id": 1, "price":2800, "name":"MacBook Pro"}, 
-			{"id": 2, "price":1000, "name":"Usb"}, 
-			{"id": 3, "price":800, "name":"iPod"}, 
-			{"id": 4, "price":600, "name":"iPhone"}, 
-			{"id": 5, "price":3300, "name":"Apple Watch"}, 
+			{"id": 1, "price":2800, "name":"MacBook Pro"},
+			{"id": 2, "price":1000, "name":"Usb"},
+			{"id": 3, "price":800, "name":"iPod"},
+			{"id": 4, "price":600, "name":"iPhone"},
+			{"id": 5, "price":3300, "name":"Apple Watch"},
 		];
 
 		form = new FormGroup({
@@ -1153,7 +1165,7 @@ import { Product } from '../../models/product.interface';
 			stock: new FormArray([
 				this.createStock({ product_id: 1, quantity: 3}),
 				this.createStock({ product_id: 3, quantity: 50})
-			])	
+			])
 		});
 
 		createStock(stock){
@@ -1162,7 +1174,7 @@ import { Product } from '../../models/product.interface';
 				quantity: new FormControl(stock.quantity || 10)
 			});
 		}
-		
+
 		addStock(stock){
 			const control = this.form.get('stock') as FormArray;
 			this.control.push(this.createStock(stock));
@@ -1178,38 +1190,45 @@ import { Product } from '../../models/product.interface';
 		}
 
 	}
-	
+
 ```
 
+- the below becomes a component
 
-
-- the below becomes a component 
----
 <!-- html -->
+
 ```html
 <div formGroupName="store">
-	<input type="text" placeholder="branch id" formControlName="branch">
-	<input type="text" placeholder="manager code" formControlName="code">
+	<input type="text" placeholder="branch id" formControlName="branch" />
+	<input type="text" placeholder="manager code" formControlName="code" />
 </div>
-```
+````
+
 <!-- becomes -->
+
 ```html
 <stock-branch></stock-branch>
 ```
+
 <!-- app/stock-inventory/components/stock-branch/stock-branch.component.ts -->
+
 ```ts
-import {Component} from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+
 @Component({
-	selector:'stock-branch',
-	styleUrls:['stock-branch.component.scss'],
-	template:`<div>
-		<div formGroupName="store">
-			<input type="text" placeholder="branch id" formControlName="branch">
-			<input type="text" placeholder="manager code" formControlName="code">
+	selector: 'stock-branch',
+	styleUrls: ['stock-branch.component.scss'],
+	template: `
+		<div [formGroup]="parent">
+			<div formGroupName="store">
+				<input type="text" placeholder="branch id" formControlName="branch" />
+				<input type="text" placeholder="manager code" formControlName="code" />
+			</div>
 		</div>
-	</div>`
+	`
 })
-export class StockBranchComponent{
+export class StockBranchComponent {
 	@Input()
 	parent: FormGroup;
 
@@ -1218,18 +1237,20 @@ export class StockBranchComponent{
 }
 ```
 
-
 ---
+
 <!-- html -->
-```html
-```
-<!-- becomes -->
+
 ```html
 <stock-selector></stock-selector>
 ```
+
 <!-- app/stock-inventory/components/stock-selector/stock-selector.component.ts -->
+
 ```ts
-import {Component} from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+
 @Component({
 	selector:'stock-selector',
 	styleUrls:['stock-selector.component.scss'],
@@ -1260,16 +1281,21 @@ export class StockSelectorComponent{
 	onAdd(){
 		this.added.emit(this.parent.get('selector').value);
 	}
-}
+
+})
+
 ```
 
-
 ---
+
 <!-- becomes -->
+
 ```html
 <stock-products></stock-products>
 ```
+
 <!-- app/stock-inventory/components/stock-products/stock-products.component.ts -->
+
 ```ts
 import {Component, Output, EventEmitter } from '@angular/core';
 @Component({
@@ -1300,7 +1326,7 @@ export class StockProductsComponent{
 
 	@Output()
 	removed: new EventEmitter<any>();
-	
+
 	onRemove(group, index){
 		this.removed.emit({group, index});
 	}
@@ -1313,52 +1339,54 @@ export class StockProductsComponent{
 
 ## http service observables
 
-* replacing static products list with db.json (db json entries are like endpoints with array as value)
-* make api requests
-* setup service allows us to inject it into our component, 
-* angular service gets the data from .json
-* use observables to merge api request
-* refactor by removing data out of stock-inventory.component and moving to db.json
-* "stock" becomes an empty array in the component and the data moves to db.json
-* import {HttpModule} @angular/http into stock-inventory.module then we can use http api
-* register in the module the service under 'providers' 
-* import {Injectable } in the service @Injectable says we can inject this into another component
-* import {Http, Response } from '@angular/http'
-* the angular is set up so end point points to api/ and anything after is the property from the .json
-* import service in the module into the component `import {StockInventoryService } from '../services/stock-inventory.service'`
-* in the component, import 'rxjs/add/observable/forkJoin'
-* in the constructor create an instance of the service
+- replacing static products list with db.json (db json entries are like endpoints with array as value)
+- make api requests
+- setup service allows us to inject it into our component,
+- angular service gets the data from .json
+- use observables to merge api request
+- refactor by removing data out of stock-inventory.component and moving to db.json
+- "stock" becomes an empty array in the component and the data moves to db.json
+- import {HttpModule} @angular/http into stock-inventory.module then we can use http api
+- register in the module the service under 'providers'
+- import {Injectable } in the service @Injectable says we can inject this into another component
+- import {Http, Response } from '@angular/http'
+- the angular is set up so end point points to api/ and anything after is the property from the .json
+- import service in the module into the component `import {StockInventoryService } from '../services/stock-inventory.service'`
+- in the component, import 'rxjs/add/observable/forkJoin'
+- in the constructor create an instance of the service
 
 <!-- db.json -->
+
 ```json
 {
-	"cart":[
-		{"product_id": 1, "quantity": 10},
-		{"product_id": 3, "quantity": 50 }
+	"cart": [
+		{ "product_id": 1, "quantity": 10 },
+		{ "product_id": 3, "quantity": 50 }
 	],
-	"products":
-	[
-		{"id": 1, "price": 400, "name": "macbook pro"},
-		{"id": 2, "price": 100, "name": "ipod"},
-		{"id": 3, "price": 60, "name": "iphone"},
+	"products": [
+		{ "id": 1, "price": 400, "name": "macbook pro" },
+		{ "id": 2, "price": 100, "name": "ipod" },
+		{ "id": 3, "price": 60, "name": "iphone" }
 	]
 }
 ```
+
 <!-- models/product.interface -->
+
 ```ts
-export interface Product{
-	id: number,
-	price: number,
-	name: string
+export interface Product {
+	id: number;
+	price: number;
+	name: string;
 }
-export interface Item{
-	product_id: number,
-	quantity: number
+export interface Item {
+	product_id: number;
+	quantity: number;
 }
 ```
 
-
 <!-- services/stock-inventory.module -->
+
 ```ts
 import {StockInventoryService } from '../services/stock-inventory.service'
 
@@ -1369,6 +1397,7 @@ import {StockInventoryService } from '../services/stock-inventory.service'
 ```
 
 <!-- services/stock-inventory.service -->
+
 ```ts
 import {Injectable} from '@angular/core';
 import {Http, Response} from '@angular/http';
@@ -1402,6 +1431,7 @@ export class StockInventoryService{
 ```
 
 <!-- stock-inventory.component -->
+
 ```ts
 
 import { Observable } from 'rxjs/Observable';
@@ -1433,3 +1463,21 @@ export class StockInventoryComponent implements OnInit{
 
 ```
 
+<!-- stock-product.component -->
+
+```ts
+import { Component, Input } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+
+@Component({
+	selector: 'stock-products',
+	styleUrls: ['stock-products.component.scss'],
+	template: `
+		<div class="stock-products" [formGroup]="parent"></div>
+	`
+})
+export class StockProductsComponent {
+	@Input()
+	parent: FormGroup;
+}
+```
