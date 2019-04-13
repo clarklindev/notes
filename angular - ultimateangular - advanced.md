@@ -1202,7 +1202,7 @@ import { Product } from '../../models/product.interface';
 	<input type="text" placeholder="branch id" formControlName="branch" />
 	<input type="text" placeholder="manager code" formControlName="code" />
 </div>
-````
+```
 
 <!-- becomes -->
 
@@ -1355,10 +1355,10 @@ export class StockProductsComponent{
 - import service in the module into the component `import {StockInventoryService } from '../services/stock-inventory.service'`
 - in the component, import 'rxjs/add/observable/forkJoin', forkJoin joins multiple services
 - in the constructor create an instance of the service
-- using a map uses key/value lookup, ```productMap: Map<number, Product>```
+- using a map uses key/value lookup, `productMap: Map<number, Product>`
 - each product returns [product.id, product], `const myMap = products.map<[number, Product]>(product => [product.id, product]);`
-the above says .map<[number, Product]> means type returning an array with number
-- `this.productMap = new Map<number, Product>(myMap);`  //returns something like {1: {product details}}
+  the above says .map<[number, Product]> means type returning an array with number
+- `this.productMap = new Map<number, Product>(myMap);` //returns something like {1: {product details}}
 - then assign `this.products = products;`
 - pass map down into `<stock-products>`
 - in stock products, `@Input() map: Map<number, Product>;`
@@ -1366,15 +1366,21 @@ the above says .map<[number, Product]> means type returning an array with number
 
 ## value change observers
 
-* create a total with calculation and value change observable
-* subscribing to the changes of our form
-* .valueChanges() observable, we subscribe to it
-* to set an initial value, call the calculateTotal 
+- create a total with calculation and value change observable
+- subscribing to the changes of our form
+- .valueChanges() observable, we subscribe to it
+- to set an initial value, call the calculateTotal
 
-## reset update form controls
+## reset update form controls /patchValue
 
-* reseting a form or a particular control
-* call .reset({}) pass in an object and tell it which properties we want to reset
+- can reset a whole form or a particular control
+- call .reset({}) pass in an object and tell it which properties on the form object we want to reset
+- add to onAdd(){} function after the emit, this.parent.get('selector').reset({'product_id':'', quantity: 10})
+- the form classes also get reset when calling the .reset(),
+  resets the classes ng-pristine, ng-touched, ng-dirty, ng-valid
+- reset resets every single value,
+- to reset a specific value on the form, use .patchValue() or .setValue({}) allows us to say just reset 'product_id' but does not reset the classes ng-pristine, ng-touched, ng-dirty, ng-valid etc
+- setValue() you have to redefine values for every property on the group/control or form object
 
 <!-- db.json -->
 
@@ -1420,9 +1426,9 @@ import {StockInventoryService } from '../services/stock-inventory.service'
 <!-- services/stock-inventory.service -->
 
 ```ts
-import {Injectable} from '@angular/core';
-import {Http, Response} from '@angular/http';
-import {Observable} from 'rxjs/Observable';
+import { Injectable } from '@angular/core';
+import { Http, Response } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/thow';
@@ -1430,23 +1436,21 @@ import 'rxjs/add/observable/thow';
 import { Product, Item } from '../models/product.interface';
 
 @Injectable()
-export class StockInventoryService{
-	constructor(
-		private http: Http
-	){}
+export class StockInventoryService {
+	constructor(private http: Http) {}
 
-	getCartItems():Observable<Item[]>{
+	getCartItems(): Observable<Item[]> {
 		return this.http
-		.get('/api/cart')
-		.map((response:Response) => response.json() )
-		.catch((error:any) => Observable.throw(error.json()));
+			.get('/api/cart')
+			.map((response: Response) => response.json())
+			.catch((error: any) => Observable.throw(error.json()));
 	}
 
-	getProducts():Observable<Product[]>{
+	getProducts(): Observable<Product[]> {
 		return this.http
-		.get('/api/products')
-		.map((response:Response) => response.json() )
-		.catch((error:any)=> Observable.throw(error.json()));
+			.get('/api/products')
+			.map((response: Response) => response.json())
+			.catch((error: any) => Observable.throw(error.json()));
 	}
 }
 ```
@@ -1465,7 +1469,7 @@ import { StockInventoryService } from '../../services/stock-inventory.service';
 		<stock-products [map]="productMap" [parent]="form" (removed)="removeStock($event)"></stock-products>
 
 		<div class="stock-inventory__price">total: {{ total | currency: 'USD': true}}</div>
-		
+
 		<div class="stock-inventory__buttons"><button type="submit" [disabled]="form.invalid">Order stock</button></div>
 	`
 })
@@ -1499,11 +1503,11 @@ export class StockInventoryComponent implements OnInit{
 			});
 		}
 	}
-	
+
 	calculateTotal(value:Item[]){
 		const total = value.reduce((prev, next)=>{
 			return prev + (next.quantity * this.produceMap.get(next.product_id).price);
-		}, 0); //sets inital value of reduce to 0 
+		}, 0); //sets inital value of reduce to 0
 		this.total = total;
 	}
 
@@ -1513,6 +1517,46 @@ export class StockInventoryComponent implements OnInit{
 
 }
 
+```
+
+<!-- stock-selector.component -->
+
+```ts
+@Component({
+	selector: 'stock-selector',
+	template: `<div class="stock-selector" [formGroup]="parent">
+		<div formGroupName="selector">
+			<select formControlName="product_id">
+				<option
+				*ngFor="let product of products" [value]="product.id">
+				{{product.name}}
+				</option>
+			</select>
+			<input type="number" step="10" min="10" max="1000" formControlName="quantity">
+			<button type="button" (click)="onAdd()">Add stock
+			</button>
+		</div>
+	</div>`
+})
+export class StockSelectorCompnent {
+	@Input()
+	parent: FormGroup;
+
+	@Input()
+	products: Product[];
+
+	@Output()
+	added: EventEmitter<any>();
+
+	onAdd(){
+		this.added.emit(this.parent.get('selector').value);
+
+		//variations of form reset
+		this.parent.get('selector').reset({product_id:'', quantity:10});
+		this.parent.get('selector').patchValue({product_id:''});
+		this.parent.get('selector').setValue({product_id:'', quantity:10});
+	}
+}
 ```
 
 <!-- stock-product.component -->
@@ -1535,10 +1579,8 @@ export class StockProductsComponent {
 	@Input()
 	map: Map<number, Product>;
 
-	getProduct(id){
+	getProduct(id) {
 		return this.map.get(id);
 	}
 }
 ```
-
-
