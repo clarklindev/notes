@@ -1584,3 +1584,75 @@ export class StockProductsComponent {
 	}
 }
 ```
+---
+
+## custom form components
+
+* import into the module the component
+* add it to the declarations array
+* set up the properties on the class and add increment/decrement methods to mimic the 'input'
+* now you can use stock-counter.component in stock-selector.component
+* note it binds the data to the class properties with `[prop]` rather than assigning with string like in the html 'input' sytnax
+* disable or enable button by binding to disabled property  `[disabled]="value===max"`
+
+## control value accessor
+
+* 
+
+<!-- stock-inventory.module.ts -->
+```ts
+import { StockCounterComponent } from './components/stock-counter/stock-counter.component';
+
+@NgModule({
+	declarations:[StockCounterComponent],
+})
+```
+
+<!-- stock-counter/stock-counter.component.ts -->
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+	selector:'stock-counter',
+	styleUrls: ['stock-counter.component.scss'],
+	template: `<div>
+		<div>
+			<div>
+				<p>{{value}}</p>
+				<div>
+					<button type="button" [disabled]="value===max" (click)="increment()">+</button>
+					<button type="button" [disabled]="value===min" (click)="decrement()">-</button>
+				</div>
+			</div>
+		</div>
+	</div>`
+})
+export class StockCounterComponent{
+	@Input() step: number = 10;
+	@Input() min: number = 10;
+	@Input() max: number = 1000;
+
+	value: number = 0;
+
+	increment(){
+		if(this.value < this.max){
+			this.value = this.value + this.step;
+		}
+	}
+
+	decrement(){
+		if(this.value > this.min){
+			this.value = this.value - this.step;
+		}
+	}
+
+}
+```
+
+<!-- stock-selector.component -->
+```ts
+template:`
+	<stock-counter [step]="10" [min]="10" [max]="1000">
+	</stock-counter>
+`
+```
