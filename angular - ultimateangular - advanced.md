@@ -1629,6 +1629,20 @@ export class StockProductsComponent {
   	this.onTouch = fn;
   }
 
+## keyboard events
+
+* use wrapper div element to bind events to
+* (keydown)="onKeyDown($event)"
+* (blur)="onBlur($event)"
+* (focus)="onFocus($event)" 
+* listen to onKeyDown events with `handlers[event.code]` to check if 'ArrowDown' or 'ArrowUp' if it exists call it `handlers[event.code]()`
+* call this.onTouch()
+* onBlur set focus to false, call event.preventDefault(); event.stopPropagation();
+* onFocus set focus to true, call event.preventDefault(); event.stopPropagation();
+* bind to `[class.focused]="focus"` when focus is true 
+* add .focused css to stylesheet
+* to get div elements to fire these events we need to add a tabindex="0" to the DOM
+
 <!-- stock-inventory.module.ts -->
 
 ```ts
@@ -1656,9 +1670,13 @@ const COUNTER_CONTROL_ACCESSOR = {
 	styleUrls: ['stock-counter.component.scss'],
 	providers: [COUNTER_CONTROL_ACCESSOR],
 	template: `
-		<div>
+		<div class="stock-counter">
 			<div>
-				<div>
+				<div 
+					(keydown)="onKeyDown($event)"
+					(blur)="onBlur($event)"
+					(focus)="onFocus($event)"	
+				>
 					<p>{{ value }}</p>
 					<div>
 						<button
@@ -1701,6 +1719,34 @@ export class StockCounterComponent implements ControlValueAccessor {
 	@Input() max: number = 1000;
 
 	value: number = 0;
+
+	onKeyDown(event: KeyboardEvent){
+		const handlers = {
+			ArrowDown: () => this.decrement(),
+			ArrowUp: () => this.increment()
+		};
+
+		if(handlers[event.code]){
+			handlers[event.code]();
+			event.preventDefault();
+			event.stopPropagation();
+		}
+		this.onTouch();
+	}
+
+	onBlur(event:FocusEvent){
+		this.focus = false;
+		event.preventDefault();
+		event.stopPropagation();
+		this.onTouch();
+	}
+
+	onFocus(event:FocusEvent){
+		this.focus = true;
+		event.preventDefault();
+		event.stopPropagation();
+		this.onTouch();
+	}
 
 	increment() {
 		if (this.value < this.max) {
