@@ -1584,22 +1584,53 @@ export class StockProductsComponent {
 	}
 }
 ```
+
 ---
 
 ## custom form components
 
-* import into the module the component
-* add it to the declarations array
-* set up the properties on the class and add increment/decrement methods to mimic the 'input'
-* now you can use stock-counter.component in stock-selector.component
-* note it binds the data to the class properties with `[prop]` rather than assigning with string like in the html 'input' sytnax
-* disable or enable button by binding to disabled property  `[disabled]="value===max"`
+- import into the module the component
+- add it to the declarations array
+- set up the properties on the class and add increment/decrement methods to mimic the 'input'
+- now you can use stock-counter.component in stock-selector.component
+- note it binds the data to the class properties with `[prop]` rather than assigning with string like in the html 'input' sytnax
+- disable or enable button by binding to disabled property `[disabled]="value===max"`
 
 ## control value accessor
 
-* 
+- control value accessor allows us to use our own component and talk directly to our reactive form (whereas it usually uses the input element)
+- stock-counter.component `import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';`
+- register CounterComponent, and extend NG_VALUE_ACCESSOR to allow us to use our own component to talk to the form groups
+- angular uses NG_VALUE_ACCESSOR to go into the input and allows us to update the values
+- so we tell angular we have a component that want to do something similar,
+- create a object that we will pass into our component as a provider `const COUNTER_CONTROL_ACCESSOR = {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(()=> StockCounterComponent)};`
+- 'useExisting' tells Angular which component we will use to control the read and write access to our form control
+- we need to use a forwardRef which we need to `import { forwardRef } from '@angular/core'`
+- we return from a forwardRef our component, StockCounterComponent
+- forwardRef it allows us to hoist the class/wait for the StockCounterComponent to become available, meaning giving us access to the class.
+- add prop `multi: true` means we are extending NG_VALUE_ACCESSOR with our own StockCounterComponent
+- in stockCounterCompnent, add `providers: [COUNTER_CONTROL_ACCESSOR],`
+- the StockCounterComponent needs to implements ControlValueAccessor which needs us to implement the following functions:
+
+- writeValue(value){ this.value = value || 0 } , we are writing the value of the formcontrol into our own custom component
+- we create 2 property functions `private onTouch:Function;`
+  `private onModelChange: Function;` we assign these properties to the functions that angular reactive forms are exposing
+- we call onModelChange when our counter changes, this happens in the increment() and decrement()
+
+  registerOnChange(fn){
+  	this.onModelChange = fn;
+  }
+
+- onTouch notifies formControl that the component has been interacted with/ it has been touched
+  this registers ng-touched, ng-pristine, ng-valid and when component is touched ng-valid ng-touched, ng-dirty
+  this ties in with validation
+
+  registerOnTouched(fn){
+  	this.onTouch = fn;
+  }
 
 <!-- stock-inventory.module.ts -->
+
 ```ts
 import { StockCounterComponent } from './components/stock-counter/stock-counter.component';
 
@@ -1609,50 +1640,91 @@ import { StockCounterComponent } from './components/stock-counter/stock-counter.
 ```
 
 <!-- stock-counter/stock-counter.component.ts -->
+
 ```ts
-import { Component } from '@angular/core';
+import { Component, Input, forwardRef } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+const COUNTER_CONTROL_ACCESSOR = {
+	provide: NG_VALUE_ACCESSOR,
+	useExisting: forwardRef(() => StockCounterComponent),
+	multi: true
+};
 
 @Component({
-	selector:'stock-counter',
+	selector: 'stock-counter',
 	styleUrls: ['stock-counter.component.scss'],
-	template: `<div>
+	providers: [COUNTER_CONTROL_ACCESSOR],
+	template: `
 		<div>
 			<div>
-				<p>{{value}}</p>
 				<div>
-					<button type="button" [disabled]="value===max" (click)="increment()">+</button>
-					<button type="button" [disabled]="value===min" (click)="decrement()">-</button>
+					<p>{{ value }}</p>
+					<div>
+						<button
+							type="button"
+							[disabled]="value === max"
+							(click)="increment()"
+						>
+							+
+						</button>
+						<button
+							type="button"
+							[disabled]="value === min"
+							(click)="decrement()"
+						>
+							-
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>`
+	`
 })
-export class StockCounterComponent{
+export class StockCounterComponent implements ControlValueAccessor {
+	private onTouch: Function;
+	private onModelChange: Function;
+
+	registerOnTouched(fn) {
+		this.onTouch = fn;
+	}
+	registerOnChange(fn) {
+		this.onModelChange = fn;
+	}
+
+	writeValue(value) {
+		this.value = value || 0;
+	}
+
 	@Input() step: number = 10;
 	@Input() min: number = 10;
 	@Input() max: number = 1000;
 
 	value: number = 0;
 
-	increment(){
-		if(this.value < this.max){
+	increment() {
+		if (this.value < this.max) {
 			this.value = this.value + this.step;
+			this.onModelChange(this.value);
 		}
+		this.onTouch();
 	}
 
-	decrement(){
-		if(this.value > this.min){
+	decrement() {
+		if (this.value > this.min) {
 			this.value = this.value - this.step;
+			this.onModelChange(this.value);
 		}
+		this.onTouch();
 	}
-
 }
 ```
 
 <!-- stock-selector.component -->
+
 ```ts
-template:`
+template: `
 	<stock-counter [step]="10" [min]="10" [max]="1000">
 	</stock-counter>
-`
+`;
 ```
