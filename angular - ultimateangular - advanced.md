@@ -1810,6 +1810,8 @@ template: `
 * we add a second argument to the form group, which is an object which we can pass in validator or asyncvalidator
 * here our example we use .some() which returns a boolean and we can use this to check if the one thing is in the other array and it iterates through all items,
 * note the validator returns false if the item is already in the array which returns {stockExists: true}
+* add stock selector component is the wrapping component which includes the selector and stock
+* we bind to `[disabled]="stockExists"`
 
 <!-- stock-inventory.component -->
 ```ts
@@ -1878,7 +1880,6 @@ template:
 
 ```
 
-
 ```ts
 export class StockBranchComponent{
 	@Input parent:FormGroup;
@@ -1900,4 +1901,23 @@ export class StockBranchComponent{
 	}
 }
 
+```
+<!-- stock-selector.component -->
+```ts
+`
+<button type="button" [disabled]="stockExists || notSelected" (click)="onAdd()">Add stock</button>
+<div class="stock-selector__error" *ngIf="stockExists">Item already exists in the stock</div>
+`
+get notSelected(){
+	return (
+		!this.parent.get('selector.product_id').value
+	);
+}
+
+get stockExists(){
+	return (
+		this.parent.hasError('stockExists') && 
+		this.parent.get('selector.product_id').dirty
+	);
+}
 ```
