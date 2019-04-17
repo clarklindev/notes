@@ -1774,3 +1774,110 @@ template: `
 	</stock-counter>
 `;
 ```
+
+## validators object
+
+* stock-inventory.component import {Validators} from '@angular/forms';
+* with reactive forms, form = this.fb.group({store: this.fb.group({branch: '', code: ''})}) we want to make branch and code "required"
+* with reactive forms, validation can be done on the form object
+* the value of the group is then assigned an array branch:['', Validators.] 
+* the first argument is the value
+* the second argument is the validators object
+* example Validators.required
+* add validation messages by creating div element below input element, give it class="error" 
+* use .hasError('invalidBranch') checks against the custom validators' error method eg. StockValidators.checkBranchs' return object {invalidBranch:true}
+* target parent then the input and check for error, *ngIf="parent.get('store.branch').hasError('required')" 
+* but only when field has been interacted with && parent.get('store.branch').touched
+* we can replace the *ngIf="" by calling a function instead required('') and passing in the name of the form group
+* if the ngIf returns true, then show the div, which means if required() returns true, then there are errors and it has been touched
+
+## custom control validator
+* second argument in Validator object becomes an array, and we pass in the method
+* these are synchronous validators, the 3rd argument is an asynchronous validator
+* import {StockValidators } from './stock-inventory.validators';
+* note that the validator method is static
+* the method has a few arguments, first is of type :AbstractControl,
+* the control referenced by the validator depends on which property on the form we bind the validator to
+* for the function we want to check if branch is valid
+* can create a regular expression and test against the control with .test()
+* if true, return null, else if invalid return an object { invalidBranch:true} which adds a property to the angular Validator
+* *ngIf's can be moved into a function
+* using getter get invalid() you can access the method directly like *ngIf="invalid" without method brackets ()
+
+
+<!-- stock-inventory.component -->
+```ts
+import {StockValidators} from './stock-inventory.validators';
+
+@Component({
+
+})
+
+export class StockInventoryComponent{
+
+	form = this.fb.group({
+		store: this.fb.group({
+			branch: ['', [Validators.required, StockValidators.checkBranch]],
+			code: ['', Validators.required]
+		}),
+		selector: this.createStock({}),
+		stock: this.fb.array([])
+	})
+
+	constructor(private fb: FormBuilder, private stockService: StockInventoryService){}
+```
+
+<!-- stock-inventory.validators.ts -->
+```ts
+import { AbstractControl } from '@angular/forms';
+
+export class StockValidators{
+	static checkBranch(control:AbstractControl){ 
+		const regexp = /^[a-z]\d{3}$/i;			//what to check against
+		const valid = regexp.test(control.value);			
+		return valid ? null : { invalidBranch: true };
+	}
+}
+
+```
+
+<!-- stock-branch.component -->
+```ts
+import {Validators} from '@angular/forms'; 	
+
+template: 
+`<input type="text" placeholder="Branch ID" formControlName="branch">
+<div class="error" *ngIf="parent.get('store.branch').hasError('required') && parent.get('store.branch').touched">Branch Id is required</div>
+<div class="error" *ngIf="parent.get('store.branch').hasError('invalidBranch')>Invalid branch code: 1 letter, 3 numbers</div>`
+// can be replaced with...0
+// if ngIf returns true
+template:
+`<input type="text" placeholder="Branch ID" formControlName="branch">
+<div class="error" *ngIf="required('branch')">Branch ID is required</div>
+<div class="error" *ngIf="invalid">Invalid branch code: 1 letter, 3 numbers</div>`
+
+```
+
+
+```ts
+export class StockBranchComponent{
+	@Input parent:FormGroup;
+
+	// if required returns true
+	required(name:string){
+		return(
+			this.parent.get(`store.${name}`).hasError('required') && 
+			this.parent.get(`store.${name}`).touched
+		);
+	}
+
+	get invalid(){
+		return (
+			this.parent.get('store.branch').hasError('invalidBranch') &&
+			this.parent.get('store.branch').dirty && 
+			!this.required('branch')
+		);
+	}
+}
+
+```
