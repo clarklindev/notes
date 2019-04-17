@@ -1796,7 +1796,7 @@ template: `
 * these are synchronous validators, the 3rd argument is an asynchronous validator
 * import {StockValidators } from './stock-inventory.validators';
 * note that the validator method is static
-* the method has a few arguments, first is of type :AbstractControl,
+* the method has a few arguments, first is of type :AbstractControl, which is a class that all formgroups inherit from
 * the control referenced by the validator depends on which property on the form we bind the validator to
 * for the function we want to check if branch is valid
 * can create a regular expression and test against the control with .test()
@@ -1804,6 +1804,12 @@ template: `
 * *ngIf's can be moved into a function
 * using getter get invalid() you can access the method directly like *ngIf="invalid" without method brackets ()
 
+## custom formgroup validator
+
+* validator on formgroup to check if its already in the list, if it is then dont add it
+* we add a second argument to the form group, which is an object which we can pass in validator or asyncvalidator
+* here our example we use .some() which returns a boolean and we can use this to check if the one thing is in the other array and it iterates through all items,
+* note the validator returns false if the item is already in the array which returns {stockExists: true}
 
 <!-- stock-inventory.component -->
 ```ts
@@ -1822,7 +1828,7 @@ export class StockInventoryComponent{
 		}),
 		selector: this.createStock({}),
 		stock: this.fb.array([])
-	})
+	}, {validators: StockValidators.checkStockExists });
 
 	constructor(private fb: FormBuilder, private stockService: StockInventoryService){}
 ```
@@ -1836,6 +1842,20 @@ export class StockValidators{
 		const regexp = /^[a-z]\d{3}$/i;			//what to check against
 		const valid = regexp.test(control.value);			
 		return valid ? null : { invalidBranch: true };
+	}
+
+	static checkStockExists(control: AbstractControl){
+		const stockItem = control.get('stock');
+		const selector = control.get('selector');
+
+		if(! (stockItem && selector)){
+			return null;
+		}
+		const exists = stockItem.value.some((stock) => {
+			return stock.product_id === parseInt(selector.value.product_id, 10);
+		});
+		
+		return exists ? {stockExists: true} : null;
 	}
 }
 
