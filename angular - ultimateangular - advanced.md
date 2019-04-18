@@ -1813,6 +1813,15 @@ template: `
 * add stock selector component is the wrapping component which includes the selector and stock
 * we bind to `[disabled]="stockExists"`
 
+## asynchronous custom validator
+
+* asynchronous validator go and communicate with an api, then bring back a response which we can validate against
+* update the db.json with "branches"
+* update service with `checkBranchId(id: string): Observable<boolean>`, the call should return a response from http call
+* the stock-inventory.component imports service and creates an instance in the contructor
+* create a function validateBranch() in the component, the function uses the service and calls the service method to check if a branch exists
+* import {AbstractControl} from '@angular/forms' 
+
 <!-- stock-inventory.component -->
 ```ts
 import {StockValidators} from './stock-inventory.validators';
@@ -1822,10 +1831,14 @@ import {StockValidators} from './stock-inventory.validators';
 })
 
 export class StockInventoryComponent{
-
+ 
 	form = this.fb.group({
 		store: this.fb.group({
-			branch: ['', [Validators.required, StockValidators.checkBranch]],
+			branch: [
+				'', 
+				[Validators.required, StockValidators.checkBranch], 
+				[this.validateBranch.bind(this)]
+			],
 			code: ['', Validators.required]
 		}),
 		selector: this.createStock({}),
@@ -1833,6 +1846,14 @@ export class StockInventoryComponent{
 	}, {validators: StockValidators.checkStockExists });
 
 	constructor(private fb: FormBuilder, private stockService: StockInventoryService){}
+
+	validateBranch(control:AbstractControl){
+		return this.stockService
+		.checkBranchId(control.value)
+		.map((response:boolean)=>{
+			return response ? null : {unknownBranch: true}
+		});
+	}
 ```
 
 <!-- stock-inventory.validators.ts -->
@@ -1865,24 +1886,34 @@ export class StockValidators{
 
 <!-- stock-branch.component -->
 ```ts
+
 import {Validators} from '@angular/forms'; 	
+@Component({
+	template: 
+	`<input type="text" placeholder="Branch ID" formControlName="branch">
+	<div class="error" *ngIf="parent.get('store.branch').hasError('required') && parent.get('store.branch').touched">Branch Id is required</div>
+	<div class="error" *ngIf="parent.get('store.branch').hasError('invalidBranch')>Invalid branch code: 1 letter, 3 numbers</div>`
+	// can be replaced with...0
+	// if ngIf returns true 
+	template:
+	`<input type="text" placeholder="Branch ID" formControlName="branch">
+	<div class="error" *ngIf="required('branch')">Branch ID is required</div>
+	<div class="error" *ngIf="invalid">Invalid branch code: 1 letter, 3 numbers</div>
+	<div class="error" *ngIf="unknown">Unknown branch, please check the ID</div>
 
-template: 
-`<input type="text" placeholder="Branch ID" formControlName="branch">
-<div class="error" *ngIf="parent.get('store.branch').hasError('required') && parent.get('store.branch').touched">Branch Id is required</div>
-<div class="error" *ngIf="parent.get('store.branch').hasError('invalidBranch')>Invalid branch code: 1 letter, 3 numbers</div>`
-// can be replaced with...0
-// if ngIf returns true
-template:
-`<input type="text" placeholder="Branch ID" formControlName="branch">
-<div class="error" *ngIf="required('branch')">Branch ID is required</div>
-<div class="error" *ngIf="invalid">Invalid branch code: 1 letter, 3 numbers</div>`
+	<input type="text" placeholder="manager code" formControlName="code">
+	<div class="error" *ngIf="required('code')">Manager ID is required</div>`
+})
 
-```
-
-```ts
 export class StockBranchComponent{
 	@Input parent:FormGroup;
+
+	get unknown(){
+		return(
+			this.parent.get('store.branch').hasError('unknownBranch') &&
+			this.parent.get('store.branch').dirty
+		);
+	}
 
 	// if required returns true
 	required(name:string){
@@ -1897,7 +1928,7 @@ export class StockBranchComponent{
 			this.parent.get('store.branch').hasError('invalidBranch') &&
 			this.parent.get('store.branch').dirty && 
 			!this.required('branch')
-		);
+		);  
 	}
 }
 
@@ -1920,4 +1951,31 @@ get stockExists(){
 		this.parent.get('selector.product_id').dirty
 	);
 }
+```
+<!-- stock-inventory.service -->
+```ts
+import { Http, Response, URLSearchParams } from '@angular/http';
+
+	checkBranchId(id:string):Observable<boolean>{
+		let search = new URLSearchParams();
+		search.set('id', id);
+		
+		//the first map maps the response to json
+		//the second map checks if the response that has been parsed from json actually exists...if it exists we get the branch else, there wont be a length
+		return this.http
+		.get('/api/branches', {search} )
+		.map((response:Response) => response.json() )
+		.map((response:any[]) => !! response.length )
+		.catch( (error:any) => Observable.throw(error.json()) );
+	}
+```
+
+<!-- db.json -->
+```ts
+"branches": [
+	{"id": "B182"},
+	{"id": "A779"},
+	{"id": "C390"},
+	{"id": "R262"}
+]
 ```
