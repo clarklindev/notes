@@ -2020,6 +2020,14 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 - test event instanceof one of the routing Classes
 - we can use rxjs filter to first filter the event then if we are sure that it is an instanceof NavigationEnd then subscribe to it
 
+## Routeroutlet events
+
+* adding events to `<router-outlet (activate)="onActivate($event)" (deactivate)="onDeactivate($event)">` provided by angular
+* we can then pass through $event to the listening method
+* the router outlet 'activate' event tells us the component has been instantiated
+* the router outlet 'deactivate' event tells us the component that has been destroyed
+* can use these for analytics, or logging, or running global function when component activated or destroyed..
+
 <!-- app.module.ts -->
 
 ```ts
@@ -2052,4 +2060,19 @@ export class AppComponent implements OnInit {
 		});
 	}
 }
+```
+<!-- mail-app.component -->
+```ts
+@Component({
+	template:`<router-outlet (activate)="onActivate($event)" (deactivate)="onDeactivate($event)"></router-outlet>`
+})
+export class MailAppComponent{
+	onActivate(event){
+		console.log('activate: ', event);
+	}
+	onDeactivate(event){
+		console.log('deactivate: ', event);
+	}
+}
+
 ```
