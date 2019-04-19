@@ -1618,7 +1618,7 @@ export class StockProductsComponent {
 - we call onModelChange when our counter changes, this happens in the increment() and decrement()
 
   registerOnChange(fn){
-  	this.onModelChange = fn;
+  this.onModelChange = fn;
   }
 
 - onTouch notifies formControl that the component has been interacted with/ it has been touched
@@ -1626,22 +1626,22 @@ export class StockProductsComponent {
   this ties in with validation
 
   registerOnTouched(fn){
-  	this.onTouch = fn;
+  this.onTouch = fn;
   }
 
 ## keyboard events
 
-* use wrapper div element to bind events to
-* (keydown)="onKeyDown($event)"
-* (blur)="onBlur($event)"
-* (focus)="onFocus($event)" 
-* listen to onKeyDown events with `handlers[event.code]` to check if 'ArrowDown' or 'ArrowUp' if it exists call it `handlers[event.code]()`
-* call this.onTouch()
-* onBlur set focus to false, call event.preventDefault(); event.stopPropagation();
-* onFocus set focus to true, call event.preventDefault(); event.stopPropagation();
-* bind to `[class.focused]="focus"` when focus is true 
-* add .focused css to stylesheet
-* to get div elements to fire these events we need to add a tabindex="0" to the DOM
+- use wrapper div element to bind events to
+- (keydown)="onKeyDown(\$event)"
+- (blur)="onBlur(\$event)"
+- (focus)="onFocus(\$event)"
+- listen to onKeyDown events with `handlers[event.code]` to check if 'ArrowDown' or 'ArrowUp' if it exists call it `handlers[event.code]()`
+- call this.onTouch()
+- onBlur set focus to false, call event.preventDefault(); event.stopPropagation();
+- onFocus set focus to true, call event.preventDefault(); event.stopPropagation();
+- bind to `[class.focused]="focus"` when focus is true
+- add .focused css to stylesheet
+- to get div elements to fire these events we need to add a tabindex="0" to the DOM
 
 <!-- stock-inventory.module.ts -->
 
@@ -1672,10 +1672,10 @@ const COUNTER_CONTROL_ACCESSOR = {
 	template: `
 		<div class="stock-counter">
 			<div>
-				<div 
+				<div
 					(keydown)="onKeyDown($event)"
 					(blur)="onBlur($event)"
-					(focus)="onFocus($event)"	
+					(focus)="onFocus($event)"
 				>
 					<p>{{ value }}</p>
 					<div>
@@ -1720,13 +1720,13 @@ export class StockCounterComponent implements ControlValueAccessor {
 
 	value: number = 0;
 
-	onKeyDown(event: KeyboardEvent){
+	onKeyDown(event: KeyboardEvent) {
 		const handlers = {
 			ArrowDown: () => this.decrement(),
 			ArrowUp: () => this.increment()
 		};
 
-		if(handlers[event.code]){
+		if (handlers[event.code]) {
 			handlers[event.code]();
 			event.preventDefault();
 			event.stopPropagation();
@@ -1734,14 +1734,14 @@ export class StockCounterComponent implements ControlValueAccessor {
 		this.onTouch();
 	}
 
-	onBlur(event:FocusEvent){
+	onBlur(event: FocusEvent) {
 		this.focus = false;
 		event.preventDefault();
 		event.stopPropagation();
 		this.onTouch();
 	}
 
-	onFocus(event:FocusEvent){
+	onFocus(event: FocusEvent) {
 		this.focus = true;
 		event.preventDefault();
 		event.stopPropagation();
@@ -1777,52 +1777,54 @@ template: `
 
 ## validators object
 
-* stock-inventory.component import {Validators} from '@angular/forms';
-* with reactive forms, form = this.fb.group({store: this.fb.group({branch: '', code: ''})}) we want to make branch and code "required"
-* with reactive forms, validation can be done on the form object
-* the value of the group is then assigned an array branch:['', Validators.] 
-* the first argument is the value
-* the second argument is the validators object
-* example Validators.required
-* add validation messages by creating div element below input element, give it class="error" 
-* use .hasError('invalidBranch') checks against the custom validators' error method eg. StockValidators.checkBranchs' return object {invalidBranch:true}
-* target parent then the input and check for error, *ngIf="parent.get('store.branch').hasError('required')" 
-* but only when field has been interacted with && parent.get('store.branch').touched
-* we can replace the *ngIf="" by calling a function instead required('') and passing in the name of the form group
-* if the ngIf returns true, then show the div, which means if required() returns true, then there are errors and it has been touched
+- stock-inventory.component import {Validators} from '@angular/forms';
+- with reactive forms, form = this.fb.group({store: this.fb.group({branch: '', code: ''})}) we want to make branch and code "required"
+- with reactive forms, validation can be done on the form object
+- the value of the group is then assigned an array branch:['', Validators.]
+- the first argument is the value
+- the second argument is the validators object
+- example Validators.required
+- add validation messages by creating div element below input element, give it class="error"
+- use .hasError('invalidBranch') checks against the custom validators' error method eg. StockValidators.checkBranchs' return object {invalidBranch:true}
+- target parent then the input and check for error, \*ngIf="parent.get('store.branch').hasError('required')"
+- but only when field has been interacted with && parent.get('store.branch').touched
+- we can replace the \*ngIf="" by calling a function instead required('') and passing in the name of the form group
+- if the ngIf returns true, then show the div, which means if required() returns true, then there are errors and it has been touched
 
 ## custom control validator
-* second argument in Validator object becomes an array, and we pass in the method
-* these are synchronous validators, the 3rd argument is an asynchronous validator
-* import {StockValidators } from './stock-inventory.validators';
-* note that the validator method is static
-* the method has a few arguments, first is of type :AbstractControl, which is a class that all formgroups inherit from
-* the control referenced by the validator depends on which property on the form we bind the validator to
-* for the function we want to check if branch is valid
-* can create a regular expression and test against the control with .test()
-* if true, return null, else if invalid return an object { invalidBranch:true} which adds a property to the angular Validator
-* *ngIf's can be moved into a function
-* using getter get invalid() you can access the method directly like *ngIf="invalid" without method brackets ()
+
+- second argument in Validator object becomes an array, and we pass in the method
+- these are synchronous validators, the 3rd argument is an asynchronous validator
+- import {StockValidators } from './stock-inventory.validators';
+- note that the validator method is static
+- the method has a few arguments, first is of type :AbstractControl, which is a class that all formgroups inherit from
+- the control referenced by the validator depends on which property on the form we bind the validator to
+- for the function we want to check if branch is valid
+- can create a regular expression and test against the control with .test()
+- if true, return null, else if invalid return an object { invalidBranch:true} which adds a property to the angular Validator
+- \*ngIf's can be moved into a function
+- using getter get invalid() you can access the method directly like \*ngIf="invalid" without method brackets ()
 
 ## custom formgroup validator
 
-* validator on formgroup to check if its already in the list, if it is then dont add it
-* we add a second argument to the form group, which is an object which we can pass in validator or asyncvalidator
-* here our example we use .some() which returns a boolean and we can use this to check if the one thing is in the other array and it iterates through all items,
-* note the validator returns false if the item is already in the array which returns {stockExists: true}
-* add stock selector component is the wrapping component which includes the selector and stock
-* we bind to `[disabled]="stockExists"`
+- validator on formgroup to check if its already in the list, if it is then dont add it
+- we add a second argument to the form group, which is an object which we can pass in validator or asyncvalidator
+- here our example we use .some() which returns a boolean and we can use this to check if the one thing is in the other array and it iterates through all items,
+- note the validator returns false if the item is already in the array which returns {stockExists: true}
+- add stock selector component is the wrapping component which includes the selector and stock
+- we bind to `[disabled]="stockExists"`
 
 ## asynchronous custom validator
 
-* asynchronous validator go and communicate with an api, then bring back a response which we can validate against
-* update the db.json with "branches"
-* update service with `checkBranchId(id: string): Observable<boolean>`, the call should return a response from http call
-* the stock-inventory.component imports service and creates an instance in the contructor
-* create a function validateBranch() in the component, the function uses the service and calls the service method to check if a branch exists
-* import {AbstractControl} from '@angular/forms' 
+- asynchronous validator go and communicate with an api, then bring back a response which we can validate against
+- update the db.json with "branches"
+- update service with `checkBranchId(id: string): Observable<boolean>`, the call should return a response from http call
+- the stock-inventory.component imports service and creates an instance in the contructor
+- create a function validateBranch() in the component, the function uses the service and calls the service method to check if a branch exists
+- import {AbstractControl} from '@angular/forms'
 
 <!-- stock-inventory.component -->
+
 ```ts
 import {StockValidators} from './stock-inventory.validators';
 
@@ -1831,12 +1833,12 @@ import {StockValidators} from './stock-inventory.validators';
 })
 
 export class StockInventoryComponent{
- 
+
 	form = this.fb.group({
 		store: this.fb.group({
 			branch: [
-				'', 
-				[Validators.required, StockValidators.checkBranch], 
+				'',
+				[Validators.required, StockValidators.checkBranch],
 				[this.validateBranch.bind(this)]
 			],
 			code: ['', Validators.required]
@@ -1857,44 +1859,45 @@ export class StockInventoryComponent{
 ```
 
 <!-- stock-inventory.validators.ts -->
+
 ```ts
 import { AbstractControl } from '@angular/forms';
 
-export class StockValidators{
-	static checkBranch(control:AbstractControl){ 
-		const regexp = /^[a-z]\d{3}$/i;			//what to check against
-		const valid = regexp.test(control.value);			
+export class StockValidators {
+	static checkBranch(control: AbstractControl) {
+		const regexp = /^[a-z]\d{3}$/i; //what to check against
+		const valid = regexp.test(control.value);
 		return valid ? null : { invalidBranch: true };
 	}
 
-	static checkStockExists(control: AbstractControl){
+	static checkStockExists(control: AbstractControl) {
 		const stockItem = control.get('stock');
 		const selector = control.get('selector');
 
-		if(! (stockItem && selector)){
+		if (!(stockItem && selector)) {
 			return null;
 		}
-		const exists = stockItem.value.some((stock) => {
+		const exists = stockItem.value.some(stock => {
 			return stock.product_id === parseInt(selector.value.product_id, 10);
 		});
-		
-		return exists ? {stockExists: true} : null;
+
+		return exists ? { stockExists: true } : null;
 	}
 }
-
 ```
 
 <!-- stock-branch.component -->
+
 ```ts
 
-import {Validators} from '@angular/forms'; 	
+import {Validators} from '@angular/forms';
 @Component({
-	template: 
+	template:
 	`<input type="text" placeholder="Branch ID" formControlName="branch">
 	<div class="error" *ngIf="parent.get('store.branch').hasError('required') && parent.get('store.branch').touched">Branch Id is required</div>
 	<div class="error" *ngIf="parent.get('store.branch').hasError('invalidBranch')>Invalid branch code: 1 letter, 3 numbers</div>`
 	// can be replaced with...0
-	// if ngIf returns true 
+	// if ngIf returns true
 	template:
 	`<input type="text" placeholder="Branch ID" formControlName="branch">
 	<div class="error" *ngIf="required('branch')">Branch ID is required</div>
@@ -1918,7 +1921,7 @@ export class StockBranchComponent{
 	// if required returns true
 	required(name:string){
 		return(
-			this.parent.get(`store.${name}`).hasError('required') && 
+			this.parent.get(`store.${name}`).hasError('required') &&
 			this.parent.get(`store.${name}`).touched
 		);
 	}
@@ -1926,14 +1929,16 @@ export class StockBranchComponent{
 	get invalid(){
 		return (
 			this.parent.get('store.branch').hasError('invalidBranch') &&
-			this.parent.get('store.branch').dirty && 
+			this.parent.get('store.branch').dirty &&
 			!this.required('branch')
-		);  
+		);
 	}
 }
 
 ```
+
 <!-- stock-selector.component -->
+
 ```ts
 `
 <button type="button" [disabled]="stockExists || notSelected" (click)="onAdd()">Add stock</button>
@@ -1947,19 +1952,21 @@ get notSelected(){
 
 get stockExists(){
 	return (
-		this.parent.hasError('stockExists') && 
+		this.parent.hasError('stockExists') &&
 		this.parent.get('selector.product_id').dirty
 	);
 }
 ```
+
 <!-- stock-inventory.service -->
+
 ```ts
 import { Http, Response, URLSearchParams } from '@angular/http';
 
 	checkBranchId(id:string):Observable<boolean>{
 		let search = new URLSearchParams();
 		search.set('id', id);
-		
+
 		//the first map maps the response to json
 		//the second map checks if the response that has been parsed from json actually exists...if it exists we get the branch else, there wont be a length
 		return this.http
@@ -1971,6 +1978,7 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 ```
 
 <!-- db.json -->
+
 ```ts
 "branches": [
 	{"id": "B182"},
@@ -1978,4 +1986,70 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 	{"id": "C390"},
 	{"id": "R262"}
 ]
+```
+
+---
+
+# Routing
+
+## enable tracing
+
+- traces out the route event info
+- in app.module, turn on enableTracing... imports:[ RouterModule.forRoot(ROUTES, {enableTracing: true})]
+- can inject Router in app.component constructor and listen to the events in ngOnInit()
+
+* EVENTS
+
+- NavigationStart event
+- RoutesRecognized event
+- NavigationEnd event
+
+- NavigationCancel event
+- NavigationError event
+
+- RouteConfigLoadStart event
+- RouteConfigLoadEnd event
+
+* doing something when navigation has ended,
+
+## Router Event Subscriptions
+
+- we listen to router events in ngOnInit() by subscribing to this.router.events.subscribe()
+- we need to import any Routing events we need if we are to subscribe to them 
+- import { Router, NavigationEnd } from '@angular/router'
+- test event instanceof one of the routing Classes
+- we can use rxjs filter to first filter the event then if we are sure that it is an instanceof NavigationEnd then subscribe to it
+
+<!-- app.module.ts -->
+
+```ts
+@NgModule({
+	imports:[
+		RouterModule.forRoot(ROUTES, {enableTracing: true})
+	]
+})
+```
+
+<!-- app.component.ts -->
+
+```ts
+export class AppComponent implements OnInit {
+	constructor(private router: Router) {}
+	ngOnInit() {
+		this.router.events
+		.subscribe(event => {
+			console.log(event);
+			if(event instanceof NavigationEnd){
+				console.log(event);
+			}
+		});
+
+		// alternative method to first filter (rxjs)
+		this.router.events
+		.filter(event=> event instanceof NavigationEnd)
+		.subscribe(event => {
+			console.log(event);
+		});
+	}
+}
 ```
