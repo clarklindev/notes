@@ -2015,22 +2015,73 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 ## Router Event Subscriptions
 
 - we listen to router events in ngOnInit() by subscribing to this.router.events.subscribe()
-- we need to import any Routing events we need if we are to subscribe to them 
+- we need to import any Routing events we need if we are to subscribe to them
 - import { Router, NavigationEnd } from '@angular/router'
 - test event instanceof one of the routing Classes
 - we can use rxjs filter to first filter the event then if we are sure that it is an instanceof NavigationEnd then subscribe to it
 
 ## Routeroutlet events
 
-* adding events to `<router-outlet (activate)="onActivate($event)" (deactivate)="onDeactivate($event)">` provided by angular
-* we can then pass through $event to the listening method
-* the router outlet 'activate' event tells us the component has been instantiated
-* the router outlet 'deactivate' event tells us the component that has been destroyed
-* can use these for analytics, or logging, or running global function when component activated or destroyed..
+- adding events to `<router-outlet (activate)="onActivate($event)" (deactivate)="onDeactivate($event)">` provided by angular
+- we can then pass through \$event to the listening method
+- the router outlet 'activate' event tells us the component has been instantiated
+- the router outlet 'deactivate' event tells us the component that has been destroyed
+- can use these for analytics, or logging, or running global function when component activated or destroyed..
 
-<!-- app.module.ts -->
+## Routing resolves
+
+- preloads data before you have navigated to a particular routed component
+- learning to configure a resolve from the module
+- in the module, add 'resolve' property to the routes mail.module.ts -> export const ROUTES: Routes = [{ path:'', component: MailFolderComponent, resolve: {}}]
+- we use db.json as the static json server in our example which holds a property "messages"
+
+- set up service to fetch data mail.service.ts
+- later, the resolve will call the service method...
+- import { Injectable } from '@angular/core'; and define class as @Injectable()
+- create constructor, inject http and import {Http} from '@angular/http'
+- make a function getFolder(folder:string):Observable<Mail[]> that returns an observable of type Mail array
+- mail is an interface
+- use query like this: '?folder' to set different look up data here we are looking up what the folder is
+
+- in the module, regist mailService as a provider
+
+<!-- resolve -->
+
+- create a resolve (mail-folder.resolve.ts) acts as a middleware between component and router
+- when it successfully resolves, component will be give the information via router (where resolve is declared)
+- make resolve class eg MailFolderResolve @Injectable()
+- import { Resolve } from '@angular/router'; and the resolve class must implements Resolve<Mail[]> (and you have to give it a type)
+- needs a resolve(){} function and we MUST call it resolve().
+- inside we make our service call.
+- create constructor() and inject the service
+- resolve() must return something, here...return an observable
+- resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) receives as parameter an ActivatedRouteSnapshot and RouterStateSnapshot but it must also be imported from '@angular/routes'
+- ActivatedRouteSnapshot contains information about our routing (mostly stuff on the url, params, query params, url fragments, and any data that will be used to fetch resolve data)
+- state:RouterStateSnapshot represents the state of the router at a particular place in time that this function was called. it also contains information about all the nodes in a particular router tree, because router is generating a tree of nodes which contain information about the current state of the router, we can get these from RouterStateSnapshot
+- .getFolder(route.params.name) where 'name' is the particular value on the route
+- import resolve into mail.module.ts
+- import { MailFolderResolve } from './containers/mail-folder/mail-folder.resolve';
+- because MailFolderResolve is injectable, we must add it to our providers:[]
+- now we can use it in mail.module.ts resolve:{}
+- the resolve property tells angular that we want to resolve some data that will be returned from a resolver,
+- here... the result of the resolve() in MailFolderResolve
+- we create a property on the router, resolve, and its value is an object with a property we make called 'messages' and we associate this with the response of MailFolderResolve function resolve()
+- resolve:{ messages: MailFolderResolve }
+- this messages property is then accessible inside MailFolderComponent as this.route.data which is an Observable;
+- in mail-folder.component, class MailFolderComponent,
+- import { ActivatedRoute } from '@angular/router';
+- inject router in constructor and then access that resolve data
+- in mail-folder.components we create a property data: Observable<{messages:Mail[]}> it is an observable and it will return an object with our MailFolderResolve resolve 'messages' property inside which is of type Mail array
+- we assign this data:Observable<{messages:Mail[]}> = this.route.data;
+- now we can access this data's message property in the template `<mail-item *ngFor="let message of (data | async).messages">`
+- we can also target specific route.data by pluck messages: Observable<Mail[]> = this.route.data.pluck('messages');
+- import 'rxjs/add/operator/pluck';
+- we can then pluck specific data from the route `title: Observable<string> = this.route.params.pluck('name');`
+- note to display this title in html we need to pipe async `{{ title| async }}`
+  <!-- app.module.ts -->
 
 ```ts
+
 @NgModule({
 	imports:[
 		RouterModule.forRoot(ROUTES, {enableTracing: true})
@@ -2044,35 +2095,127 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 export class AppComponent implements OnInit {
 	constructor(private router: Router) {}
 	ngOnInit() {
-		this.router.events
-		.subscribe(event => {
+		this.router.events.subscribe(event => {
 			console.log(event);
-			if(event instanceof NavigationEnd){
+			if (event instanceof NavigationEnd) {
 				console.log(event);
 			}
 		});
 
 		// alternative method to first filter (rxjs)
 		this.router.events
-		.filter(event=> event instanceof NavigationEnd)
-		.subscribe(event => {
-			console.log(event);
-		});
+			.filter(event => event instanceof NavigationEnd)
+			.subscribe(event => {
+				console.log(event);
+			});
 	}
 }
 ```
+
 <!-- mail-app.component -->
+
 ```ts
 @Component({
-	template:`<router-outlet (activate)="onActivate($event)" (deactivate)="onDeactivate($event)"></router-outlet>`
+	template: `
+		<router-outlet
+			(activate)="onActivate($event)"
+			(deactivate)="onDeactivate($event)"
+		></router-outlet>
+	`
 })
-export class MailAppComponent{
-	onActivate(event){
+export class MailAppComponent {
+	onActivate(event) {
 		console.log('activate: ', event);
 	}
-	onDeactivate(event){
+	onDeactivate(event) {
 		console.log('deactivate: ', event);
 	}
 }
+```
 
+<!-- mail.module -->
+
+```ts
+import { MailService } from './mail.service';
+import { MailFolderResolve } from './containers/mail-folder/mail-folder.resolve';
+
+export const ROUTES: Routes = [
+	{
+		path: 'folder/:name',
+		component: MailFolderComponent,
+		resolve: {}
+	}
+];
+
+@NgModule({
+	providers:[
+		MailService, MailFolderResolve
+	]
+})
+```
+
+<!-- mail.service -->
+
+```ts
+import { Injectable } from '@angular/core';
+import { Http } from '@angular/http';
+import { Observable } from 'rxjs/Observable';
+import { Mail } from './models/mail.interface';
+import 'rxjs/add/operator/map';
+
+@Injectable()
+export class MailService {
+	constructor(private http: Http) {}
+
+	getFolder(folder: string): Observable<Mail[]> {
+		return this.http
+			.get(`/api/messages?folder=${folder}`)
+			.map(response => response.json());
+	}
+}
+```
+
+<!-- mail-folder.resolve -->
+
+```ts
+import { Injectable } from '@angular/core';
+import {
+	Resolve,
+	ActivatedRouteSnapshot,
+	RouterStateSnapshot
+} from '@angular/router';
+import { Mail } from '../../models/mail.interface';
+import { MailService } from '../../mail.service';
+
+@Injectable()
+export class MailFolderResolve implements Resolve<Mail[]> {
+	constructor(private mailService: MailService) {}
+	resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+		return this.mailService.getFolder(route.params.name);
+	}
+}
+```
+
+<!-- mail.folder.component -->
+
+```ts
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Observable';
+
+@Component({
+	template:`<h2>{{ title| async }}</h2><mail-item
+		*ngFor="let message of messages"
+		[message]="message">
+	</mail-item>`
+})
+export class MailFolderComponent {
+	constructor(private route: ActivatedRoute) {
+		data: Observable<{messages:Mail[]}> = this.route.data;
+
+		// OR using pluck to get only messages we rename our data to messages
+		messages: Observable<Mail[]> = this.route.data.pluck('messages');
+		title: Observable<string> = this.route.params.pluck('name');
+		constructor(private route: ActivatedRoute){}
+	}
+}
 ```
