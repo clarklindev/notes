@@ -2078,6 +2078,17 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 - import 'rxjs/add/operator/pluck';
 - we can then pluck specific data from the route `title: Observable<string> = this.route.params.pluck('name');`
 - note to display this title in html we need to pipe async `{{ title| async }}`
+
+## auxilary outlets
+
+* aka second router outlet, named-router outlet, auxilary route
+* allow a sibling route into our router outlet
+* the primary router outlet and a second-router outlet (which is named) exists side by side
+* mail-app.component eg name="pane" `<router-outlet></router-outlet> <router-outlet name="pane"></router-outlet>`
+* mail.module.ts configure another outlet, create a new sibling route `export const ROUTES: Routes = [{path:'folder/:name', component:MailFolderComponent, resolve:{messages:MailFolderResolve}}, { path: 'message/:id', component:MailViewComponent, outlet:'pane'}]`
+* how to tell router-outlet that we want to render our component inside the named router-outlet? refer to 'name' in the router, via outlet property
+* when we want to navigate to this route, angular will create the pattern in the url `localhost:4000/folder/inbox(pane:message/1)` ie. url(named of outlet:routing-definition/unique-id)
+
   <!-- app.module.ts -->
 
 ```ts
