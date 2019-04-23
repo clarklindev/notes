@@ -2134,8 +2134,9 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 * in the module, import { MailViewResolve } from './components/mail-view/mail-view.resolve';
 * register resolve in providers: [MailViewResolve]
 * add getMessage() to mail.service.ts NOTE: it returns an Observable<Mail>
-* AHA MOMENT!!!! ROUTE's 'resolve' allows us access to its properties..once the resolve has been called
-* in MailViewComponent we can acess route data via message: Observable<Mail> = this.route.data.pluck('message');
+* AHA MOMENT!!!! ROUTE's 'resolve' allows us access to its properties..once the Component that is associated within ROUTE has been instantiated
+  and we have access to ActivatedRoute we can assign an Observable to this.route.data.pluck('message'), 
+* so in MailViewComponent we can acess route data via message: Observable<Mail> = this.route.data.pluck('message');
 * AHA MOMENT!!!! something that is an instance of Observable in the class needs to have | async in the html
 
 <!-- app.module.ts -->
