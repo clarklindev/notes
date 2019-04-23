@@ -2098,11 +2098,47 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 * note the first param is empty string because route path is relative ie (based off /inbox), 
 * the second param of routerLink is an object with param outlets {outlets:} which references 'pane' from ROUTES, and arguments we give pane is what the router is expecting 'message/:id'
 * the id we pass as argument dynamically into the array
-* routerLinkAcitve="active" class given to when in active state 
+* routerLinkActive="active" class given to when in active state 
 
+## auxiliary navigation api
 
-  <!-- app.module.ts -->
+* using routerLink makes angular give a elements href="" tags making it valid a tags, 
+* routerLinkActive adds 'active' class
+* using native api / javascript to navigate
+* `<a (click)="navigateToMessage()">`
+* import { Router} from '@angular/router';
+* inject router:Router into constructor
+* removeLink and routerLinkActive as we dont benefit from using these routerLink directives
+* use this.router.navigate() to navigate, and we pass in the same object as when we used routerLinks value (NOTE: we reference this.message)
+* `function navigateToMessage(){this.router.navigate(['', {outlets:{ pane:['message', this.message.id] }}] )}`
+* we dont have access to routerLinkActive though
+* to navigate by destroying aux outlet `this.router.navigate(['', {outlets:{ pane: null } }] )`
 
+## destroy auxiliary outlets
+
+* removing the auxiliary outlet section from the url this part... '(pane:message/1)'
+* switching data in router-outlet doesnt remove the auxiliary outlet data as it persists, then the url still includes the auxiliary outlet part
+* we want to clear the second router outlet
+* so routerLink="folder/inbox" becomes [routerLink]="[{outlets:{primary:'folder/inbox'}}]"
+* we change this by going to the parent app.component and binding [routerLink] to 'primary' to an array and use outlets property
+* ="[{outlets:{primary:'folder/inbox', pane:'null'}}]" this allows us to also use the auxiliary outlet eg. 'pane'
+* and to reset the url we pass null to reset `this.router.navigate(['', {outlets:{ pane: null } }] )`
+  
+## resolving auxiliary outlets
+
+* creating a resolve for the auxiliary outlet and load data in
+* mail.module.ts add a resolve property on the auxiliary route,
+* the resolve returns a single data entry not an array
+* inject service in the constructor
+* resolve() calls on services' .getMessage() and we pass in the id of the message which we get from the router ROUTES (ie from route.params.id)
+* in the module, import { MailViewResolve } from './components/mail-view/mail-view.resolve';
+* register resolve in providers: [MailViewResolve]
+* add getMessage() to mail.service.ts NOTE: it returns an Observable<Mail>
+* AHA MOMENT!!!! ROUTE's 'resolve' allows us access to its properties..once the resolve has been called
+* in MailViewComponent we can acess route data via message: Observable<Mail> = this.route.data.pluck('message');
+* AHA MOMENT!!!! something that is an instance of Observable in the class needs to have | async in the html
+
+<!-- app.module.ts -->
 ```ts
 
 @NgModule({
@@ -2166,7 +2202,17 @@ export const ROUTES: Routes = [
 	{
 		path: 'folder/:name',
 		component: MailFolderComponent,
-		resolve: {}
+		resolve: { 
+			messages: MailFolderResolve 
+		}
+	},
+	{
+		path: 'messages/:id',
+		component: MailViewComponent,
+		outlet: 'pane',
+		resolve: {
+			message: MailViewResolve
+		}
 	}
 ];
 
@@ -2195,6 +2241,12 @@ export class MailService {
 			.get(`/api/messages?folder=${folder}`)
 			.map(response => response.json());
 	}
+	
+	getMessage(id:string): Observable<Mail>{
+		return this.http
+			.get(`/api/messages/${id}`)
+			.map(response => response.json());
+	}
 }
 ```
 
@@ -2215,6 +2267,23 @@ export class MailFolderResolve implements Resolve<Mail[]> {
 	constructor(private mailService: MailService) {}
 	resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
 		return this.mailService.getFolder(route.params.name);
+	}
+}
+```
+<!-- mail-view.resolve -->
+```ts
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
+import { MailService} from '../../mail.service';
+import { Mail } from '../../models/mail.interface';
+
+@Injectable()
+export class MailViewResolve implements Resolve<Mail>{
+	constructor(private mailService:MailService){
+	}
+
+	resolve(route: ActivatedRouteSnapshot){
+		return this.mailService.getMessage(route.params.id);
 	}
 }
 ```
@@ -2242,10 +2311,37 @@ export class MailFolderComponent {
 	}
 }
 ```
-<!-- mail-item.components -->
+---
+<!-- mail-view.component -->
 ```ts
-import {Component, Input} from '@angular/core';
-import { Mail} from '../../models/mail.interface';
+import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Observable } from 'rxjs/Observable';
+import { Mail } from '../../models/mail.interface';	
+
+@Component({
+	selector:'mail-view',
+	styleUrls:['mail-view.component.scss'],
+	template:`<div class="mail-view">
+		<h2>{{ (message | async).from }}</h2>
+		<p>{{ (full | async).from}}</p>
+	</div>`
+})
+export class MailViewComponent{
+	message: Observable<Mail> = this.route.data.pluck('message');
+	constructor(private route:ActivatedRoute){}
+}
+```
+
+
+
+---
+<!-- mail-item.component -->
+```ts
+import { Component, Input } from '@angular/core';
+import { Mail } from '../../models/mail.interface';
+import { Router } from '@angular/router';
+
 @Component({
 	selector:'mail-item',
 	styleUrls: ['mail-item.component.scss'],
@@ -2255,7 +2351,16 @@ import { Mail} from '../../models/mail.interface';
 		routerLinkActive="active"
 	</a>`
 })
+
 export class MailItemComponent{
 	@Input() message: Mail;
+	
+	constructor(router:Router){}
+
+	navigateToMessage(){
+		this.router.navigate(
+			['', {outlets: {pane: ['message', this.message.id] }}]
+		);
+	}
 }
 ```
