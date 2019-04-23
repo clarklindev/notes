@@ -2089,6 +2089,18 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 * how to tell router-outlet that we want to render our component inside the named router-outlet? refer to 'name' in the router, via outlet property
 * when we want to navigate to this route, angular will create the pattern in the url `localhost:4000/folder/inbox(pane:message/1)` ie. url(named of outlet:routing-definition/unique-id)
 
+## auxiliary routerlink navigation
+
+* click on routerlink to navigate to particular router-outlet
+* mail-item.component.ts `<a class="mail-item" [routerLink]="" routerLinkActive="active"></a>`
+* we pass 'id' data from db.json into the routerLink dynamically by binding a value so that we can navigate to that component, 
+* [routerLink] = ['', {outlets:{ pane:['message', message.id] }}] 
+* note the first param is empty string because route path is relative ie (based off /inbox), 
+* the second param of routerLink is an object with param outlets {outlets:} which references 'pane' from ROUTES, and arguments we give pane is what the router is expecting 'message/:id'
+* the id we pass as argument dynamically into the array
+* routerLinkAcitve="active" class given to when in active state 
+
+
   <!-- app.module.ts -->
 
 ```ts
@@ -2228,5 +2240,22 @@ export class MailFolderComponent {
 		title: Observable<string> = this.route.params.pluck('name');
 		constructor(private route: ActivatedRoute){}
 	}
+}
+```
+<!-- mail-item.components -->
+```ts
+import {Component, Input} from '@angular/core';
+import { Mail} from '../../models/mail.interface';
+@Component({
+	selector:'mail-item',
+	styleUrls: ['mail-item.component.scss'],
+	template:`<a 
+		class="mail-item"
+		[routerLink]="['', {outlets: {pane: ['message', message.id]}}]">
+		routerLinkActive="active"
+	</a>`
+})
+export class MailItemComponent{
+	@Input() message: Mail;
 }
 ```
