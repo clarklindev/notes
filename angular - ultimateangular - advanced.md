@@ -2139,6 +2139,12 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 * so in MailViewComponent we can acess route data via message: Observable<Mail> = this.route.data.pluck('message');
 * AHA MOMENT!!!! something that is an instance of Observable in the class needs to have | async in the html
 
+## Lazy loading
+
+* spliting up chuncks of code and requesting code on demand
+* modules and code related to it is lazy loaded on demand
+* 
+
 <!-- app.module.ts -->
 ```ts
 
