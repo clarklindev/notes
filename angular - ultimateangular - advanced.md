@@ -2160,21 +2160,51 @@ UPDATE:
 * in the Dashboard.module, we remove the now duplicate path (as it is set in the root ROUTER), and set the initial path:''
 * lazyloaded modules show up in the browser 'network' as '0.chunk.js', filename is done via webpack
 
+## preload all
+
+* even with Lazy loading modules code in place, it is possible to override the lazyload code by preloadAll
+* import { PreloadAllModules } from '@angular/router';
+* in the module, RouterModule.forRoot(ROUTES) gets updated to RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules})
+
+# custom preload (requires lazy loading)
+
+* updating preloadingStrategy on RouterModule.forRoot(ROUTES, {preloadingStrategy:PreloadAllModules}); 
+* we update to RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules});
+* we import { PreloadingStrategy }
+* we remove the import { PreloadAllModules }
+* create and export a class, on the  `export class CustomPreload implements PreloadingStrategy` and make it implement PreloadingStrategy
+* we need to implement the preload function in this customPreload class `preload(route:Route, fn:()=>Observable<any>):Observable<any>{}` 
+* and inside this method, we say what should happen when we hit this route 
+* but we need to update the ROUTES first to add a property data:{preload:true} to the object for path:'dashboard' 
+* then we can test if the route exists and if there is a 'preload' property on the route 
+* add providers:[CustomPreload], and then replace the preloadingStrategy forRoot with CustomPreload
+* the CustomPreload strategy is iterating over our router tree definitions and checking if route.data exists and preload is true, THEN preload() by invoke the function given to us else return an observable of null																																																		
+
 <!-- app.module.ts -->
 ```ts
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/of';
+
 import { MailModule } from './mail/mail.module';
 // import { DashboardModule } from './dashboard/dashboard.module';
 
 export const ROUTES:Routes = [
-{ path:'dashboard', loadChildren:'./dashboard/dashboard.module#DashboardModule' },
+{ path:'dashboard', data:{preload: true}, loadChildren:'./dashboard/dashboard.module#DashboardModule' },
 { path:'**', redirectTo:'mail/folder/inbox' }
 ];
 
+export class CustomPreload implements PreloadingStrategy{
+	preload(route:Route, fn:()=>Observable<any>): Observable<any>{
+		return route.data && route.data.preload ? fn() : Observable.of(null);
+	}
+}
+
 @NgModule({
+	providers:[CustomPreload],
 	imports:[
 		MailModule,
 		// DashboardModule,
-		RouterModule.forRoot(ROUTES, {enableTracing: true})
+		RouterModule.forRoot(ROUTES, {enableTracing: true, preloadingStrategy: CustomPreload});
 	]
 })
 ```
