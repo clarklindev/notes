@@ -2141,15 +2141,39 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 
 ## Lazy loading
 
-* spliting up chuncks of code and requesting code on demand
-* modules and code related to it is lazy loaded on demand
-* 
+* spliting up chuncks of code and requesting code on demand making inital payload smaller
+* lazy loading starts with modules and code related to it is lazy loaded on demand
+* it starts with defining the routes to have their own paths for the different modules
+* we attempt to lazy load the 'dashboard' module
+* app.module should import all the modules irrespective if its lazy loaded or no
+* import { MailModule} and import { DashboardModule } then import the modules in the NgModule({ imports:[ MailModule, DashboardModule ]})
+* the respective modules path:'' starts with defining their respective paths (INSTEAD OF being in the main Router, we change it to path:'dashboard' and path:'mail' in their own modules)
+* `<a>` links in main component should [routerLink] to respective modules and the module will handle the pathing from there
+* main app modules using `<router-outlet>` means we can use the router to do the routing
+  
+UPDATE:
+* in app.module, remove the import for the module you want to lazy load
+* and remove it from imports:[]
+* then we lazy load by adding property to ROUTES in app.module by setting path:'' as the path we want as the root of the module (the custom route), 
+* AND then ADD for ondemand loading add the module, `loadChildren:'./dashboard/dashboard.module#DashboardModule'` and because there could be multiple modules in one file, reference the name of the module with #nameofmodule
+* the loadChildren path is relative to the current file (app.module)
+* in the Dashboard.module, we remove the now duplicate path (as it is set in the root ROUTER), and set the initial path:''
+* lazyloaded modules show up in the browser 'network' as '0.chunk.js', filename is done via webpack
 
 <!-- app.module.ts -->
 ```ts
+import { MailModule } from './mail/mail.module';
+// import { DashboardModule } from './dashboard/dashboard.module';
+
+export const ROUTES:Routes = [
+{ path:'dashboard', loadChildren:'./dashboard/dashboard.module#DashboardModule' },
+{ path:'**', redirectTo:'mail/folder/inbox' }
+];
 
 @NgModule({
 	imports:[
+		MailModule,
+		// DashboardModule,
 		RouterModule.forRoot(ROUTES, {enableTracing: true})
 	]
 })
