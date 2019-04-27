@@ -2178,7 +2178,7 @@ UPDATE:
 * but we need to update the ROUTES first to add a property data:{preload:true} to the object for path:'dashboard' 
 * then we can test if the route exists and if there is a 'preload' property on the route 
 * add providers:[CustomPreload], and then replace the preloadingStrategy forRoot with CustomPreload
-* the CustomPreload strategy is iterating over our router tree definitions and checking if route.data exists and preload is true, THEN preload() by invoke the function given to us else return an observable of null																																																		
+* the CustomPreload strategy is iterating over our router tree definitions and checking if route.data exists and preload is true, THEN preload() by invoke the function given to us else return an observable of null	
 
 <!-- app.module.ts -->
 ```ts
@@ -2424,4 +2424,56 @@ export class MailItemComponent{
 		);
 	}
 }
+```
+
+## route guard / canload()
+
+* function that gets called when navigating away from a route we are currently on
+* routing guard to disable access to the route if not admin
+* we create an AuthModule
+* import { AuthService } and add as providers:[ AuthService ]
+* import AuthModule into AppModule
+* we can use our service in the AuthGuard
+
+<!-- app/auth.module -->
+```ts
+import {NgModule} from '@angular/core';
+import {AuthService} from './auth.service';
+
+@NgModule({
+	providers:[AuthService]
+})
+
+export class AuthModule{
+}
+```
+
+<!-- app/auth.service -->
+```ts
+import 'rxjs/add/observable/of';
+
+@Injectable()
+export class AuthService{
+	
+	user = {isAdmin:true};
+	
+	checkPermissions(){
+		return Observable.of(this.user.isAdmin);
+	}
+	isLoggedIn(){
+		return Observable.of(true);
+	}
+}
+```
+
+<!-- app.module -->
+```ts
+import {AuthModule} from './auth/auth.module';
+
+@NgModule({
+	imports:[
+		AuthModule
+	]
+})
+export class AppModule{}
 ```
