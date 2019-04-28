@@ -2430,18 +2430,40 @@ export class MailItemComponent{
 
 * function that gets called when navigating away from a route we are currently on
 * routing guard to disable access to the route if not admin
+* the service contains typical functions like checkPermissions() or isLoggedIn()
+* in service, we can also store typical info like the particular 'user' for an AuthService
 * we create an AuthModule
-* import { AuthService } and add as providers:[ AuthService ]
 * import AuthModule into AppModule
-* we can use our service in the AuthGuard
+* import { AuthService } and add as providers:[ AuthService ]
+* we use our service in the AuthGuard to protect access to our module
+* the AuthGuard is also imported into AuthModule 
+* the AuthGuard is registered in AuthModule's providers:[]
+
+AUTH GUARD
+* simple function bound to a routing definition
+* this function gets called before transitioning to a route or transitioning away
+* AuthGuard is an @Injectable and a class
+* inject service into constructor of guard class
+* depending on the type of guard, the guard class needs to implement a specific type of guard
+* AuthGuard is imported into App.Module
+* we add the AuthGuard to the ROUTES of app.module by adding canLoad:[AuthGuard]
+
+TYPES OF ROUTE GUARD
+* canLoad()
+		- allows us to decide if current user is allowed to load our module, it is specific to lazy loading
+		- import {CanLoad} from '@angular/router';
+		- (the class) implements CanLoad
+		- needs a canLoad() function, that gets called when the guard is bind to the routing definition
+		- we bind guard by adding it to the routing configuration {path:'dashboard', canLoad:[AuthGuard], loadCHildren:''}
+		- we can now use Auth.service and its methods to check if something is possible like if user is an admin
 
 <!-- app/auth.module -->
 ```ts
 import {NgModule} from '@angular/core';
 import {AuthService} from './auth.service';
-
+import {AuthGuard} from './auth.guard';
 @NgModule({
-	providers:[AuthService]
+	providers:[AuthService, AuthGuard]
 })
 
 export class AuthModule{
@@ -2469,11 +2491,34 @@ export class AuthService{
 <!-- app.module -->
 ```ts
 import {AuthModule} from './auth/auth.module';
+import {AuthGuard} from './auth/auth.guard';
 
+export const ROUTES: Routes = [
+	{path: 'dashboard', canLoad:[AuthGuard], loadChildren:'etc'}
+];
 @NgModule({
 	imports:[
-		AuthModule
+		AuthModule,
 	]
 })
 export class AppModule{}
+```
+
+<!-- auth.guard -->
+```ts
+import { Injectable } from '@angular/core';
+import { CanLoad } from '@angular/router';
+
+import { AuthService } from './auth.service';
+
+@Injectable()
+
+export class AuthGuard implements CanLoad{
+	constructor(private authService:AuthService){}
+	/* implements CanLoad Guard */
+	canLoad(){
+		return this.authService.checkPermissions();
+	}
+}
+
 ```
