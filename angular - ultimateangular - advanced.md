@@ -2478,7 +2478,25 @@ AUTH GUARD
   * protecting only the children, but the current path in the route is accessible
   * mail.module.ts we put the canActivateChild:[AuthGuard], guard on the parent route to see if we can activate the children
   * auth.guard.ts canActivateChild(){}
-		
+
+## canDeactivate()
+
+  * hooking in deactivate route guard to warn the user that they are leaving the route and may lose changes
+  * if canDeactivate() returns true, it means we can navigate away
+  * mail-view.component.ts
+  * we bind textArea's [value]="reply" to the reply property and (change) event to updateReply($event.target.value) which assigns the new value to 'reply' property
+  * mail-view.guard we want to add an Auth Guard that protects the route, 
+  * the guard is specific for a particular component
+  * the guard needs to implement CanDeactivate<type> where type is a generic type of the component class that is deactivating <MailViewComponent>
+  * import {MailViewComponent} from './mail-view.component';
+  * import { CanDeactivate } from '@angular/router';
+  * the guard class needs canDeactivate()	
+  * and now because we get access to the component via the function canDeactive(component:MailViewComponent)  
+  * the MailViewComponent adds access to a property hasUnsavedChanges = false;
+  * we add the MailViewGuard to the mail.module by import 
+  * and add to the modules' providers:[ MailViewGuard], now we have access to the guard inside the component
+  * add to the routing definition for that path canDeactivate:[MailViewGuard]
+
 <!-- app/auth.module -->
 ```ts
 import {NgModule} from '@angular/core';
@@ -2553,6 +2571,10 @@ export class AuthGuard implements CanLoad, CanActivate{
 ```
 <!-- mail.module -->
 ```ts
+
+import { MailViewResolve } from './components/mail-view/mail-view.resolve';
+import { MailViewGuard } from './components/mail-view/mail-view.guard';
+
 import { AuthModule } from '../auth/auth.module';
 import { AuthGuard } from '../auth/auth.guard';
 
@@ -2576,7 +2598,47 @@ export const ROUTES: Routes = [
 @NgModule({
 	imports:[],
 	declarations:[],
-	providers:[],
+	providers:[ MailViewGuard],
 	exports:[]
 })
+```
+
+<!-- mail-view.component.ts -->
+```ts
+@Component({
+	template:`<div class="mail-reply">
+	<textarea (change)="updateReply($event.target.value)" placeholder="Type your reply..." [value]="reply"></textarea>
+	<button type="button" (click)="sendReply()">Send</button>
+	</div>`
+})
+
+export class MailViewComponent implements OnInit{
+	reply = '';
+
+	ngOnInit(){
+		this.route.params.subscribe(()=>{
+			this.reply = '';
+		})
+	}
+
+	updateReply(value:string){
+		this.reply = value;
+	}
+
+	sendReply(){
+		
+	}
+
+}
+```
+<!-- mail-view.guard -->
+```ts
+import { Injectable } from '@angular/core';
+import { CanDeactivate } from '@angular/router';
+import { MailViewComponent } from './mail-view.component';
+
+@Injectable()
+export class MailViewGuard implements CanDeactivate{
+
+}
 ```
