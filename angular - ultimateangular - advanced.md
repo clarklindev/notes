@@ -2450,15 +2450,25 @@ AUTH GUARD
 
 TYPES OF ROUTE GUARD
 * canLoad()
-		- allows us to decide if current user is allowed to load our module, it is specific to lazy loading
-		- import {CanLoad} from '@angular/router';
-		- (the class) implements CanLoad
-		- needs a canLoad() function, that gets called when the guard is bind to the routing definition
-		- we bind guard by adding it to the routing configuration {path:'dashboard', canLoad:[AuthGuard], loadCHildren:''}
-		- we can now use Auth.service and its methods to check if something is possible like if user is an admin
+  - allows us to decide if current user is allowed to load our module, it is specific to lazy loading
+  - import {CanLoad} from '@angular/router';
+  - (the class) implements CanLoad
+  - needs a canLoad() function, that gets called when the guard is bind to the routing definition
+  - we bind guard by adding it to the routing configuration {path:'dashboard', canLoad:[AuthGuard], loadCHildren:''}
+  - we can now use Auth.service and its methods to check if something is possible like if user is an admin
 
 * canActivate()
-		- check if we are allowed to access some particular routes
+  * aims to check in our modules if we are allowed to access some particular routes
+  * adding it at the parent level of child routes' routing structure
+  * adding guard canActivate() at parent level to check access to route
+  * in mail.module we import the AuthModule
+  		- import {AuthModule} from '../auth/auth.module';  
+  		- import {AuthGuard} from '../auth/auth.guard';  
+		- add AuthModule to imports:[AuthModule]
+		- add canActivate:[] on the routing definition and it accepts an array of guards
+  * auth.guard.ts needs to import { CanActivate } from '@angular/router';
+  * export  class AuthGuard implements CanActivate
+  * 
 
 		
 <!-- app/auth.module -->
@@ -2511,18 +2521,50 @@ export class AppModule{}
 <!-- auth.guard -->
 ```ts
 import { Injectable } from '@angular/core';
-import { CanLoad } from '@angular/router';
-
+import { CanLoad, CanActivate } from '@angular/router';
 import { AuthService } from './auth.service';
 
 @Injectable()
 
-export class AuthGuard implements CanLoad{
+export class AuthGuard implements CanLoad, CanActivate{
 	constructor(private authService:AuthService){}
 	/* implements CanLoad Guard */
 	canLoad(){
 		return this.authService.checkPermissions();
 	}
+
+	canActivate(){
+		return this.authService.isLoggedIn();
+	}
 }
 
+```
+<!-- mail.module -->
+```ts
+import { AuthModule } from '../auth/auth.module';
+import { AuthGuard } from '../auth/auth.guard';
+
+export const ROUTES: Routes = [
+	{
+		path: 'mail',
+		component: MailAppComponent,
+		canActivate:[AuthGuard],
+		children:[
+			{
+				path:'folder/:name',
+				component: MailFolderComponent,
+				resolve:{
+					messages: MailFolderResolve
+				}
+			},
+		]
+	}
+]
+
+@NgModule({
+	imports:[],
+	declarations:[],
+	providers:[],
+	exports:[]
+})
 ```
