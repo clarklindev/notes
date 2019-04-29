@@ -2426,7 +2426,11 @@ export class MailItemComponent{
 }
 ```
 
-## route guard / canload()
+## route guard 
+
+TYPES OF ROUTE GUARD
+
+### canload()
 
 * function that gets called when navigating away from a route we are currently on
 * routing guard to disable access to the route if not admin
@@ -2448,7 +2452,6 @@ AUTH GUARD
 * AuthGuard is imported into App.Module
 * we add the AuthGuard to the ROUTES of app.module by adding canLoad:[AuthGuard]
 
-TYPES OF ROUTE GUARD
 * canLoad()
   - allows us to decide if current user is allowed to load our module, it is specific to lazy loading
   - import {CanLoad} from '@angular/router';
@@ -2457,7 +2460,8 @@ TYPES OF ROUTE GUARD
   - we bind guard by adding it to the routing configuration {path:'dashboard', canLoad:[AuthGuard], loadCHildren:''}
   - we can now use Auth.service and its methods to check if something is possible like if user is an admin
 
-* canActivate()
+### canActivate()
+
   * aims to check in our modules if we are allowed to access some particular routes
   * adding it at the parent level of child routes' routing structure
   * adding guard canActivate() at parent level to check access to route
@@ -2467,9 +2471,13 @@ TYPES OF ROUTE GUARD
 		- add AuthModule to imports:[AuthModule]
 		- add canActivate:[] on the routing definition and it accepts an array of guards
   * auth.guard.ts needs to import { CanActivate } from '@angular/router';
-  * export  class AuthGuard implements CanActivate
-  * 
+  * export class AuthGuard implements CanActivate
+  
+### canActivateChild()
 
+  * protecting only the children, but the current path in the route is accessible
+  * mail.module.ts we put the canActivateChild:[AuthGuard], guard on the parent route to see if we can activate the children
+  * auth.guard.ts canActivateChild(){}
 		
 <!-- app/auth.module -->
 ```ts
@@ -2535,6 +2543,10 @@ export class AuthGuard implements CanLoad, CanActivate{
 
 	canActivate(){
 		return this.authService.isLoggedIn();
+	}
+	
+	canActivateChild(){
+		return false;
 	}
 }
 
