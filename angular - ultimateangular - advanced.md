@@ -2457,6 +2457,10 @@ TYPES OF ROUTE GUARD
 		- we bind guard by adding it to the routing configuration {path:'dashboard', canLoad:[AuthGuard], loadCHildren:''}
 		- we can now use Auth.service and its methods to check if something is possible like if user is an admin
 
+* canActivate()
+		- check if we are allowed to access some particular routes
+
+		
 <!-- app/auth.module -->
 ```ts
 import {NgModule} from '@angular/core';
