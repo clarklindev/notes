@@ -2492,10 +2492,16 @@ AUTH GUARD
   * import { CanDeactivate } from '@angular/router';
   * the guard class needs canDeactivate()	
   * and now because we get access to the component via the function canDeactive(component:MailViewComponent)  
-  * the MailViewComponent adds access to a property hasUnsavedChanges = false;
+  * the MailViewComponent adds access to a property hasUnsavedChanges that defaults to false; 
+	* when updateReply() is called, hasUsavedChanges is set to true
+	* when sendReply() is called hasUnsavedChanges is set to false again
+	* the ngOnInit() resets the reply = '' and also resets hasUnsavedChanges = false; because angular doesnt destroy the component, it reuses it
   * we add the MailViewGuard to the mail.module by import 
   * and add to the modules' providers:[ MailViewGuard], now we have access to the guard inside the component
   * add to the routing definition for that path canDeactivate:[MailViewGuard]
+	* mail-view.guard now has access to the properties of the Component class and we can test if(component.hasUnsavedChanges){ return window.confirm('leave?')}
+
+	
 
 <!-- app/auth.module -->
 ```ts
@@ -2591,6 +2597,16 @@ export const ROUTES: Routes = [
 					messages: MailFolderResolve
 				}
 			},
+			{
+				path:'message/:id',
+				component: MailViewComponent,
+				outlet:'pane',
+				canDeactivate:[MailViewGuard],
+				resolve:{
+					message: MailViewResolve
+				}
+
+			}
 		]
 	}
 ]
@@ -2614,19 +2630,25 @@ export const ROUTES: Routes = [
 
 export class MailViewComponent implements OnInit{
 	reply = '';
+	hasUnsavedChanges = false;
+	message:Observable<Mail> = this.route.data.pluck('message');
+
+	constructor(private route: ActivatedRoute){}
 
 	ngOnInit(){
 		this.route.params.subscribe(()=>{
 			this.reply = '';
+			this.hasUnsavedChanges = false; 
 		})
 	}
 
 	updateReply(value:string){
 		this.reply = value;
+		this.hasUnsavedChanges = true;
 	}
 
 	sendReply(){
-		
+		this.hasUnsavedChanges = false;	
 	}
 
 }
