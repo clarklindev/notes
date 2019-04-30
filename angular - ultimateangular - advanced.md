@@ -2805,3 +2805,83 @@ describe('FileSizePipe', ()=>{
 	});
 });
 ```
+
+## Testing services with dependencies
+
+* testing a service with a dependency to http
+* do the initial TestBed.initTestEnvironment() only need to do this once for project
+* code as per below to test service...
+* do a beforeEach() and TestBed.configureTestingModule({ providers: [ StockInventoryService ] }); 
+* and we pass our service in the providers:[]
+* we dont want to inject the real http, we create a mock class that imitates the http with get() method that returns an ObservableResponse
+* want to inject StockInventoryService with MockHttp, using token of Http but instead use our class useClass:MockHttp
+* 
+
+<!-- stock-inventory.service.spec.ts -->
+```ts
+import { Http, Response, ResponseOptions } from '@angular/http';
+import { TestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+
+import {StockInventoryService} from './stock-inventory.service';
+
+TestBed.initTestEnvironment(
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting()
+);
+
+function createResponse(body){
+	return Observable.of(
+		new Response(new ResponseOptions({ body: JSON.stringify(body) }));
+	);
+}
+
+class MockHttp{
+	get(){
+		return createResponse([]);
+	}
+}
+
+const cartItems = [ {product_id:1, quantity:10}, {product_id:2, quantity:5} ];
+const productItems = [{id:1, price:10, name:'Test'}, {id:2, price:100, name:'Another Test'} ];
+
+describe('StockInventoryService', ()=>{
+
+	let service: StockInventoryService;
+	let http: Http;
+
+	beforeEach(()=>{
+		const bed = TestBed.configureTestingModule({
+			providers:[
+				StockInventoryService,
+				{ provide: Http, useClass:MockHttp }
+			]
+		});
+
+		http = bed.get(Http);
+		service = bed.get(StockInventoryService);
+	});
+
+	it('should get cart items', ()=>{
+		spyOn(http, 'get').and.returnValue(createResponse([...cartItems]));
+
+		service.getCartItems()
+		.subscribe((result) => {
+			console.log(result);
+			expect(result.length).toBe(2);
+			expect(result).toEqual(cartItems);
+		});
+	});
+
+	it('should get product items', ()=>{
+		spyOn(http, 'get').and.returnValue(createResponse([...productItems]));
+
+		service.getProducts()
+		.subscribe((result)=>{
+			expect(result.length).toBe(2);
+			expect(result).toEqual(productItems);
+		});
+	});
+}
+
+```
