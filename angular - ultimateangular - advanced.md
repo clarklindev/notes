@@ -2678,7 +2678,7 @@ export class MailViewGuard implements CanDeactivate{
     - reporters:['spec'], says we gonna have color for tests in terminal for pass or fail
 
 ## Structure of a Unit Test
-
+* test files are name.spec.ts
 * describe('name', ()=> {}) block
 * describe blocks can wrap to indent
 * inside the function we call it('description for test', ()=>{}); function  
@@ -2686,8 +2686,19 @@ export class MailViewGuard implements CanDeactivate{
 * we can import the Pipe
 * inside the it() we can do expect().toBe() checks 
 
+THINGS WE CAN TEST
+* pipes, pipes inside Component,
+* shallow testing
+* services with dependencies
+* component methods
+* component inputs outputs
+* templates
+* async providers
+* no errors schema
+* attribute directives
 
-## unit test for a pipe (ISOLATE tests NOT USING angular framework directly)
+## ISOLATE tests NOT USING angular framework directly - unit test for a pipe
+
 * inside the describe block we can create an instance of the FileSizePipe() and then use this instance in our tests
 * expect(pipe.transform(123456789)).toBe('117.74MB');  
 * run with yarn test or npm test
@@ -2705,6 +2716,92 @@ describe('FileSizePipe', ()=>{
 
 	it('should override the extension when supplied', ()=>{
 		expect(pipe.transform(123456789,'myExt')).toBe('117.74myExt');
+	});
+});
+```
+
+## Shallow testing pipes
+
+* testing within the angular and testing frame
+* learning to instantiate the pipe inside a component testing that it works inside the component
+* import { TestBed, ComponentFixture } from '@angular/core/testing';
+* import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+* create the testbed TestBed.initTestEnvironment(BrowserDynamicTestingModule,platformBrowserDynamicTesting());
+* inside the describe() create the component definition @Component({}) and the class with properties
+* create references component, fixture, el
+  * component references the class we just created
+  * fixture is of type ComponentFixture<TestComponent>;
+  * generic type TestComponent relates the TestComponent with the fixture
+  * ComponentFixture holds info about mounted component, also use it access debug element and native element
+  * let el:HTMLElement; 
+* beforeEach(()=>{}); will be called before each it() test in describe() block
+* so for further tests, we configure our testing module to dynamically create our Component with our FilesizePipe and we use these variables to access the things we are binding them to inside the beforeEach()
+* need to setup testbed TestBed.configureTestingModule({ declarations:[ FileSizePipe, TestComponent ]}); which allows us to dynamically create a very small module to test a few things against
+* then reasign variables 
+  * fixture = TestBed.createComponent(TestComponent);
+  * component = fixture.componentInstance;
+  * el = fixture.nativeElement;
+* use fixture.detectChanges(); to detect changes
+* have access to .toContain()
+
+```ts
+import { Component } from '@angular/core';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+
+// creating the testbed
+TestBed.initTestEnvironment(
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting()
+);
+
+import {FileSizePipe} from './file-size.pipe';
+
+describe('FileSizePipe', ()=>{
+	describe('shallow FileSizePipe test', ()=>{
+		@Component({
+			template:`Size:{{size | filesize: suffix }}`
+		})
+		class TestComponent{
+			suffix;
+			size: 123456789;
+		}
+
+		let component:TestComponent;
+		let fixture: ComponentFixture<TestComponent>;
+		let el:HTMLElement;
+
+		beforeEach(()=>{
+			TestBed.configureTestingModule({
+				declarations:[
+					FileSizePipe,
+					TestComponent
+				]
+			});
+
+			fixture = TestBed.createComponent(TestComponent);
+   			component = fixture.componentInstance;
+  			el = fixture.nativeElement;
+		});
+
+		it('should convert bytes to megabytes', () => {
+			fixture.detectChanges();
+			expect(el.textContent).toContain('Size: 117.74MB');
+			component.size = 1029281;
+			fixture.detectChanges();
+			expect(el.textContent).toContain('Size: 0.98MB');
+		});
+		
+		it('should override the extension when supplied', () => {
+			component.suffix = 'myExt';
+			fixture.detectChanges();
+			expect(el.textContent).toContain('Size: 117.74myExt');
+		});
+
+	});
+
+	describe('isolate FileSizePipe test', ()=>{
+
 	});
 });
 ```
