@@ -2697,6 +2697,50 @@ THINGS WE CAN TEST
 * no errors schema
 * attribute directives
 
+### SETUP / CONFIG
+
+<!-- package.json -->
+    
+    "devDependencies":{  
+        "@types/jasmine":"2.5.46",   
+        "@types/karma":"0.13.34",   
+        "karma":"1.5.0",  
+        "karma-chrome-launcher": "2.0.0",  
+        "karma-jasmine":"1.1.0",  
+        "karma-sourcemap-loader":"0.3.7",  
+        "karma-spec-reporter":"0.0.30",  
+        "karma-webpack":"2.0.3"  
+    }
+
+### karma configuration (karma.conf.js)
+<!-- karma.conf.js -->
+```ts
+const webpack = require('webpack');
+
+module.exports = (config)=>{
+    config.set(
+        { browsers:['Chrome'],
+        files:['node_modules/reflect-metadata/Reflect.js',
+        'node_modules/zone.js/dist/zone.js',
+        'node_modules/zone.js/dist/proxy.js',
+        'node_modules/zone.js/dist/sync-test.js',
+        'node_modules/zone.js/dist/async-test.js',
+        'node_modules/zone.js/dist/jasmine-patch.js',
+        'node_modules/zone.js/dist/long-stack-trace-zone.js',
+        {pattern: __dirname + '/**/*.spec.ts', watched:false}
+        ],
+        frameworks:['jasmine'],
+        mime:{'text/x-typescript':['ts']},
+        preprocessors:{'*.js':['sourcemap'],
+        '**/*.spec.ts':['sourcemap', 'webpack']},
+        reporters:['spec'],
+        webpack:{
+            
+        }
+    })
+}
+```
+
 ## ISOLATE tests NOT USING angular framework directly - unit test for a pipe
 
 * inside the describe block we can create an instance of the FileSizePipe() and then use this instance in our tests
