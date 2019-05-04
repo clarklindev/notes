@@ -2764,6 +2764,34 @@ describe('FileSizePipe', ()=>{
 });
 ```
 
+---
+## template for testing with TestBed
+
+<!-- template for testing with TestBed-->
+```ts
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+
+/*import the component to test */
+import { StockCounterComponent } from './stock-counter.component';
+
+// creating the testbed
+TestBed.initTestEnvironment(
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting()
+);
+
+describe('StockCounterComponent', ()=> {
+	beforeEach(()=>{
+		Testbed.configureTestingModule({
+			declarations:[StockCounterComponent]
+		});
+	});
+});
+
+```
+---
+
 ## Shallow testing pipes
 
 * testing within the angular and testing frame
@@ -2852,14 +2880,13 @@ describe('FileSizePipe', ()=>{
 
 ## Testing services with dependencies
 
-* testing a service with a dependency to http
+* testing a service with a dependency (here dependency to http)
 * do the initial TestBed.initTestEnvironment() only need to do this once for project
 * code as per below to test service...
 * do a beforeEach() and TestBed.configureTestingModule({ providers: [ StockInventoryService ] }); 
 * and we pass our service in the providers:[]
 * we dont want to inject the real http, we create a mock class that imitates the http with get() method that returns an ObservableResponse
 * want to inject StockInventoryService with MockHttp, using token of Http but instead use our class useClass:MockHttp
-* 
 
 <!-- stock-inventory.service.spec.ts -->
 ```ts
@@ -2927,5 +2954,77 @@ describe('StockInventoryService', ()=>{
 		});
 	});
 }
+
+```
+## testing component methods
+
+* testing if methods go above or below our max and min properties checks
+* we define component, and fixture inside the describe block
+* we override them in the beforeEach()
+* to reference the component in the testbed we pass the Component into TestBed.createComponent()
+* we access the component with refence to the fixture by fixture.componentInstance;
+* set a default value in the beforeEach() component.value = 0;
+* our it() test testing the methods of the component
+* the test passes or fails if all expect() inside it() passes 
+
+
+<!-- template for testing with TestBed-->
+```ts
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+
+/*import the component to test */
+import { StockCounterComponent } from './stock-counter.component';
+
+// creating the testbed
+TestBed.initTestEnvironment(
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting()
+);
+
+describe('StockCounterComponent', ()=> {
+
+	let component : StockCounterComponent;
+	let fixture : ComponentFixture<StockCounterComponent>;
+	component.value = 0;
+
+	it('should increment correctly', ()=>{
+		component.increment();
+		expect(component.value).toBe(1);
+	}
+
+	if('should decrement correctly', ()=>{
+		component.increment();
+		expect(component.value).toBe(1);
+		component.decrement();
+		expect(component.value).toBe(0);
+	}
+
+	if('should not decrement below the minimum value', ()=>{
+		component.increment();
+		expect(component.value).toBe(1);
+		component.decrement();
+		expect(component.value).toBe(0);
+		component.decrement();
+		expect(component.value).toBe(0);
+	}
+
+	if('should not increment over the maximum value', ()=>{
+		for(let i =0; i<200; i++){
+			component.increment();
+		}
+		expect(component.value).toBe(100);
+	}
+
+	beforeEach(()=>{
+		Testbed.configureTestingModule({
+			declarations:[StockCounterComponent]
+		});
+
+		fixture = TestBed.createComponent(StockCounterComponent);
+		component = fixture.componentInstance;
+
+	});
+});
 
 ```
