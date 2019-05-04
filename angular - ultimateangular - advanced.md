@@ -2081,106 +2081,108 @@ import { Http, Response, URLSearchParams } from '@angular/http';
 
 ## auxilary outlets
 
-* aka second router outlet, named-router outlet, auxilary route
-* allow a sibling route into our router outlet
-* the primary router outlet and a second-router outlet (which is named) exists side by side
-* mail-app.component eg name="pane" `<router-outlet></router-outlet> <router-outlet name="pane"></router-outlet>`
-* mail.module.ts configure another outlet, create a new sibling route `export const ROUTES: Routes = [{path:'folder/:name', component:MailFolderComponent, resolve:{messages:MailFolderResolve}}, { path: 'message/:id', component:MailViewComponent, outlet:'pane'}]`
-* how to tell router-outlet that we want to render our component inside the named router-outlet? refer to 'name' in the router, via outlet property
-* when we want to navigate to this route, angular will create the pattern in the url `localhost:4000/folder/inbox(pane:message/1)` ie. url(named of outlet:routing-definition/unique-id)
+- aka second router outlet, named-router outlet, auxilary route
+- allow a sibling route into our router outlet
+- the primary router outlet and a second-router outlet (which is named) exists side by side
+- mail-app.component eg name="pane" `<router-outlet></router-outlet> <router-outlet name="pane"></router-outlet>`
+- mail.module.ts configure another outlet, create a new sibling route `export const ROUTES: Routes = [{path:'folder/:name', component:MailFolderComponent, resolve:{messages:MailFolderResolve}}, { path: 'message/:id', component:MailViewComponent, outlet:'pane'}]`
+- how to tell router-outlet that we want to render our component inside the named router-outlet? refer to 'name' in the router, via outlet property
+- when we want to navigate to this route, angular will create the pattern in the url `localhost:4000/folder/inbox(pane:message/1)` ie. url(named of outlet:routing-definition/unique-id)
 
 ## auxiliary routerlink navigation
 
-* click on routerlink to navigate to particular router-outlet
-* mail-item.component.ts `<a class="mail-item" [routerLink]="" routerLinkActive="active"></a>`
-* we pass 'id' data from db.json into the routerLink dynamically by binding a value so that we can navigate to that component, 
-* [routerLink] = ['', {outlets:{ pane:['message', message.id] }}] 
-* note the first param is empty string because route path is relative ie (based off /inbox), 
-* the second param of routerLink is an object with param outlets {outlets:} which references 'pane' from ROUTES, and arguments we give pane is what the router is expecting 'message/:id'
-* the id we pass as argument dynamically into the array
-* routerLinkActive="active" class given to when in active state 
+- click on routerlink to navigate to particular router-outlet
+- mail-item.component.ts `<a class="mail-item" [routerLink]="" routerLinkActive="active"></a>`
+- we pass 'id' data from db.json into the routerLink dynamically by binding a value so that we can navigate to that component,
+- [routerLink] = ['', {outlets:{ pane:['message', message.id] }}]
+- note the first param is empty string because route path is relative ie (based off /inbox),
+- the second param of routerLink is an object with param outlets {outlets:} which references 'pane' from ROUTES, and arguments we give pane is what the router is expecting 'message/:id'
+- the id we pass as argument dynamically into the array
+- routerLinkActive="active" class given to when in active state
 
 ## auxiliary navigation api
 
-* using routerLink makes angular give a elements href="" tags making it valid a tags, 
-* routerLinkActive adds 'active' class
-* using native api / javascript to navigate
-* `<a (click)="navigateToMessage()">`
-* import { Router} from '@angular/router';
-* inject router:Router into constructor
-* removeLink and routerLinkActive as we dont benefit from using these routerLink directives
-* use this.router.navigate() to navigate, and we pass in the same object as when we used routerLinks value (NOTE: we reference this.message)
-* `function navigateToMessage(){this.router.navigate(['', {outlets:{ pane:['message', this.message.id] }}] )}`
-* we dont have access to routerLinkActive though
-* to navigate by destroying aux outlet `this.router.navigate(['', {outlets:{ pane: null } }] )`
+- using routerLink makes angular give a elements href="" tags making it valid a tags,
+- routerLinkActive adds 'active' class
+- using native api / javascript to navigate
+- `<a (click)="navigateToMessage()">`
+- import { Router} from '@angular/router';
+- inject router:Router into constructor
+- removeLink and routerLinkActive as we dont benefit from using these routerLink directives
+- use this.router.navigate() to navigate, and we pass in the same object as when we used routerLinks value (NOTE: we reference this.message)
+- `function navigateToMessage(){this.router.navigate(['', {outlets:{ pane:['message', this.message.id] }}] )}`
+- we dont have access to routerLinkActive though
+- to navigate by destroying aux outlet `this.router.navigate(['', {outlets:{ pane: null } }] )`
 
 ## destroy auxiliary outlets
 
-* removing the auxiliary outlet section from the url this part... '(pane:message/1)'
-* switching data in router-outlet doesnt remove the auxiliary outlet data as it persists, then the url still includes the auxiliary outlet part
-* we want to clear the second router outlet
-* so routerLink="folder/inbox" becomes [routerLink]="[{outlets:{primary:'folder/inbox'}}]"
-* we change this by going to the parent app.component and binding [routerLink] to 'primary' to an array and use outlets property
-* ="[{outlets:{primary:'folder/inbox', pane:'null'}}]" this allows us to also use the auxiliary outlet eg. 'pane'
-* and to reset the url we pass null to reset `this.router.navigate(['', {outlets:{ pane: null } }] )`
-  
+- removing the auxiliary outlet section from the url this part... '(pane:message/1)'
+- switching data in router-outlet doesnt remove the auxiliary outlet data as it persists, then the url still includes the auxiliary outlet part
+- we want to clear the second router outlet
+- so routerLink="folder/inbox" becomes [routerLink]="[{outlets:{primary:'folder/inbox'}}]"
+- we change this by going to the parent app.component and binding [routerLink] to 'primary' to an array and use outlets property
+- ="[{outlets:{primary:'folder/inbox', pane:'null'}}]" this allows us to also use the auxiliary outlet eg. 'pane'
+- and to reset the url we pass null to reset `this.router.navigate(['', {outlets:{ pane: null } }] )`
+
 ## resolving auxiliary outlets
 
-* creating a resolve for the auxiliary outlet and load data in
-* mail.module.ts add a resolve property on the auxiliary route,
-* the resolve returns a single data entry not an array
-* inject service in the constructor
-* resolve() calls on services' .getMessage() and we pass in the id of the message which we get from the router ROUTES (ie from route.params.id)
-* in the module, import { MailViewResolve } from './components/mail-view/mail-view.resolve';
-* register resolve in providers: [MailViewResolve]
-* add getMessage() to mail.service.ts NOTE: it returns an Observable<Mail>
-* AHA MOMENT!!!! ROUTE's 'resolve' allows us access to its properties..once the Component that is associated within ROUTE has been instantiated
-  and we have access to ActivatedRoute we can assign an Observable to this.route.data.pluck('message'), 
-* so in MailViewComponent we can acess route data via message: Observable<Mail> = this.route.data.pluck('message');
-* AHA MOMENT!!!! something that is an instance of Observable in the class needs to have | async in the html
+- creating a resolve for the auxiliary outlet and load data in
+- mail.module.ts add a resolve property on the auxiliary route,
+- the resolve returns a single data entry not an array
+- inject service in the constructor
+- resolve() calls on services' .getMessage() and we pass in the id of the message which we get from the router ROUTES (ie from route.params.id)
+- in the module, import { MailViewResolve } from './components/mail-view/mail-view.resolve';
+- register resolve in providers: [MailViewResolve]
+- add getMessage() to mail.service.ts NOTE: it returns an Observable<Mail>
+- AHA MOMENT!!!! ROUTE's 'resolve' allows us access to its properties..once the Component that is associated within ROUTE has been instantiated
+  and we have access to ActivatedRoute we can assign an Observable to this.route.data.pluck('message'),
+- so in MailViewComponent we can acess route data via message: Observable<Mail> = this.route.data.pluck('message');
+- AHA MOMENT!!!! something that is an instance of Observable in the class needs to have | async in the html
 
 ## Lazy loading
 
-* spliting up chuncks of code and requesting code on demand making inital payload smaller
-* lazy loading starts with modules and code related to it is lazy loaded on demand
-* it starts with defining the routes to have their own paths for the different modules
-* we attempt to lazy load the 'dashboard' module
-* app.module should import all the modules irrespective if its lazy loaded or no
-* import { MailModule} and import { DashboardModule } then import the modules in the NgModule({ imports:[ MailModule, DashboardModule ]})
-* the respective modules path:'' starts with defining their respective paths (INSTEAD OF being in the main Router, we change it to path:'dashboard' and path:'mail' in their own modules)
-* `<a>` links in main component should [routerLink] to respective modules and the module will handle the pathing from there
-* main app modules using `<router-outlet>` means we can use the router to do the routing
-  
+- spliting up chuncks of code and requesting code on demand making inital payload smaller
+- lazy loading starts with modules and code related to it is lazy loaded on demand
+- it starts with defining the routes to have their own paths for the different modules
+- we attempt to lazy load the 'dashboard' module
+- app.module should import all the modules irrespective if its lazy loaded or no
+- import { MailModule} and import { DashboardModule } then import the modules in the NgModule({ imports:[ MailModule, DashboardModule ]})
+- the respective modules path:'' starts with defining their respective paths (INSTEAD OF being in the main Router, we change it to path:'dashboard' and path:'mail' in their own modules)
+- `<a>` links in main component should [routerLink] to respective modules and the module will handle the pathing from there
+- main app modules using `<router-outlet>` means we can use the router to do the routing
+
 UPDATE:
-* in app.module, remove the import for the module you want to lazy load
-* and remove it from imports:[]
-* then we lazy load by adding property to ROUTES in app.module by setting path:'' as the path we want as the root of the module (the custom route), 
-* AND then ADD for ondemand loading add the module, `loadChildren:'./dashboard/dashboard.module#DashboardModule'` and because there could be multiple modules in one file, reference the name of the module with #nameofmodule
-* the loadChildren path is relative to the current file (app.module)
-* in the Dashboard.module, we remove the now duplicate path (as it is set in the root ROUTER), and set the initial path:''
-* lazyloaded modules show up in the browser 'network' as '0.chunk.js', filename is done via webpack
+
+- in app.module, remove the import for the module you want to lazy load
+- and remove it from imports:[]
+- then we lazy load by adding property to ROUTES in app.module by setting path:'' as the path we want as the root of the module (the custom route),
+- AND then ADD for ondemand loading add the module, `loadChildren:'./dashboard/dashboard.module#DashboardModule'` and because there could be multiple modules in one file, reference the name of the module with #nameofmodule
+- the loadChildren path is relative to the current file (app.module)
+- in the Dashboard.module, we remove the now duplicate path (as it is set in the root ROUTER), and set the initial path:''
+- lazyloaded modules show up in the browser 'network' as '0.chunk.js', filename is done via webpack
 
 ## preload all
 
-* even with Lazy loading modules code in place, it is possible to override the lazyload code by preloadAll
-* import { PreloadAllModules } from '@angular/router';
-* in the module, RouterModule.forRoot(ROUTES) gets updated to RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules})
+- even with Lazy loading modules code in place, it is possible to override the lazyload code by preloadAll
+- import { PreloadAllModules } from '@angular/router';
+- in the module, RouterModule.forRoot(ROUTES) gets updated to RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules})
 
 # custom preload (requires lazy loading)
 
-* updating preloadingStrategy on RouterModule.forRoot(ROUTES, {preloadingStrategy:PreloadAllModules}); 
-* we update to RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules});
-* we import { PreloadingStrategy }
-* we remove the import { PreloadAllModules }
-* create and export a class, on the  `export class CustomPreload implements PreloadingStrategy` and make it implement PreloadingStrategy
-* we need to implement the preload function in this customPreload class `preload(route:Route, fn:()=>Observable<any>):Observable<any>{}` 
-* and inside this method, we say what should happen when we hit this route 
-* but we need to update the ROUTES first to add a property data:{preload:true} to the object for path:'dashboard' 
-* then we can test if the route exists and if there is a 'preload' property on the route 
-* add providers:[CustomPreload], and then replace the preloadingStrategy forRoot with CustomPreload
-* the CustomPreload strategy is iterating over our router tree definitions and checking if route.data exists and preload is true, THEN preload() by invoke the function given to us else return an observable of null	
+- updating preloadingStrategy on RouterModule.forRoot(ROUTES, {preloadingStrategy:PreloadAllModules});
+- we update to RouterModule.forRoot(ROUTES, {preloadingStrategy: PreloadAllModules});
+- we import { PreloadingStrategy }
+- we remove the import { PreloadAllModules }
+- create and export a class, on the `export class CustomPreload implements PreloadingStrategy` and make it implement PreloadingStrategy
+- we need to implement the preload function in this customPreload class `preload(route:Route, fn:()=>Observable<any>):Observable<any>{}`
+- and inside this method, we say what should happen when we hit this route
+- but we need to update the ROUTES first to add a property data:{preload:true} to the object for path:'dashboard'
+- then we can test if the route exists and if there is a 'preload' property on the route
+- add providers:[CustomPreload], and then replace the preloadingStrategy forRoot with CustomPreload
+- the CustomPreload strategy is iterating over our router tree definitions and checking if route.data exists and preload is true, THEN preload() by invoke the function given to us else return an observable of null
 
 <!-- app.module.ts -->
+
 ```ts
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
@@ -2263,8 +2265,8 @@ export const ROUTES: Routes = [
 	{
 		path: 'folder/:name',
 		component: MailFolderComponent,
-		resolve: { 
-			messages: MailFolderResolve 
+		resolve: {
+			messages: MailFolderResolve
 		}
 	},
 	{
@@ -2302,8 +2304,8 @@ export class MailService {
 			.get(`/api/messages?folder=${folder}`)
 			.map(response => response.json());
 	}
-	
-	getMessage(id:string): Observable<Mail>{
+
+	getMessage(id: string): Observable<Mail> {
 		return this.http
 			.get(`/api/messages/${id}`)
 			.map(response => response.json());
@@ -2331,19 +2333,20 @@ export class MailFolderResolve implements Resolve<Mail[]> {
 	}
 }
 ```
+
 <!-- mail-view.resolve -->
+
 ```ts
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { MailService} from '../../mail.service';
+import { MailService } from '../../mail.service';
 import { Mail } from '../../models/mail.interface';
 
 @Injectable()
-export class MailViewResolve implements Resolve<Mail>{
-	constructor(private mailService:MailService){
-	}
+export class MailViewResolve implements Resolve<Mail> {
+	constructor(private mailService: MailService) {}
 
-	resolve(route: ActivatedRouteSnapshot){
+	resolve(route: ActivatedRouteSnapshot) {
 		return this.mailService.getMessage(route.params.id);
 	}
 }
@@ -2372,87 +2375,96 @@ export class MailFolderComponent {
 	}
 }
 ```
+
 ---
+
 <!-- mail-view.component -->
+
 ```ts
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { Mail } from '../../models/mail.interface';	
+import { Mail } from '../../models/mail.interface';
 
 @Component({
-	selector:'mail-view',
-	styleUrls:['mail-view.component.scss'],
-	template:`<div class="mail-view">
-		<h2>{{ (message | async).from }}</h2>
-		<p>{{ (full | async).from}}</p>
-	</div>`
+	selector: 'mail-view',
+	styleUrls: ['mail-view.component.scss'],
+	template: `
+		<div class="mail-view">
+			<h2>{{ (message | async).from }}</h2>
+			<p>{{ (full | async).from }}</p>
+		</div>
+	`
 })
-export class MailViewComponent{
+export class MailViewComponent {
 	message: Observable<Mail> = this.route.data.pluck('message');
-	constructor(private route:ActivatedRoute){}
+	constructor(private route: ActivatedRoute) {}
 }
 ```
 
-
-
 ---
+
 <!-- mail-item.component -->
+
 ```ts
 import { Component, Input } from '@angular/core';
 import { Mail } from '../../models/mail.interface';
 import { Router } from '@angular/router';
 
 @Component({
-	selector:'mail-item',
+	selector: 'mail-item',
 	styleUrls: ['mail-item.component.scss'],
-	template:`<a 
-		class="mail-item"
-		[routerLink]="['', {outlets: {pane: ['message', message.id]}}]">
-		routerLinkActive="active"
-	</a>`
+	template: `
+		<a
+			class="mail-item"
+			[routerLink]="['', { outlets: { pane: ['message', message.id] } }]"
+		>
+			routerLinkActive="active"
+		</a>
+	`
 })
-
-export class MailItemComponent{
+export class MailItemComponent {
 	@Input() message: Mail;
-	
-	constructor(router:Router){}
 
-	navigateToMessage(){
-		this.router.navigate(
-			['', {outlets: {pane: ['message', this.message.id] }}]
-		);
+	constructor(router: Router) {}
+
+	navigateToMessage() {
+		this.router.navigate([
+			'',
+			{ outlets: { pane: ['message', this.message.id] } }
+		]);
 	}
 }
 ```
 
-## route guard 
+## route guard
 
 TYPES OF ROUTE GUARD
 
 ### canload()
 
-* function that gets called when navigating away from a route we are currently on
-* routing guard to disable access to the route if not admin
-* the service contains typical functions like checkPermissions() or isLoggedIn()
-* in service, we can also store typical info like the particular 'user' for an AuthService
-* we create an AuthModule
-* import AuthModule into AppModule
-* import { AuthService } and add as providers:[ AuthService ]
-* we use our service in the AuthGuard to protect access to our module
-* the AuthGuard is also imported into AuthModule 
-* the AuthGuard is registered in AuthModule's providers:[]
+- function that gets called when navigating away from a route we are currently on
+- routing guard to disable access to the route if not admin
+- the service contains typical functions like checkPermissions() or isLoggedIn()
+- in service, we can also store typical info like the particular 'user' for an AuthService
+- we create an AuthModule
+- import AuthModule into AppModule
+- import { AuthService } and add as providers:[ AuthService ]
+- we use our service in the AuthGuard to protect access to our module
+- the AuthGuard is also imported into AuthModule
+- the AuthGuard is registered in AuthModule's providers:[]
 
 AUTH GUARD
-* simple function bound to a routing definition
-* this function gets called before transitioning to a route or transitioning away
-* AuthGuard is an @Injectable and a class
-* inject service into constructor of guard class
-* depending on the type of guard, the guard class needs to implement a specific type of guard
-* AuthGuard is imported into App.Module
-* we add the AuthGuard to the ROUTES of app.module by adding canLoad:[AuthGuard]
 
-* canLoad()
+- simple function bound to a routing definition
+- this function gets called before transitioning to a route or transitioning away
+- AuthGuard is an @Injectable and a class
+- inject service into constructor of guard class
+- depending on the type of guard, the guard class needs to implement a specific type of guard
+- AuthGuard is imported into App.Module
+- we add the AuthGuard to the ROUTES of app.module by adding canLoad:[AuthGuard]
+
+- canLoad()
   - allows us to decide if current user is allowed to load our module, it is specific to lazy loading
   - import {CanLoad} from '@angular/router';
   - (the class) implements CanLoad
@@ -2462,120 +2474,116 @@ AUTH GUARD
 
 ### canActivate()
 
-  * aims to check in our modules if we are allowed to access some particular routes
-  * adding it at the parent level of child routes' routing structure
-  * adding guard canActivate() at parent level to check access to route
-  * in mail.module we import the AuthModule
-  		- import {AuthModule} from '../auth/auth.module';  
-  		- import {AuthGuard} from '../auth/auth.guard';  
-		- add AuthModule to imports:[AuthModule]
-		- add canActivate:[] on the routing definition and it accepts an array of guards
-  * auth.guard.ts needs to import { CanActivate } from '@angular/router';
-  * export class AuthGuard implements CanActivate
-  
+- aims to check in our modules if we are allowed to access some particular routes
+- adding it at the parent level of child routes' routing structure
+- adding guard canActivate() at parent level to check access to route
+- in mail.module we import the AuthModule - import {AuthModule} from '../auth/auth.module';
+  - import {AuthGuard} from '../auth/auth.guard';
+  - add AuthModule to imports:[AuthModule] - add canActivate:[] on the routing definition and it accepts an array of guards
+- auth.guard.ts needs to import { CanActivate } from '@angular/router';
+- export class AuthGuard implements CanActivate
+
 ### canActivateChild()
 
-  * protecting only the children, but the current path in the route is accessible
-  * mail.module.ts we put the canActivateChild:[AuthGuard], guard on the parent route to see if we can activate the children
-  * auth.guard.ts canActivateChild(){}
+- protecting only the children, but the current path in the route is accessible
+- mail.module.ts we put the canActivateChild:[AuthGuard], guard on the parent route to see if we can activate the children
+- auth.guard.ts canActivateChild(){}
 
 ## canDeactivate()
 
-  * hooking in deactivate route guard to warn the user that they are leaving the route and may lose changes
-  * if canDeactivate() returns true, it means we can navigate away
-  * mail-view.component.ts
-  * we bind textArea's [value]="reply" to the reply property and (change) event to updateReply($event.target.value) which assigns the new value to 'reply' property
-  * mail-view.guard we want to add an Auth Guard that protects the route, 
-  * the guard is specific for a particular component
-  * the guard needs to implement CanDeactivate<type> where type is a generic type of the component class that is deactivating <MailViewComponent>
-  * import {MailViewComponent} from './mail-view.component';
-  * import { CanDeactivate } from '@angular/router';
-  * the guard class needs canDeactivate()	
-  * and now because we get access to the component via the function canDeactive(component:MailViewComponent)  
-  * the MailViewComponent adds access to a property hasUnsavedChanges that defaults to false; 
-	* when updateReply() is called, hasUsavedChanges is set to true
-	* when sendReply() is called hasUnsavedChanges is set to false again
-	* the ngOnInit() resets the reply = '' and also resets hasUnsavedChanges = false; because angular doesnt destroy the component, it reuses it
-  * we add the MailViewGuard to the mail.module by import 
-  * and add to the modules' providers:[ MailViewGuard], now we have access to the guard inside the component
-  * add to the routing definition for that path canDeactivate:[MailViewGuard]
-	* mail-view.guard now has access to the properties of the Component class and we can test if(component.hasUnsavedChanges){ return window.confirm('leave?')}
+- hooking in deactivate route guard to warn the user that they are leaving the route and may lose changes
+- if canDeactivate() returns true, it means we can navigate away
+- mail-view.component.ts
+- we bind textArea's [value]="reply" to the reply property and (change) event to updateReply(\$event.target.value) which assigns the new value to 'reply' property
+- mail-view.guard we want to add an Auth Guard that protects the route,
+- the guard is specific for a particular component
+- the guard needs to implement CanDeactivate<type> where type is a generic type of the component class that is deactivating <MailViewComponent>
+- import {MailViewComponent} from './mail-view.component';
+- import { CanDeactivate } from '@angular/router';
+- the guard class needs canDeactivate()
+- and now because we get access to the component via the function canDeactive(component:MailViewComponent)
+- the MailViewComponent adds access to a property hasUnsavedChanges that defaults to false;
+  - when updateReply() is called, hasUsavedChanges is set to true
+  - when sendReply() is called hasUnsavedChanges is set to false again
+  - the ngOnInit() resets the reply = '' and also resets hasUnsavedChanges = false; because angular doesnt destroy the component, it reuses it
+- we add the MailViewGuard to the mail.module by import
+- and add to the modules' providers:[ MailViewGuard], now we have access to the guard inside the component
+- add to the routing definition for that path canDeactivate:[MailViewGuard]
 
-	
+  - mail-view.guard now has access to the properties of the Component class and we can test if(component.hasUnsavedChanges){ return window.confirm('leave?')}
 
 <!-- app/auth.module -->
-```ts
-import {NgModule} from '@angular/core';
-import {AuthService} from './auth.service';
-import {AuthGuard} from './auth.guard';
-@NgModule({
-	providers:[AuthService, AuthGuard]
-})
 
-export class AuthModule{
-}
+```ts
+import { NgModule } from '@angular/core';
+import { AuthService } from './auth.service';
+import { AuthGuard } from './auth.guard';
+@NgModule({
+	providers: [AuthService, AuthGuard]
+})
+export class AuthModule {}
 ```
 
 <!-- app/auth.service -->
+
 ```ts
 import 'rxjs/add/observable/of';
 
 @Injectable()
-export class AuthService{
-	
-	user = {isAdmin:true};
-	
-	checkPermissions(){
+export class AuthService {
+	user = { isAdmin: true };
+
+	checkPermissions() {
 		return Observable.of(this.user.isAdmin);
 	}
-	isLoggedIn(){
+	isLoggedIn() {
 		return Observable.of(true);
 	}
 }
 ```
 
 <!-- app.module -->
+
 ```ts
-import {AuthModule} from './auth/auth.module';
-import {AuthGuard} from './auth/auth.guard';
+import { AuthModule } from './auth/auth.module';
+import { AuthGuard } from './auth/auth.guard';
 
 export const ROUTES: Routes = [
-	{path: 'dashboard', canLoad:[AuthGuard], loadChildren:'etc'}
+	{ path: 'dashboard', canLoad: [AuthGuard], loadChildren: 'etc' }
 ];
 @NgModule({
-	imports:[
-		AuthModule,
-	]
+	imports: [AuthModule]
 })
-export class AppModule{}
+export class AppModule {}
 ```
 
 <!-- auth.guard -->
+
 ```ts
 import { Injectable } from '@angular/core';
 import { CanLoad, CanActivate } from '@angular/router';
 import { AuthService } from './auth.service';
 
 @Injectable()
-
-export class AuthGuard implements CanLoad, CanActivate{
-	constructor(private authService:AuthService){}
+export class AuthGuard implements CanLoad, CanActivate {
+	constructor(private authService: AuthService) {}
 	/* implements CanLoad Guard */
-	canLoad(){
+	canLoad() {
 		return this.authService.checkPermissions();
 	}
 
-	canActivate(){
+	canActivate() {
 		return this.authService.isLoggedIn();
 	}
-	
-	canActivateChild(){
+
+	canActivateChild() {
 		return false;
 	}
 }
-
 ```
+
 <!-- mail.module -->
+
 ```ts
 
 import { MailViewResolve } from './components/mail-view/mail-view.resolve';
@@ -2620,133 +2628,142 @@ export const ROUTES: Routes = [
 ```
 
 <!-- mail-view.component.ts -->
+
 ```ts
 @Component({
-	template:`<div class="mail-reply">
-	<textarea (change)="updateReply($event.target.value)" placeholder="Type your reply..." [value]="reply"></textarea>
-	<button type="button" (click)="sendReply()">Send</button>
-	</div>`
+	template: `
+		<div class="mail-reply">
+			<textarea
+				(change)="updateReply($event.target.value)"
+				placeholder="Type your reply..."
+				[value]="reply"
+			></textarea>
+			<button type="button" (click)="sendReply()">Send</button>
+		</div>
+	`
 })
-
-export class MailViewComponent implements OnInit{
+export class MailViewComponent implements OnInit {
 	reply = '';
 	hasUnsavedChanges = false;
-	message:Observable<Mail> = this.route.data.pluck('message');
+	message: Observable<Mail> = this.route.data.pluck('message');
 
-	constructor(private route: ActivatedRoute){}
+	constructor(private route: ActivatedRoute) {}
 
-	ngOnInit(){
-		this.route.params.subscribe(()=>{
+	ngOnInit() {
+		this.route.params.subscribe(() => {
 			this.reply = '';
-			this.hasUnsavedChanges = false; 
-		})
+			this.hasUnsavedChanges = false;
+		});
 	}
 
-	updateReply(value:string){
+	updateReply(value: string) {
 		this.reply = value;
 		this.hasUnsavedChanges = true;
 	}
 
-	sendReply(){
-		this.hasUnsavedChanges = false;	
+	sendReply() {
+		this.hasUnsavedChanges = false;
 	}
-
 }
 ```
+
 <!-- mail-view.guard -->
+
 ```ts
 import { Injectable } from '@angular/core';
 import { CanDeactivate } from '@angular/router';
 import { MailViewComponent } from './mail-view.component';
 
 @Injectable()
-export class MailViewGuard implements CanDeactivate{
-
-}
+export class MailViewGuard implements CanDeactivate {}
 ```
 
 # Unit Testing
 
-* karma.conf.json gets generated by angular cli
-* testing is done using Karma and Jasmine
-* package.json add @types/jasmine and @types/karma to devDependencies as well as karma related packages
-  	- module has an export which sets up the config 
-    - browsers:['Chrome'] property which tells where we gonna boot up testing
-    - files:[] is list of files necessary to run unit tests
-    - files:[] can also have a { pattern: __dirname + '/**/*.spec.ts', watched:false} the pattern look for specific matches only
-    - preprocessors:{'*.js' :['sourcemap'],'**/*.spec.ts':['sourcemap', 'webpack']} says we using sourcemaps
-    - reporters:['spec'], says we gonna have color for tests in terminal for pass or fail
+- karma.conf.json gets generated by angular cli
+- testing is done using Karma and Jasmine
+- package.json add @types/jasmine and @types/karma to devDependencies as well as karma related packages - module has an export which sets up the config
+  - browsers:['Chrome'] property which tells where we gonna boot up testing
+  - files:[] is list of files necessary to run unit tests
+  - files:[] can also have a { pattern: \_\_dirname + '/\*_/_.spec.ts', watched:false} the pattern look for specific matches only
+  - preprocessors:{'_.js' :['sourcemap'],'\*\*/_.spec.ts':['sourcemap', 'webpack']} says we using sourcemaps
+  - reporters:['spec'], says we gonna have color for tests in terminal for pass or fail
 
 ## Structure of a Unit Test
-* test files are name.spec.ts
-* describe('name', ()=> {}) block
-* describe blocks can wrap to indent
-* inside the function we call it('description for test', ()=>{}); function  
-* each test is a it() function call
-* we can import the Pipe
-* inside the it() we can do expect().toBe() checks 
+
+- test files are name.spec.ts
+- describe('name', ()=> {}) block
+- describe blocks can wrap to indent
+- inside the function we call it('description for test', ()=>{}); function
+- each test is a it() function call
+- we can import the Pipe
+- inside the it() we can do expect().toBe() checks
 
 THINGS WE CAN TEST
-* pipes, pipes inside Component,
-* shallow testing
-* services with dependencies
-* component methods
-* component inputs outputs
-* templates
-* async providers
-* no errors schema
-* attribute directives
+
+- pipes, pipes inside Component,
+- shallow testing
+- services with dependencies
+- component methods
+- component inputs outputs
+- templates
+- async providers
+- no errors schema
+- attribute directives
 
 ### SETUP / CONFIG
 
 <!-- package.json -->
-    
-    "devDependencies":{  
-        "@types/jasmine":"2.5.46",   
-        "@types/karma":"0.13.34",   
-        "karma":"1.5.0",  
-        "karma-chrome-launcher": "2.0.0",  
-        "karma-jasmine":"1.1.0",  
-        "karma-sourcemap-loader":"0.3.7",  
-        "karma-spec-reporter":"0.0.30",  
-        "karma-webpack":"2.0.3"  
+
+    "devDependencies":{
+        "@types/jasmine":"2.5.46",
+        "@types/karma":"0.13.34",
+        "karma":"1.5.0",
+        "karma-chrome-launcher": "2.0.0",
+        "karma-jasmine":"1.1.0",
+        "karma-sourcemap-loader":"0.3.7",
+        "karma-spec-reporter":"0.0.30",
+        "karma-webpack":"2.0.3"
     }
 
 ### karma configuration (karma.conf.js)
+
 <!-- karma.conf.js -->
+
 ```ts
 const webpack = require('webpack');
 
-module.exports = (config)=>{
-    config.set(
-        { browsers:['Chrome'],
-        files:['node_modules/reflect-metadata/Reflect.js',
-        'node_modules/zone.js/dist/zone.js',
-        'node_modules/zone.js/dist/proxy.js',
-        'node_modules/zone.js/dist/sync-test.js',
-        'node_modules/zone.js/dist/async-test.js',
-        'node_modules/zone.js/dist/jasmine-patch.js',
-        'node_modules/zone.js/dist/long-stack-trace-zone.js',
-        {pattern: __dirname + '/**/*.spec.ts', watched:false}
-        ],
-        frameworks:['jasmine'],
-        mime:{'text/x-typescript':['ts']},
-        preprocessors:{'*.js':['sourcemap'],
-        '**/*.spec.ts':['sourcemap', 'webpack']},
-        reporters:['spec'],
-        webpack:{
-            
-        }
-    })
-}
+module.exports = config => {
+	config.set({
+		browsers: ['Chrome'],
+		files: [
+			'node_modules/reflect-metadata/Reflect.js',
+			'node_modules/zone.js/dist/zone.js',
+			'node_modules/zone.js/dist/proxy.js',
+			'node_modules/zone.js/dist/sync-test.js',
+			'node_modules/zone.js/dist/async-test.js',
+			'node_modules/zone.js/dist/jasmine-patch.js',
+			'node_modules/zone.js/dist/long-stack-trace-zone.js',
+			{ pattern: __dirname + '/**/*.spec.ts', watched: false }
+		],
+		frameworks: ['jasmine'],
+		mime: { 'text/x-typescript': ['ts'] },
+		preprocessors: {
+			'*.js': ['sourcemap'],
+			'**/*.spec.ts': ['sourcemap', 'webpack']
+		},
+		reporters: ['spec'],
+		webpack: {}
+	});
+};
 ```
 
 ## ISOLATE tests NOT USING angular framework directly - unit test for a pipe
 
-* inside the describe block we can create an instance of the FileSizePipe() and then use this instance in our tests
-* expect(pipe.transform(123456789)).toBe('117.74MB');  
-* run with yarn test or npm test
-* the transform method can take a second parameter, the extension
+- inside the describe block we can create an instance of the FileSizePipe() and then use this instance in our tests
+- expect(pipe.transform(123456789)).toBe('117.74MB');
+- run with yarn test or npm test
+- the transform method can take a second parameter, the extension
 
 ```ts
 import {FileSizePipe} fromo './file-size.pipe';
@@ -2755,7 +2772,7 @@ describe('FileSizePipe', ()=>{
 	const pipe = new FileSizePipe();
 
 	it('should convert bytes to megabytes', ()=>{
-		expect(pipe.transform(123456789)).toBe('117.74MB');  
+		expect(pipe.transform(123456789)).toBe('117.74MB');
 	});
 
 	it('should override the extension when supplied', ()=>{
@@ -2765,12 +2782,17 @@ describe('FileSizePipe', ()=>{
 ```
 
 ---
+
 ## template for testing with TestBed
 
 <!-- template for testing with TestBed-->
+
 ```ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting
+} from '@angular/platform-browser-dynamic/testing';
 
 /*import the component to test */
 import { StockCounterComponent } from './stock-counter.component';
@@ -2781,45 +2803,48 @@ TestBed.initTestEnvironment(
 	platformBrowserDynamicTesting()
 );
 
-describe('StockCounterComponent', ()=> {
-	beforeEach(()=>{
+describe('StockCounterComponent', () => {
+	beforeEach(() => {
 		Testbed.configureTestingModule({
-			declarations:[StockCounterComponent]
+			declarations: [StockCounterComponent]
 		});
 	});
 });
-
 ```
+
 ---
 
 ## Shallow testing pipes
 
-* testing within the angular and testing frame
-* learning to instantiate the pipe inside a component testing that it works inside the component
-* import { TestBed, ComponentFixture } from '@angular/core/testing';
-* import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
-* create the testbed TestBed.initTestEnvironment(BrowserDynamicTestingModule,platformBrowserDynamicTesting());
-* inside the describe() create the component definition @Component({}) and the class with properties
-* create references component, fixture, el
-  * component references the class we just created
-  * fixture is of type ComponentFixture<TestComponent>;
-  * generic type TestComponent relates the TestComponent with the fixture
-  * ComponentFixture holds info about mounted component, also use it access debug element and native element
-  * let el:HTMLElement; 
-* beforeEach(()=>{}); will be called before each it() test in describe() block
-* so for further tests, we configure our testing module to dynamically create our Component with our FilesizePipe and we use these variables to access the things we are binding them to inside the beforeEach()
-* need to setup testbed TestBed.configureTestingModule({ declarations:[ FileSizePipe, TestComponent ]}); which allows us to dynamically create a very small module to test a few things against
-* then reasign variables 
-  * fixture = TestBed.createComponent(TestComponent);
-  * component = fixture.componentInstance;
-  * el = fixture.nativeElement;
-* use fixture.detectChanges(); to detect changes
-* have access to .toContain()
+- testing within the angular and testing frame
+- learning to instantiate the pipe inside a component testing that it works inside the component
+- import { TestBed, ComponentFixture } from '@angular/core/testing';
+- import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+- create the testbed TestBed.initTestEnvironment(BrowserDynamicTestingModule,platformBrowserDynamicTesting());
+- inside the describe() create the component definition @Component({}) and the class with properties
+- create references component, fixture, el
+  - component references the class we just created
+  - fixture is of type ComponentFixture<TestComponent>;
+  - generic type TestComponent relates the TestComponent with the fixture
+  - ComponentFixture holds info about mounted component, also use it access debug element and native element
+  - let el:HTMLElement;
+- beforeEach(()=>{}); will be called before each it() test in describe() block
+- so for further tests, we configure our testing module to dynamically create our Component with our FilesizePipe and we use these variables to access the things we are binding them to inside the beforeEach()
+- need to setup testbed TestBed.configureTestingModule({ declarations:[ FileSizePipe, TestComponent ]}); which allows us to dynamically create a very small module to test a few things against
+- then reasign variables
+  - fixture = TestBed.createComponent(TestComponent);
+  - component = fixture.componentInstance;
+  - el = fixture.nativeElement;
+- use fixture.detectChanges(); to detect changes
+- have access to .toContain()
 
 ```ts
 import { Component } from '@angular/core';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
+import {
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting
+} from '@angular/platform-browser-dynamic/testing';
 
 // creating the testbed
 TestBed.initTestEnvironment(
@@ -2827,33 +2852,32 @@ TestBed.initTestEnvironment(
 	platformBrowserDynamicTesting()
 );
 
-import {FileSizePipe} from './file-size.pipe';
+import { FileSizePipe } from './file-size.pipe';
 
-describe('FileSizePipe', ()=>{
-	describe('shallow FileSizePipe test', ()=>{
+describe('FileSizePipe', () => {
+	describe('shallow FileSizePipe test', () => {
 		@Component({
-			template:`Size:{{size | filesize: suffix }}`
+			template: `
+				Size:{{ size | filesize: suffix }}
+			`
 		})
-		class TestComponent{
+		class TestComponent {
 			suffix;
 			size: 123456789;
 		}
 
-		let component:TestComponent;
+		let component: TestComponent;
 		let fixture: ComponentFixture<TestComponent>;
-		let el:HTMLElement;
+		let el: HTMLElement;
 
-		beforeEach(()=>{
+		beforeEach(() => {
 			TestBed.configureTestingModule({
-				declarations:[
-					FileSizePipe,
-					TestComponent
-				]
+				declarations: [FileSizePipe, TestComponent]
 			});
 
 			fixture = TestBed.createComponent(TestComponent);
-   			component = fixture.componentInstance;
-  			el = fixture.nativeElement;
+			component = fixture.componentInstance;
+			el = fixture.nativeElement;
 		});
 
 		it('should convert bytes to megabytes', () => {
@@ -2863,32 +2887,30 @@ describe('FileSizePipe', ()=>{
 			fixture.detectChanges();
 			expect(el.textContent).toContain('Size: 0.98MB');
 		});
-		
+
 		it('should override the extension when supplied', () => {
 			component.suffix = 'myExt';
 			fixture.detectChanges();
 			expect(el.textContent).toContain('Size: 117.74myExt');
 		});
-
 	});
 
-	describe('isolate FileSizePipe test', ()=>{
-
-	});
+	describe('isolate FileSizePipe test', () => {});
 });
 ```
 
 ## Testing services with dependencies
 
-* testing a service with a dependency (here dependency to http)
-* do the initial TestBed.initTestEnvironment() only need to do this once for project
-* code as per below to test service...
-* do a beforeEach() and TestBed.configureTestingModule({ providers: [ StockInventoryService ] }); 
-* and we pass our service in the providers:[]
-* we dont want to inject the real http, we create a mock class that imitates the http with get() method that returns an ObservableResponse
-* want to inject StockInventoryService with MockHttp, using token of Http but instead use our class useClass:MockHttp
+- testing a service with a dependency (here dependency to http)
+- do the initial TestBed.initTestEnvironment() only need to do this once for project
+- code as per below to test service...
+- do a beforeEach() and TestBed.configureTestingModule({ providers: [ StockInventoryService ] });
+- and we pass our service in the providers:[]
+- we dont want to inject the real http, we create a mock class that imitates the http with get() method that returns an ObservableResponse
+- want to inject StockInventoryService with MockHttp, using token of Http but instead use our class useClass:MockHttp
 
 <!-- stock-inventory.service.spec.ts -->
+
 ```ts
 import { Http, Response, ResponseOptions } from '@angular/http';
 import { TestBed } from '@angular/core/testing';
@@ -2956,19 +2978,42 @@ describe('StockInventoryService', ()=>{
 }
 
 ```
+
 ## testing component methods
 
-* testing if methods go above or below our max and min properties checks
-* we define component, and fixture inside the describe block
-* we override them in the beforeEach()
-* to reference the component in the testbed we pass the Component into TestBed.createComponent()
-* we access the component with refence to the fixture by fixture.componentInstance;
-* set a default value in the beforeEach() component.value = 0;
-* our it() test testing the methods of the component
-* the test passes or fails if all expect() inside it() passes 
+- testing if methods go above or below our max and min properties checks
+- we define component, and fixture inside the describe block
+- we override them in the beforeEach()
+- to reference the component in the testbed we pass the Component into TestBed.createComponent()
+- we access the component with refence to the fixture by fixture.componentInstance;
+- set a default value in the beforeEach() component.value = 0;
+- our it() test testing the methods of the component
+- the test passes or fails if all expect() inside it() passes
 
+## testing component @Input /@Output
+
+- because we have access to the component, we have access to its class properties
+- in the example, there is @Input min, @Input max, @Input step
+- @Output changed is an event emitter
+- and we can acess these via the component
+
+### @Input test
+
+- the test sets initial values on the component.step, and component.max, and then .increment() and then we expect() value to equal the max
+
+### @Output test
+
+- `@Output() changed = new EventEmitter<number>();` is binded to an instance of EventEmitter, it has access to the 'emit' property
+- `increment(){ this.changed.emit(this.value); }`
+- for @Output, we subscribe to the component inside the body of our it() function
+- we spy on the component.changed @Output() property and the method we want to spy on is 'emit'
+- spyOn(component.changed, 'emit')
+- .and.callThrough(); makes sure this is being called
+- expecting emit to have been called with value of 100 expect(component.changed.emit).toHaveBeenCalledWith(100);
+- checking the emit value and because our step is 100, the test should pass
 
 <!-- template for testing with TestBed-->
+
 ```ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserDynamicTestingModule, platformBrowserDynamicTesting } from '@angular/platform-browser-dynamic/testing';
@@ -3015,6 +3060,23 @@ describe('StockCounterComponent', ()=> {
 		}
 		expect(component.value).toBe(100);
 	}
+
+	// testing @Input
+	it('should not increment over the maximum value', ()=>{
+		component.step = 20;
+		component.max = 20;
+		component.increment();
+		component.increment();
+		expect(component.value).toBe(20);
+	});
+
+	//testing @Output
+	it('should call the output on a value change', ()=>{
+		spyOn(component.changed, 'emit').and.callThrough();
+		component.step = 100;
+		component.increment();
+		expect(component.changed.emit).toHaveBeenCalledWith(100);
+	});
 
 	beforeEach(()=>{
 		Testbed.configureTestingModule({
