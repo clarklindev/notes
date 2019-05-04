@@ -3090,3 +3090,68 @@ describe('StockCounterComponent', ()=> {
 });
 
 ```
+
+## testing (user interaction) in component template
+
+- button + increments value, button - decrements value
+- query DOM elements and trigger events
+- import { DebugElement } from '@angular/core';
+- create new variable of type DebugElement
+- DebugElement has query() for querying nodes and triggerEventHandler()
+- el = fixture.debugElement; which gives us access to methods of DebugElement like query()
+- import {By } from '@angular/platform-browser'; the By class can be used to match particular elements
+- css() matches elements based on css selector
+- we are querying element in the template and then .triggerEventHandler('click', null)
+- fixture.detectChanges();
+- expect(el.query(By.css('p')).nativeElement.textContent).toBe('1');
+
+## testing when key is pressed
+
+- testing interaction via keyboard events
+- can test this directly so need to create an event Object
+- assigning it a code of 'ArrowUp'
+- then we reference our div which is listening to that event and we tell it to trigger a 'keydown' event and we pass it the event object basically says we pressing down on ArrowUp
+- then we calling fixture.detectChanges()
+- expecting that component value to be 1
+
+<!-- stock-counter.component.spec.ts -->
+
+```ts
+import { DebugElement } from '@angular/core';
+
+describe('StockCounterComponent', () => {
+	let component: StockCounterComponent;
+	let fixture: ComponentFixture<StockCounterComponent>;
+	let el: DebugElement;
+
+	beforeEach(() => {
+		TestBed.configureTestingModule({
+			declarations: [StockCounterComponent]
+		});
+		fixture = TestBed.createComponent(StockCounterComponent);
+		component = fixture.componentInstance;
+		el = fixture.debugElement;
+
+		// setting initial value
+		component.value = 0;
+	});
+
+	it('should increment when the + button is clicked', () => {
+		el.query(By.css('button:first-child')).triggerEventHandler('click', null);
+		fixture.detectChanges();
+		expect(component.value).toBe(1);
+		expect(el.query(By.css('p')).nativeElement.textContent).toBe('1');
+	});
+
+	it('Should increment the value when the up arrow is pressed', () => {
+		const event = new Event('KeyboardEvent') as any;
+		event.code = 'ArrowUp';
+		el.query(By.css('.stock-counter > div > div')).triggerEventHandler(
+			'keydown',
+			event
+		);
+		fixture.detectChanges();
+		expect(component.value).toBe(1);
+	});
+});
+```
