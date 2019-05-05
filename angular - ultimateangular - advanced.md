@@ -3155,3 +3155,111 @@ describe('StockCounterComponent', () => {
 	});
 });
 ```
+
+## testing components async providers
+
+- learn to test component with asynchronous provider (service)
+- import {ReactiveFormsModule} from '@angular/forms';
+- spec file starts with default template for testing
+- import the debug element
+- import all components classes that will be used in our template and add to declarations:[]
+- import the service and add to providers:[{provide:	StockInventoryService, useClass:MockInventoryService}]
+which makes StockInventoryService going to use the class of MockInventoryService
+- create the MockStockInventoryService class which mimics the StockInventoryService class
+- let service:StockInventoryService;
+* spyOn(service, 'getProducts').and.callThrough(); spyOn(service, 'getCartItems').and.callThrough(); makes sure we are calling these functions
+* component.ngOnInit();
+* expect(service.getProducts).toHaveBeenCalled();
+* expect(service.getCartItems).toHaveBeenCalled();
+* testing if the map has the data, and if so, if the object it contains is the same as what is returned from Observable
+* testing if the component product value gets assigned, it('should store the products response')
+	the test should check if component.products equals a value and if it does, then its the same and the test is a pass
+* it('should create a stock item for each cart item') checks if addStock function on Component is being called with correct values
+{product_id:1, quantity:10 }, {product_id:2, quantity:5 }
+
+
+<!-- stock-inventory.component.spec.ts -->
+
+```ts
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting
+} from '@angular/platform-browser-dynamic/testing';
+
+import { DebugElement } from '@angular/core';
+
+import { ReactiveFormsModule } from '@angular/forms';
+
+import {StockInventoryComponent} from '';
+import {StockBranchComponent} from '';
+import {StockCounterComponent} from '';
+import {StockProductsComponent} from '';
+import {StockSelectorComponent} from '';
+import {StockInventoryService} from '';
+import { Observable} from 'rxjs/observable';
+import 'rxjs/add/observable/of';
+
+// creating the testbed
+TestBed.initTestEnvironment(
+	BrowserDynamicTestingModule,
+	platformBrowserDynamicTesting()
+);
+
+class	MockStockInventoryService{
+	getProducts(){
+		return Observable.of([{id:1, price:10, name:'test'}, {id:2, price:100, name:'another test'}]);
+	}
+	getCartItems(){
+		return Observable.of([{product_id:1, quantity:10 }, {product_id:2, quantity:5 }]);
+	}
+}
+
+describe('StockCounterComponent', () => {
+	beforeEach(() => {
+		Testbed.configureTestingModule({
+			imports: [ReactiveFormsModule],
+			declarations: [
+				StockInventoryComponent,
+				StockBranchComponent,
+				StockCounterComponent,
+				StockProductsComponent,
+				StockSelectorComponent
+			],
+			providers:[{provide:	StockInventoryService, useClass:MockInventoryService}]
+		});
+	});
+
+	fixture = TestBed.createComponent(StockInventoryComponent);
+	component = fixture.componentInstance;
+	el = fixture.debugComponent;
+	service = el.injector.get(StockInventoryService);
+
+	it('should get cart items and products on init', ()=>{
+		spyOn(service, 'getProducts').and.callThrough();
+		spyOn(service, 'getCartItems').and.callThrough();
+		component.ngOnInit();
+		expect(service.getProducts).toHaveBeenCalled();
+		expect(service.getCartItems).toHaveBeenCalled();
+	});
+
+	it('should create a product map from the service response', ()=>{
+		component.ngOnInit();
+		expect(component.productsMap.get(1)).toEqual({id:1, price: 10, name:'Test'});
+		expect(component.productsMap.get(2)).toEqual({id:2, price: 100, name:'Another test'});
+	});
+
+	it('should store the products response', ()=>{
+		component.ngOnInit();
+		expect(component.products).toEqual([{id:1, price: 10, name:'Test'}, {id:2, price:100, name:'Another test'}]);
+	});
+
+	it('should create a stock item for each cart item', ()=>{
+		spyOn(component, 'addStock');
+		component.ngOninit();
+		expect(component.addStock).toHaveBeenCalledWith({product_id:1, quantity:10 });
+		expect(component.addStock).toHaveBeenCalledWith({product_id:2, quantity:5 });
+	}
+
+});
+```
