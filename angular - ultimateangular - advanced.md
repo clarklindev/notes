@@ -3263,3 +3263,11 @@ describe('StockCounterComponent', () => {
 
 });
 ```
+## no errors schema
+
+* testing a single component that may have child components, 
+* not including all the components by not importing AND by not adding to declarations
+* import {NO_ERRORS_SCHEMA} from '@angular/core';
+* on the module, schemas:[NO_ERROS_SCHEMA]
+
+
