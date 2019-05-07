@@ -3338,3 +3338,31 @@ describe('CreditCardDirective', () => {
 
 });
 ```
+# Dependency Injection & Zones
+
+### Providers usevalue
+
+* injecting value into the service from a central point (the module)
+* helps api's be controlled from single place
+* each component currently has its own instance of service in the constructor
+* change to: module has providers:[{ provide:'api', useValue:'/api/pizzas'}] which allows us to inject into service
+
+* import {Injectable, Inject} from '@angular/core';
+* use the label we gave it in the module, `constructor(private http:Http, @Inject('api') private api:string){}`
+* use as normal this.http.get(this.api).map()
+
+<!-- app.module.ts -->
+```ts
+providers:[{provide:'api', useValue:'/api/pizzas'}]
+```
+
+<!-- food.service -->
+```ts
+constructor(private http:Http, @Inject('api') private api:string){}
+
+getFood():Observable<any[]>{
+	return this.http.get(this.api).map(response=> response.json());
+}
+
+```
+
