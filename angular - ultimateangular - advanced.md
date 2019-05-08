@@ -3504,3 +3504,58 @@ getFood():Observable<any[]>{
 	return this.http.get(this.api).map(response=> response.json());
 }
 ```
+
+---
+
+## providers useExisting
+
+- so for demonstration purposes, food.service now has multiple get() functions getSides(), getPizzas(), getDrinks(),
+- we create an abstract class (no implementation just declaration) eg. `export abstract class DrinkService{}`
+- and this class lists the method we can call getDrinks() and it returns what the method in the service returns... an Observable<Drink[]>
+- in the @Component({}) using 'useExisting' to restrict access
+- providers: [FoodService, { provide: DrinkService, useExisting: FoodService }];
+- provide the DrinkService (which is our abstract class with limited methods),
+- and useExisting: FoodService class
+- in the DrinkViewerComponent, we change the feed into the constructor() from type FoodService to DrinkService
+- now in the ngOnInit(), typing this.foodService. will limit the methods available to only getDrinks() as was defined in the abstract class
+- when using useExisting if the services are part of module, we wouldnt create new instances everytime we create a new provider
+
+<!-- drink-viewer -->
+
+```ts
+export abstract class DrinkService {
+	getDrinks: () => Observable<Drink[]>;
+}
+@Component({
+	selector: 'drink-viewer',
+	providers: [FoodService, { provide: DrinkService, useExisting: FoodService }]
+})
+export class DrinkViewerComponent implements OnInit {
+	items$: Observable<Drink[]>;
+
+	// constructor(private foodService: FoodService) {}
+	constructor(private foodService: DrinkService) {}
+
+	ngOnInit() {
+		this.items$ = this.foodService.getDrinks();
+	}
+}
+```
+
+<!-- food.service -->
+
+```ts
+getSides():Observable<any[]>{
+	return this.http.get('/api/sides').map(response=> response.json());
+}
+
+getPizzas():Observable<any[]>{
+	return this.http.get('/api/pizzas').map(response=> response.json());
+}
+
+getDrinks():Observable<any[]>{
+	return this.http.get('/api/drinks').map(response=> response.json());
+}
+
+
+```
