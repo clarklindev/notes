@@ -3418,7 +3418,89 @@ import {API_TOKEN} from './token';
 ## providers useClass
 
 ```ts
-providers:[
-	{provide:FoodService, useClass:NewFoodService}
-]
+providers: [{ provide: FoodService, useClass: NewFoodService }];
+```
+
+## providers useFactory
+
+- factory object helps us create numerous objects/single object from
+- dynamically making an instance of an object instead of using a singleton like the Service class directly
+- use useFactory:()=>{ return new FoodService(); } calls a function and it returns an new instance of the Class
+- we can use a factory using providers:[{ provide:FoodService, useFactory:()=>{ return new FoodService(); } }]
+
+- we want to dynamically pass a particular url here.. API_TOKEN ... into the contructor of the FoodService Class
+  so we change the constructor by removing the @Inject(API_TOKEN) so we can pass this in from outside the class
+- deps:[], is used when a factory is dependent of other dependencies, and we need to pass in the dependency to the factory...
+
+- here we need Http, reasign to an alias from the anonymous function here 'http'
+- but we need to let angular statically analyze the code (ahead of time) so we need to make the code that useFactory calls into methods
+- note how the factory still receives arguments, even tho it is set in deps:[]
+- example: `provide: FoodService, useFactory: DrinkFactory, deps: [Http]`
+
+<!-- drink-viewer.component -->
+
+```ts
+export function DrinkFactory(http){
+	return new FoodService(http, '/api/drinks');
+}
+@Component({
+	providers: [
+		{
+			provide: FoodService,
+			useFactory: DrinkFactory,
+			deps: [Http]
+		}
+	],
+	template:``
+})
+```
+
+<!-- pizza-viewer.component -->
+
+```ts
+export PizzaFactory(http){
+	return new FoodService(http, '/api/pizza');
+}
+
+@Component({
+	providers: [
+		{
+			provide: FoodService,
+			useFactory: PizzaFactory,
+			deps: [Http]
+		}
+	],
+	template:``
+})
+```
+
+<!-- side-viewer.component -->
+
+```ts
+export function SideFactory(http){
+	return new FoodService(http, '/api/side');
+}
+@Component({
+	providers: [
+		{
+			provide: FoodService,
+			useFactory: SideFactory,
+			deps: [Http]
+		}
+	],
+	template:``
+})
+```
+
+<!-- food.service.ts -->
+
+```ts
+import { API_TOKEN } from './token';
+
+// constructor(private http:Http, @Inject(API_TOKEN) private api:string){}
+constructor(private http:Http, private api:string){}
+
+getFood():Observable<any[]>{
+	return this.http.get(this.api).map(response=> response.json());
+}
 ```
