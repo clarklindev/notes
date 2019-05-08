@@ -3163,20 +3163,20 @@ describe('StockCounterComponent', () => {
 - spec file starts with default template for testing
 - import the debug element
 - import all components classes that will be used in our template and add to declarations:[]
-- import the service and add to providers:[{provide:	StockInventoryService, useClass:MockInventoryService}]
-which makes StockInventoryService going to use the class of MockInventoryService
+- import the service and add to providers:[{provide: StockInventoryService, useClass:MockInventoryService}]
+  which makes StockInventoryService going to use the class of MockInventoryService
 - create the MockStockInventoryService class which mimics the StockInventoryService class
 - let service:StockInventoryService;
+
 * spyOn(service, 'getProducts').and.callThrough(); spyOn(service, 'getCartItems').and.callThrough(); makes sure we are calling these functions
 * component.ngOnInit();
 * expect(service.getProducts).toHaveBeenCalled();
 * expect(service.getCartItems).toHaveBeenCalled();
 * testing if the map has the data, and if so, if the object it contains is the same as what is returned from Observable
 * testing if the component product value gets assigned, it('should store the products response')
-	the test should check if component.products equals a value and if it does, then its the same and the test is a pass
+  the test should check if component.products equals a value and if it does, then its the same and the test is a pass
 * it('should create a stock item for each cart item') checks if addStock function on Component is being called with correct values
-{product_id:1, quantity:10 }, {product_id:2, quantity:5 }
-
+  {product_id:1, quantity:10 }, {product_id:2, quantity:5 }
 
 <!-- stock-inventory.component.spec.ts -->
 
@@ -3263,32 +3263,34 @@ describe('StockCounterComponent', () => {
 
 });
 ```
+
 ## no errors schema
 
-* testing a single component that may have child components, 
-* not including all the components by not importing AND by not adding to declarations
-* import {NO_ERRORS_SCHEMA} from '@angular/core';
-* on the module, schemas:[NO_ERROS_SCHEMA]
+- testing a single component that may have child components,
+- not including all the components by not importing AND by not adding to declarations
+- import {NO_ERRORS_SCHEMA} from '@angular/core';
+- on the module, schemas:[NO_ERROS_SCHEMA]
 
 ## testing attribute directives
 
-* creating an event
-* and getting the value and making sure the directive is working properly
-* unit test example format credit card number with spaces between
-* example credit-card.directive.ts
-* bind directive 'credit-card' to input
-* on the TestComponent, template, we bind to value `<input type="text" [value]="value" credit-card>`
+- creating an event
+- and getting the value and making sure the directive is working properly
+- unit test example format credit card number with spaces between
+- example credit-card.directive.ts
+- bind directive 'credit-card' to input
+- on the TestComponent, template, we bind to value `<input type="text" [value]="value" credit-card>`
 
 <!-- credit-card.directive.spec.ts -->
+
 ```ts
-import { DebugElement, Component} from '@angular/core';
+import { DebugElement, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
 	BrowserDynamicTestingModule,
 	platformBrowserDynamicTesting
 } from '@angular/platform-browser-dynamic/testing';
 import { By } from '@angular/platform-browser';
-import {CreditCardDirective} from './credit-card.directive';
+import { CreditCardDirective } from './credit-card.directive';
 
 // creating the testbed
 TestBed.initTestEnvironment(
@@ -3297,14 +3299,15 @@ TestBed.initTestEnvironment(
 );
 
 @Component({
-	template:`<input type="text" [value]="value" credit-card>`
+	template: `
+		<input type="text" [value]="value" credit-card />
+	`
 })
-class TestComponent{
+class TestComponent {
 	value = 123456;
 }
 
 describe('CreditCardDirective', () => {
-
 	let component: TestComponent;
 	let fixture: ComponentFixture<TestComponent>;
 	let el: DebugElement;
@@ -3317,10 +3320,9 @@ describe('CreditCardDirective', () => {
 		fixture = TestBed.createComponent(TestComponent);
 		component = fixture.componentInstance;
 		el = fixture.debugElement;
-
 	});
 
-	it('should format the string with spaces', ()=>{
+	it('should format the string with spaces', () => {
 		const directive = el.query(By.directive(CreditCardDirective)).nativeElement;
 		directive.value = '475123';
 		directive.dispatchEvent(new Event('input'));
@@ -3330,33 +3332,36 @@ describe('CreditCardDirective', () => {
 		expect(directive.value).toBe('4751 2398 1201 9201');
 	});
 
-	it('should have a max length of 16 characters', ()=>{
+	it('should have a max length of 16 characters', () => {
 		directive.value = '47512398120192013453534436666666';
 		directive.dispatchEvent(new Event('input'));
 		expect(directive.value).toBe('4751 2398 1201 9201');
 	});
-
 });
 ```
+
 # Dependency Injection & Zones
 
-### Providers usevalue
+### Providers useValue
 
-* injecting value into the service from a central point (the module)
-* helps api's be controlled from single place
-* each component currently has its own instance of service in the constructor
-* change to: module has providers:[{ provide:'api', useValue:'/api/pizzas'}] which allows us to inject into service
+- dependency injection syntax
+- injecting value into the service from a central point (the module)
+- helps api's be controlled from single place
+- each component currently has its own instance of service in the constructor
+- change to: module has providers:[{ provide:'api', useValue:'/api/pizzas'}] which allows us to inject into service
 
-* import {Injectable, Inject} from '@angular/core';
-* use the label we gave it in the module, `constructor(private http:Http, @Inject('api') private api:string){}`
-* use as normal this.http.get(this.api).map()
+- import {Injectable, Inject} from '@angular/core';
+- use the label we gave it in the module, `constructor(private http:Http, @Inject('api') private api:string){}`
+- use as normal this.http.get(this.api).map()
 
 <!-- app.module.ts -->
+
 ```ts
-providers:[{provide:'api', useValue:'/api/pizzas'}]
+providers: [{ provide: 'api', useValue: '/api/pizzas' }];
 ```
 
 <!-- food.service -->
+
 ```ts
 constructor(private http:Http, @Inject('api') private api:string){}
 
@@ -3366,3 +3371,44 @@ getFood():Observable<any[]>{
 
 ```
 
+## injection tokens (replaces DEPRECATED OpaqueToken which did not have type)
+
+- my understanding is it is a centralized file to declare constants
+- helps when we want to use multiple {provide:'',} with different useValues useValue:'' but this causes conflict if provide has same name (naming conflict),
+- providers: [
+  { provide: 'api', useValue: '/api/pizzas' },
+  { provide: 'api', useValue: '/api/pizzassssss' } //only overwrites as we have naming conflict
+  ];
+- resolve with using injection Token (CONST ALIASes)
+- create a token file (eg. token.ts)
+- import {InjectionToken} from '@angular/core';
+- injection token allows us to pass a string into the instance of the injection token,
+- we need to specify the type of the injection token here it is a (string)
+- `export const API_TOKEN = new InjectionToken<string>('api');`
+- in the module, we import the {API_TOKEN} from './token';
+  -we replace hardcoded API string in module with token string providers:[{ provide:API_TOKEN, useValue:'/api/pizzas' }]
+- then we change our dependency in the service
+
+<!-- app.module.ts -->
+
+```ts
+import { API_TOKEN } from './token';
+
+providers: [{ provide: API_TOKEN, useValue: '/api/pizzas' }];
+```
+
+<!-- fix -->
+<!-- token.ts -->
+
+```ts
+import { InjectionToken } from '@angular/core';
+
+export const API_TOKEN = new InjectionToken<string>('api');
+```
+
+<!-- food.service -->
+
+```ts
+import {API_TOKEN} from './token';
+@Inject(API_TOKEN) private api:String
+```
