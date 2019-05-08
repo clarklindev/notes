@@ -3412,3 +3412,13 @@ export const API_TOKEN = new InjectionToken<string>('api');
 import {API_TOKEN} from './token';
 @Inject(API_TOKEN) private api:String
 ```
+
+---
+
+## providers useClass
+
+```ts
+providers:[
+	{provide:FoodService, useClass:NewFoodService}
+]
+```
