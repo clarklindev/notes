@@ -3576,8 +3576,8 @@ getDrinks():Observable<any[]>{
 - in app.module, imports:[ FoodStoreModule.forRoot({ storeId 10292, storeToken: 'eca9843583758743' })]
 - inside the FoodStoreModule, we say we want to get the configuration by creating a static property called forRoot() method that receives config:FoodStoreConfig (see iterface in config.ts) and it returns type ModuleWithProviders
 - it forRoot needs to return an object with { ngModule: FoodStoreModule, providers: [FOOD_PROVIDERS, { provide: FOOD_STORE_CONFIG, useValue:}];} and then `providers:[]` we move from the @NgModule({ providers:}) definition to the forRoot() method
-its useValue is passed in from the forRoot(config:FoodStoreConfig) method
-  <!-- config.ts -->
+  its useValue is passed in from the forRoot(config:FoodStoreConfig) method
+    <!-- config.ts -->
 
 ```ts
 import { InjectionToken } from '@angular/core';
@@ -3616,4 +3616,40 @@ export class FoodStoreModule {
 imports: [
 	FoodStoreModule.forRoot({ storeId: 10292, storeToken: 'eca9843583758743' })
 ];
+```
+
+---
+
+## Zone / angular's NgZone
+
+- not a comonly used feature,
+- execution context that angular can keep an eye on the code that we use
+- also keeps track of async code / async events
+- angular runs your code inside a zone, to know when something has changed
+- DoCheck runs everytime a change detection has been run
+- import { NgZone}
+- to use a zone to demonstrate what it can do, constructor(private zone:NgZone)
+- most common feature is runOutsideAngular(), allows us to leave angulars zone, do the logic and return using zone.run();
+- we need to setTimeout() to schedule something from inside the function
+
+```ts
+import { Component, OnInit, DoCheck, NgZone } from '@angular/core';
+
+export class AppComponent implements OnInit, DoCheck {
+	counter = 0;
+	ngOnInit() {
+		this.zone.runOutsideAngular(() => {
+			for (let i = 0; i < 100; i++) {
+				setTimeout(() => this.counter++);
+			}
+			this.zone.run(() => {
+				setTimeout(() => (this.counter = this.counter), 1000);
+			});
+		});
+	}
+
+	ngDoCheck() {
+		console.log('change detection has been run');
+	}
+}
 ```
