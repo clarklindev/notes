@@ -1337,6 +1337,13 @@ export class StockProductsComponent{
 }
 ```
 
+## http headers
+
+- note to create a .get() header with options
+- const options = new RequestOptions();
+- options.headers = new Headers({id:this.config.storeId, token: this.config.storeToken});
+- return this.http.get(`/api/stores`, options).map((res) => res.json()[0]);
+
 ## http service observables
 
 - replacing static products list to the db.json (db json entries are like endpoints with array as value)
@@ -3558,4 +3565,55 @@ getDrinks():Observable<any[]>{
 }
 
 
+```
+
+## Configurable ngModules
+
+- say you want to have some data that you want to use in a particular module, we can define this in @NgModule({})
+- in app.module, @NgModule configuring Modules
+- in the food-store.module, REMOVE useValue:{ storeId:10292, storeToken: 'eca9843583758743'}
+- we use the .forRoot({})- making a module a configurable module, we have to move the data to app.module
+- in app.module, imports:[ FoodStoreModule.forRoot({ storeId 10292, storeToken: 'eca9843583758743' })]
+- inside the FoodStoreModule, we say we want to get the configuration by creating a static property called forRoot() method that receives config:FoodStoreConfig (see iterface in config.ts) and it returns type ModuleWithProviders
+- it forRoot needs to return an object with { ngModule: FoodStoreModule, providers: [FOOD_PROVIDERS, { provide: FOOD_STORE_CONFIG, useValue:}];} and then `providers:[]` we move from the @NgModule({ providers:}) definition to the forRoot() method
+its useValue is passed in from the forRoot(config:FoodStoreConfig) method
+  <!-- config.ts -->
+
+```ts
+import { InjectionToken } from '@angular/core';
+
+export interface FoodStoreConfig {
+	storeId: number;
+	storeToken: string;
+}
+export const FOOD_STORE_CONFIG = new InjectionToken<FoodStoreConfig>(
+	'FOOD_STORE_CONFIG'
+);
+```
+
+<!-- food-store.module -->
+
+```ts
+@NgModule({
+	// providers: [FOOD_PROVIDERS, { provide: FOOD_STORE_CONFIG, useValue:}];
+})
+export class FoodStoreModule {
+	static forRoot(config: FoodStoreConfig): ModuleWithProviders {
+		return {
+			ngModule: FoodStoreModule,
+			providers: [
+				FOOD_PROVIDERS,
+				{ provide: FOOD_STORE_CONFIG, useValue: config }
+			]
+		};
+	}
+}
+```
+
+<!-- app.module -->
+
+```ts
+imports: [
+	FoodStoreModule.forRoot({ storeId: 10292, storeToken: 'eca9843583758743' })
+];
 ```
