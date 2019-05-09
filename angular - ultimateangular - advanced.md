@@ -3653,3 +3653,25 @@ export class AppComponent implements OnInit, DoCheck {
 	}
 }
 ```
+
+## Statemanagement (NGRX)
+
+- Redux / ngrx /store (uses Redux pattern)
+- ngrx is observable based
+- building our own store
+
+### Benefits of using a store
+
+- state is only changed in a controlled way
+- component state is derived from the store
+- immutable objects are predictable and no need to have change detection
+- avoids data synchronisation problems
+- store allows us to server-side render
+- without a store - components or services can hold or maintain state
+- with a store - we can inject store into container component/smart component
+- we can ask for particular properties from the store
+- state can be shared between components because state is stored in our store
+- a component changing data -> goes @output to parent component, then can go to the service, 
+- the service updates the store
+- once store is updated the components are notified
+
