@@ -3671,7 +3671,64 @@ export class AppComponent implements OnInit, DoCheck {
 - with a store - we can inject store into container component/smart component
 - we can ask for particular properties from the store
 - state can be shared between components because state is stored in our store
-- a component changing data -> goes @output to parent component, then can go to the service, 
+- a component changing data -> goes @output to parent component, then can go to the service,
 - the service updates the store
 - once store is updated the components are notified
 
+## Our Observable store
+
+- create a store file (store.ts) - it is a es6 class
+- store is added to providers:[] in module
+- we will use a set() to save to the store, and retrieve we will use a select()
+  the store has a const sate:State = {} property
+- properties in the store reside in the state
+- to initialize State we have a behavioral subject
+- in the store import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+- a BehaviorSubject takes an initial state and we say its of type State
+- with a normal Subject DOESNOT take an initial state
+- BehaviorSubject will also pass the last value to new components that subscribers to our store
+- .next() is used to pass a value to an observable
+- a second property called 'store' = this.subject.asObservable().distinctUntilChanged();
+- .distinctUntilChanged() needs import 'rxjs/add/operator/distinctUntilChanged'; makes sure only updates with different value get called, repeats of the same value is not called
+- the .set() method takes 2 properties, name and state, name is the string ref associated with the state which is the value we want to save
+- this.suject.next({})
+
+  <!-- app.module.ts -->
+
+```ts
+import { Store } from './store';
+@NgModule({
+	providers: [Store]
+})
+export class AppModule {}
+```
+
+<!-- state.ts -->
+
+```ts
+export interface State {
+	playlist: any[];
+}
+```
+
+<!-- store.ts -->
+<!-- store.set('todos', [{},{}]) -->
+<!-- store.select('todos') -->
+
+```ts
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { State } from './state';
+
+const state: State = {
+	playlist: undefined
+};
+
+export class Store {
+	private subject = new BehaviorSubject<State>(state);
+	private store = this.subject.asObservable().distinctUntilChanged();
+
+	set(name: String, state: any) {
+		this.subject.next();
+	}
+}
+```
