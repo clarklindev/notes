@@ -3788,7 +3788,68 @@ export class AppComponent {
 
 - setting up a module songs.module
 - including container components
-- components take in the store (import Store)
+- components take in the store in the constructor and import Store
+
+- app/app.module.ts
+- app/app.component.ts
+- app/songs/songs.module.ts
+- app/songs/components/songs-favorites/songs-favorites.components.ts
+- app/songs/components/songs-listened/songs-listened.components.ts
+- app/songs/components/songs-playlist/songs-playlist.components.ts
+
+## Todd Motto - Angular Pro - 84 - store services.mp4
+
+- creating the service
+- app/songs/services/songs.service.ts
+- inject http to service constructor
+- inject store to constructor
+- getPlayList\$ = this.http.get('/api/playlist'); calls json
+- the do operator takes the result that gets passed from .map() and uses it as its parameter, here 'next' .do(next)
+  so we use the store at this point and we want to save this data 'next' to the property 'playlist'
+- in the components, import songs service
+- the constructor receives the store and service
+- ngOnInit(), `this.playlist$ = this.store.select('playlist');`
+- define at class level `playlist$:Observable<any[]>`
+- import {Observable } from 'rxjs/Observable';
+- `<div class="songs">{{ playlist$ | async }}</div>` | async auto subscribes and auto unsubscribes to observable
+- ngOnInit(), this.subscription = this.songsService.getPlaylist\$.subscribe(); calls service, which adds the playlist to the store, then all the other playlists can access the store
+- all other components select 'playlist' directly from store `this.favorites$ = this.store.select('playlist');`
+
+* <!-- db.json -->
+
+```json
+{
+	"playlist": [
+		{
+			"id": 1,
+			"artist": "Oasis",
+			"track": "Somebody",
+			"listened": false,
+			"favourite": true
+		}
+	]
+}
+```
+
+<!-- app/songs/services/songs.service.ts -->
+
+```ts
+import { Injectable } from '@angular/core';
+import { Http } from '@angular/http';
+import { Store } from '../../store';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/do';
+
+@Injectable()
+export class SongsService {
+	getPlayList$ = this.http
+		.get('/api/playlist')
+		.map(res => res.json())
+		.do(next => this.store.set('playlist', next));
+
+	constructor(private http: Http, private store: Store) {}
+}
+```
 
 <!-- app/songs/songs.module -->
 
@@ -3801,6 +3862,8 @@ import { SongsFavouritesComponent } from './components/songs-favorites/songs-fav
 import { SongsListenedComponent } from './components/songs-listened/songs-listened.component';
 import { SongsPlaylistComponent } from './components/songs-favorites/songs-playlist.component';
 
+import { SongsService } from './services/songs.service';
+
 @NgModule({
 	imports: [CommonModule, HttpModule],
 	declarations: [
@@ -3812,7 +3875,8 @@ import { SongsPlaylistComponent } from './components/songs-favorites/songs-playl
 		SongsFavouritesComponent,
 		SongsListenedComponent,
 		SongsPlaylistComponent
-	]
+	],
+	providers: [SongsService]
 })
 export class SongsModule {}
 ```
@@ -3843,47 +3907,94 @@ import {Component} from '@angular/core';
 <!-- app/songs/components/songs-favorites/songs-favorites.components.ts -->
 
 ```ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '../../../store/';
+import { Observable } from 'rxjs/Observable';
+import { SongsService } from '../../services/songs.service';
+
 @Component({
 	selector: 'songs-favourites',
 	template: `
-		<div class="songs"></div>
+		<div class="songs">
+			<div *ngFor="let item of favorites$ | async">
+				{{ item.artist }}
+				{{ item.track }}
+			</div>
+		</div>
 	`
 })
-export class SongsFavouritesComponent {
-	constructor(private store: Store) {}
+export class SongsFavoritesComponent implements OnInit {
+	favorites$: Observable<any[]>;
+
+	constructor(private store: Store, private songsService: SongsService) {}
+
+	ngOnInit() {
+		this.favorites$ = this.store.select('playlist');
+	}
 }
 ```
 
 <!-- app/songs/components/songs-listened/songs-listened.components.ts -->
 
 ```ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '../../../store/';
+import { Observable } from 'rxjs/Observable';
+import { SongsService } from '../../services/songs.service';
+
 @Component({
 	selector: 'songs-listened',
 	template: `
-		<div class="songs"></div>
+		<div class="songs">
+			<div *ngFor="let item of listened$ | async">
+				{{ item.artist }}
+				{{ item.track }}
+			</div>
+		</div>
 	`
 })
-export class SongsListenedComponent {
-	constructor(private store: Store) {}
+export class SongsListenedComponent implements OnInit {
+	listened$: Observable<any[]>;
+
+	constructor(private store: Store, private songsService: SongsService) {}
+
+	ngOnInit() {
+		this.listened$ = this.store.select('playlist');
+	}
 }
 ```
 
-<!-- app/songs/components/songs-playlist/songs-playlist.components.ts -->
+<!-- app/songs/components/songs-plalist/songs-playlist.components.ts -->
 
 ```ts
-import { Component } from '@angular/core';
-import { Store } from '../../../store/';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+
+import { SongsService } from '../../services/songs.service';
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
+
 @Component({
 	selector: 'songs-playlist',
 	template: `
-		<div class="songs"></div>
+		<div class="songs">
+			<div *ngFor="let item of playlist$ | async">
+				{{ item.artist }}
+				{{ item.track }}
+			</div>
+		</div>
 	`
 })
-export class SongsPlaylistComponent {
-	constructor(private store: Store) {}
+export class SongsPlaylistComponent implements OnInit, OnDestroy {
+	playlist$: Observable<any[]>;
+	subscription: Subscription;
+
+	constructor(private store: Store, private songsService: SongsService) {}
+	ngOnInit() {
+		this.playlist$ = this.store.select('playlist');
+		this.subscription = this.songsService.getPlaylist$.subscribe();
+	}
+	ngOnDestroy() {
+		this.subscription.unsubscribe();
+	}
 }
 ```
