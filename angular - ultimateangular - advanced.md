@@ -3783,3 +3783,105 @@ export class AppComponent {
 	}
 }
 ```
+
+## Angular advanced RXJS containers setup
+
+- setting up a module songs.module
+- including container components
+- components take in the store (import Store)
+
+<!-- app/songs/songs.module -->
+
+```ts
+import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpModule } from '@angular/http';
+
+import { SongsFavouritesComponent } from './components/songs-favorites/songs-favourites.component';
+import { SongsListenedComponent } from './components/songs-listened/songs-listened.component';
+import { SongsPlaylistComponent } from './components/songs-favorites/songs-playlist.component';
+
+@NgModule({
+	imports: [CommonModule, HttpModule],
+	declarations: [
+		SongsFavouritesComponent,
+		SongsListenedComponent,
+		SongsPlaylistComponent
+	],
+	exports: [
+		SongsFavouritesComponent,
+		SongsListenedComponent,
+		SongsPlaylistComponent
+	]
+})
+export class SongsModule {}
+```
+
+<!-- app/app.module -->
+
+```ts
+import { SongsModule } from './songs/songs.module';
+
+imports: [SongsModule];
+```
+<!-- app.component -->
+```ts
+import {Component} from '@angular/core';
+@Component({
+	selector:'app-root',
+	template:`<div>
+		<songs-playlist></songs-playlist>
+		<songs-listened></songs-listened>
+		<songs-favorites></songs-favorites>
+	</div>`
+
+})
+```
+
+<!-- app/songs/components/songs-favorites/songs-favorites.components.ts -->
+
+```ts
+import { Component } from '@angular/core';
+import { Store } from '../../../store/';
+@Component({
+	selector: 'songs-favourites',
+	template: `
+		<div class="songs"></div>
+	`
+})
+export class SongsFavouritesComponent {
+	constructor(private store: Store) {}
+}
+```
+
+<!-- app/songs/components/songs-listened/songs-listened.components.ts -->
+
+```ts
+import { Component } from '@angular/core';
+import { Store } from '../../../store/';
+@Component({
+	selector: 'songs-listened',
+	template: `
+		<div class="songs"></div>
+	`
+})
+export class SongsListenedComponent {
+	constructor(private store: Store) {}
+}
+```
+
+<!-- app/songs/components/songs-playlist/songs-playlist.components.ts -->
+
+```ts
+import { Component } from '@angular/core';
+import { Store } from '../../../store/';
+@Component({
+	selector: 'songs-playlist',
+	template: `
+		<div class="songs"></div>
+	`
+})
+export class SongsPlaylistComponent {
+	constructor(private store: Store) {}
+}
+```
