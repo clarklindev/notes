@@ -3824,7 +3824,9 @@ import { SongsModule } from './songs/songs.module';
 
 imports: [SongsModule];
 ```
+
 <!-- app.component -->
+
 ```ts
 import {Component} from '@angular/core';
 @Component({
