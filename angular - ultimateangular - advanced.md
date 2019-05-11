@@ -1346,6 +1346,8 @@ export class StockProductsComponent{
 
 ## http service observables
 
+- `todos$` means we are expecting some sort of observable on the todos property
+- we use this with the | async pipe to subscribe to it `todos$ | async`
 - replacing static products list to the db.json (db json entries are like endpoints with array as value)
 - make api requests
 - setup service allows us to inject it into our component,
@@ -3678,22 +3680,29 @@ export class AppComponent implements OnInit, DoCheck {
 ## Our Observable store
 
 - create a store file (store.ts) - it is a es6 class
+- store contain the data for entire application as one big object
 - store is added to providers:[] in module
 - we will use a set() to save to the store, and retrieve we will use a select()
   the store has a const sate:State = {} property
 - properties in the store reside in the state
 - to initialize State we have a behavioral subject
 - in the store import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-- a BehaviorSubject takes an initial state and we say its of type State
-- with a normal Subject DOESNOT take an initial state
+- a BehaviorSubject takes/has an initial state and we say its of type State
+- with a normal Subject class, it DOESNOT take an initial state
 - BehaviorSubject will also pass the last value to new components that subscribers to our store
-- .next() is used to pass a value to an observable
+- .next() how we pass a value to an observable
 - a second property called 'store' = this.subject.asObservable().distinctUntilChanged();
 - .distinctUntilChanged() needs import 'rxjs/add/operator/distinctUntilChanged'; makes sure only updates with different value get called, repeats of the same value is not called
 - the .set() method takes 2 properties, name and state, name is the string ref associated with the state which is the value we want to save
-- this.suject.next({})
+- set() is called like so... `store.set('todos', [{},{}])`
+- this.suject.next({}) is how we save to the store
+- to access this data we saved, store.select<Todo[]>('todos') //says going to return an array of todos..it is goin to return an observable, because we want to subscribe to things in our components
+- we get properties from the store using select(name:string) returns this.store.pluck(name);
+- pluck() returns an observable based on the object property and we can retrieve just the one we asking for..
+- import 'rxjs/add/operator/pluck';
+- import 'rxjs/add/operator/distinctUntilChanged';
 
-  <!-- app.module.ts -->
+<!-- app.module.ts -->
 
 ```ts
 import { Store } from './store';
@@ -3727,8 +3736,50 @@ export class Store {
 	private subject = new BehaviorSubject<State>(state);
 	private store = this.subject.asObservable().distinctUntilChanged();
 
+	get value() {
+		return this.subject.value;
+	}
+
+	// getting from store
+	select<T>(name: string): Observable<T> {
+		return this.store.pluck(name);
+	}
+
+	// store.set('todos', [{},{}])
 	set(name: String, state: any) {
-		this.subject.next();
+		this.subject.next({
+			...this.value,
+			[name]: state
+		});
+	}
+}
+```
+
+<!-- app.component -->
+
+```ts
+import { Component } from '@angular/core';
+import { Store } from './store';
+
+@Component({
+	selector: 'app-root',
+	template: `
+		<div>
+			<div *ngFor="let todo of todos$ | async">
+				{{ todo.name }}
+			</div>
+		</div>
+	`
+})
+export class AppComponent {
+	todos$ = this.store.select<any[]>('todos');
+
+	constructor(private store: Store) {
+		console.log(this.store);
+		this.store.set('todos', [
+			{ id: 1, name: 'eat dinner' },
+			{ id: 2, name: 'eat breakfast' }
+		]);
 	}
 }
 ```
