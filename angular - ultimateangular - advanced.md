@@ -3848,7 +3848,21 @@ export class AppComponent {
 
 ## Todd Motto - Angular Pro - 87 - outputs to service.mp4 (using store)
 
-<!-- db.json -->
+- hooking up click events
+- passing back to service to update database
+- update store
+- which updates components
+
+- add index as i; to the `*ngFor`,
+- add (click) event to favourite and listened icons (click)="toggleItem(i, 'favourite')", (click)="toggleItem(i, 'listened')"
+- in songs-list.component, add the toggleItem()
+- import {EventEmitter, Output} from '@angular/core';
+- inside we emit this.toggle.emit({}); where `@Output() toggle = new EventEmitter<any>();`
+- we emit a property called the 'track' (track is the item in the list array) which contains an object, we use the object spread
+  and ammend with `track:{...track, [prop]: !track['prop']}`
+- SongsPlaylistComponent listens to the (toggle) event and calls `(toggle)="onToggle($event)"` function, which calls songs.service.ts toggle(event:any)
+  this.songsService.toggle(event);
+  <!-- db.json -->
 
 ```json
 {
@@ -3887,6 +3901,10 @@ export class SongsService {
 		.get('/api/playlist')
 		.map(res => res.json())
 		.do(next => this.store.set('playlist', next));
+
+	toggle(event: any) {
+		console.log(event);
+	}
 
 	constructor(private http: Http, private store: Store) {}
 }
@@ -3933,15 +3951,17 @@ import { Component } from '@angular/core';
 		<div class="songs-list">
 			<h3><ng-content></ng-content></h3>
 			<ul>
-				<li *ngFor="let item of list">
+				<li *ngFor="let item of list; index as i;">
 					<p>{{ item.artist }}</p>
 					<span>{{ item.track }}</span>
 					<div
 						class="songs-list__favourite"
+						(click)="toggleItem(i, 'favourite')"
 						[class.active]="item.favourite"
 					></div>
 					<div
 						class="songs-list__listened"
+						(click)="toggleItem(i, 'listened')
 						[class.active]="item.listened"
 					></div>
 				</li>
@@ -3951,6 +3971,13 @@ import { Component } from '@angular/core';
 })
 export class SongsListComponent {
 	@Input() list: Song[];
+
+	toggleItem(index: number, prop: string) {
+		const track = this.list[index];
+		this.toggle.emit({
+			track: {..track, [prop]: !track[prop]}
+		});
+	}
 }
 ```
 
@@ -3991,7 +4018,9 @@ import 'rxjs/add/operator/filter';
 	selector: 'songs-favourites',
 	template: `
 		<div class="songs">
-			<songs-list [list]="favourites$ | async">favourites</songs-list>
+			<songs-list [list]="favourites$ | async" (toggle)="onToggle($event)"
+				>favourites</songs-list
+			>
 		</div>
 	`
 })
@@ -4005,6 +4034,10 @@ export class SongsFavoritesComponent implements OnInit {
 			.select('playlist')
 			.filter(Boolean)
 			.map(playlist => playlist.filter(track => track.favourite));
+	}
+
+	onToggle(event) {
+		this.songService.toggle(event);
 	}
 }
 ```
@@ -4023,7 +4056,9 @@ import 'rxjs/add/operator/filter';
 	selector: 'songs-listened',
 	template: `
 		<div class="songs">
-			<songs-list [list]="listened$ | async">playlist</songs-list>
+			<songs-list [list]="listened$ | async" (toggle)="onToggle($event)"
+				>played</songs-list
+			>
 		</div>
 	`
 })
@@ -4037,6 +4072,10 @@ export class SongsListenedComponent implements OnInit {
 			.select('playlist')
 			.filter(Boolean)
 			.map(playlist => playlist.filter(track => track.listened));
+	}
+
+	onToggle(event) {
+		this.songService.toggle(event);
 	}
 }
 ```
@@ -4054,7 +4093,9 @@ import { Subscription } from 'rxjs/Subscription';
 	selector: 'songs-playlist',
 	template: `
 		<div class="songs">
-			<songs-list [list]="playlist$ | async">playlist</songs-list>
+			<songs-list [list]="playlist$ | async" (toggle)="onToggle($event)"
+				>playlist</songs-list
+			>
 		</div>
 	`
 })
@@ -4067,6 +4108,11 @@ export class SongsPlaylistComponent implements OnInit, OnDestroy {
 		this.playlist$ = this.store.select('playlist');
 		this.subscription = this.songsService.getPlaylist$.subscribe();
 	}
+
+	onToggle(event) {
+		this.songsService.toggle(event);
+	}
+
 	ngOnDestroy() {
 		this.subscription.unsubscribe();
 	}
