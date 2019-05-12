@@ -3862,7 +3862,19 @@ export class AppComponent {
   and ammend with `track:{...track, [prop]: !track['prop']}`
 - SongsPlaylistComponent listens to the (toggle) event and calls `(toggle)="onToggle($event)"` function, which calls songs.service.ts toggle(event:any)
   this.songsService.toggle(event);
-  <!-- db.json -->
+
+## Todd Motto - Angular Pro - 88 - api request store.mp4
+
+- in service, we update the toggle(event:any) and the service communicates back to the api
+- we only update the individual track we want to update
+- this.http.put(`/api/playlist/${event.track.id}`, event.track).map(res=>res.json()).subscribe((track:Song) =>{ console.log(track); });
+- we create a property value = that we assign to the store.value.playlist,
+- playlist = value.map(song:Song), if the event.track.id === what is in the store,
+  then we update the store with the track in the event emmitted return {...song, ...event.track}
+- we end up with an array 'playlist' with all the correct data inside
+- then we update the store with the updated playlist this.store.set('playlist', playlist)
+
+<!-- db.json -->
 
 ```json
 {
@@ -3904,6 +3916,22 @@ export class SongsService {
 
 	toggle(event: any) {
 		console.log(event);
+		this.http
+			.put(`/api/playlist/${event.track.id}`, event.track)
+			.map(res => res.json())
+			.subscribe((track: Song) => {
+				console.log(track);
+				const value = this.store.value.playlist;
+				const playlist = value.map((song: Song) => {
+					if (event.track.id === song.id) {
+						return { ...song, ...event.track };
+					} else {
+						return song;
+					}
+				});
+
+				this.store.set('playlist', playlist);
+			});
 	}
 
 	constructor(private http: Http, private store: Store) {}
