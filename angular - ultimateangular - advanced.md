@@ -3833,8 +3833,20 @@ export class AppComponent {
 			.filter(Boolean)
 			.map(playlist => playlist.filter(track => track.favourite));
 	}
-
 ```
+
+## stateless component / presentational component with NGRX
+
+- songs-favorite.components.ts replacing <div \*ngFor="let item of listened\$ | async"> {{item.artist}}{{item.track}}</div> with songs-list.component
+- songs.module.ts import SongsListComponent in declarations.
+- edit songs-playlist.component, songs-favorite.component, songs-listened.component by replacing above snippet with component code
+- `<songs-list [list]="playlist$ | async"></songs-list>`
+- in songs-list.component import {Input} , @Input() list:Songs[];
+- import { Song} from 'service'
+- in service, create the Song interface, update getPlaylist%:Observable<Song[]>
+- using classes to with .active `<div class="songs-list__favourite" [class.active]="item.favourite"></div>`
+
+## Todd Motto - Angular Pro - 87 - outputs to service.mp4 (using store)
 
 <!-- db.json -->
 
@@ -3860,10 +3872,18 @@ import { Http } from '@angular/http';
 import { Store } from '../../store';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/do';
+import { Observable } from 'rxjs/Observable';
+
+export interface Song {
+	id: number;
+	name: string;
+	listened: boolean;
+	favourite: boolean;
+}
 
 @Injectable()
 export class SongsService {
-	getPlayList$ = this.http
+	getPlayList$: Observable<Song[]> = this.http
 		.get('/api/playlist')
 		.map(res => res.json())
 		.do(next => this.store.set('playlist', next));
@@ -3900,6 +3920,38 @@ import { SongsService } from './services/songs.service';
 	providers: [SongsService]
 })
 export class SongsModule {}
+```
+
+<!-- app/songs/components/songs-list/songs-list.component -->
+
+```ts
+import { Component } from '@angular/core';
+@Component({
+	selector: 'songs-list',
+	styleUrls: [],
+	template: `
+		<div class="songs-list">
+			<h3><ng-content></ng-content></h3>
+			<ul>
+				<li *ngFor="let item of list">
+					<p>{{ item.artist }}</p>
+					<span>{{ item.track }}</span>
+					<div
+						class="songs-list__favourite"
+						[class.active]="item.favourite"
+					></div>
+					<div
+						class="songs-list__listened"
+						[class.active]="item.listened"
+					></div>
+				</li>
+			</ul>
+		</div>
+	`
+})
+export class SongsListComponent {
+	@Input() list: Song[];
+}
 ```
 
 <!-- app/app.module -->
@@ -3939,10 +3991,7 @@ import 'rxjs/add/operator/filter';
 	selector: 'songs-favourites',
 	template: `
 		<div class="songs">
-			<div *ngFor="let item of favorites$ | async">
-				{{ item.artist }}
-				{{ item.track }}
-			</div>
+			<songs-list [list]="favourites$ | async">favourites</songs-list>
 		</div>
 	`
 })
@@ -3974,10 +4023,7 @@ import 'rxjs/add/operator/filter';
 	selector: 'songs-listened',
 	template: `
 		<div class="songs">
-			<div *ngFor="let item of listened$ | async">
-				{{ item.artist }}
-				{{ item.track }}
-			</div>
+			<songs-list [list]="listened$ | async">playlist</songs-list>
 		</div>
 	`
 })
@@ -4008,10 +4054,7 @@ import { Subscription } from 'rxjs/Subscription';
 	selector: 'songs-playlist',
 	template: `
 		<div class="songs">
-			<div *ngFor="let item of playlist$ | async">
-				{{ item.artist }}
-				{{ item.track }}
-			</div>
+			<songs-list [list]="playlist$ | async">playlist</songs-list>
 		</div>
 	`
 })
