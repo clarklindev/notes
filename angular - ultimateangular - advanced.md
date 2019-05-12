@@ -3815,7 +3815,28 @@ export class AppComponent {
 - ngOnInit(), this.subscription = this.songsService.getPlaylist\$.subscribe(); calls service, which adds the playlist to the store, then all the other playlists can access the store
 - all other components select 'playlist' directly from store `this.favorites$ = this.store.select('playlist');`
 
-* <!-- db.json -->
+## Composing streams
+
+- taking data output from store and filter the result
+- eg. songs listened and song favorites in db have boolean values and then we filter
+- .filter(Boolean) to check that data is in the playlist so only run the function if data exists from http call
+- map results and filter the array by selecting track.favourite
+- add this.favourites\$ to SongsFavoritesComponent
+- add this.listened\$ to SongListenedComponent
+
+```
+	import 'rxjs/add/operator/map';
+	import 'rxjs/add/operator/filter';
+
+	ngOnInit(){
+		this.favourites$ = this.store.select('playlist')
+			.filter(Boolean)
+			.map(playlist => playlist.filter(track => track.favourite));
+	}
+
+```
+
+<!-- db.json -->
 
 ```json
 {
@@ -3911,6 +3932,8 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '../../../store/';
 import { Observable } from 'rxjs/Observable';
 import { SongsService } from '../../services/songs.service';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/filter';
 
 @Component({
 	selector: 'songs-favourites',
@@ -3924,12 +3947,15 @@ import { SongsService } from '../../services/songs.service';
 	`
 })
 export class SongsFavoritesComponent implements OnInit {
-	favorites$: Observable<any[]>;
+	favourites$: Observable<any[]>;
 
 	constructor(private store: Store, private songsService: SongsService) {}
 
 	ngOnInit() {
-		this.favorites$ = this.store.select('playlist');
+		this.favourites$ = this.store
+			.select('playlist')
+			.filter(Boolean)
+			.map(playlist => playlist.filter(track => track.favourite));
 	}
 }
 ```
@@ -3941,6 +3967,8 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '../../../store/';
 import { Observable } from 'rxjs/Observable';
 import { SongsService } from '../../services/songs.service';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/filter';
 
 @Component({
 	selector: 'songs-listened',
@@ -3959,7 +3987,10 @@ export class SongsListenedComponent implements OnInit {
 	constructor(private store: Store, private songsService: SongsService) {}
 
 	ngOnInit() {
-		this.listened$ = this.store.select('playlist');
+		this.listened$ = this.store
+			.select('playlist')
+			.filter(Boolean)
+			.map(playlist => playlist.filter(track => track.listened));
 	}
 }
 ```
