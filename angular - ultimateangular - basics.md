@@ -217,7 +217,7 @@ ONE-WAY DATA FLOW
 - 'imports' is for modules
 - 'declarations' is for components
 - NOTE: to use a component of a module in another module, it needs to be exported in the module
-  <!-- passenger-dashboard.module.ts -->
+  `<!--- passenger-dashboard.module.ts -->`
 
 ```ts
 import { NgModule } from '@anglar/core';
@@ -232,7 +232,7 @@ import { CommonModule } from '@angular/common';
 export class PassengerDashBoardModule(){}
 ```
 
-<!-- app.module -->
+`<!--- app.module -->`
 
 ```ts
 import { NgModule } from '@anglar/core';
@@ -279,14 +279,14 @@ eport class x implements OnInit{
 
 - passenger-dashboard has data that we want to inject into a component called passenger-count
 - binding to [items] property in passenger-count and assigning it 'passengers' array
-  <!-- passenger-dashboard.components.ts -->
+  `<!--- passenger-dashboard.components.ts -->`
 
 ```html
 <passenger-count [items]="passengers"> </passenger-count>
 ```
 
 - import Input from @angular/core
-  <!-- passenger-count.component.ts -->
+  `<!--- passenger-count.component.ts -->`
 
 ```ts
 import { Component, Input } from '@angular/core';
@@ -315,7 +315,7 @@ export class PassengerCountComponent {
 
 - need to import { Output, EventEmitter } from '@angular/core' to get data out of component
 - we attach @Output to the class that is emitting and type the prop to `EventEmitter<any>`
-  <!-- passenger-detail.component.ts -->
+  `<!--- passenger-detail.component.ts -->`
 
 * call .emit() on the @Output properties to emit to parent
 
@@ -369,7 +369,7 @@ export class PassengerCountComponent {
 
 ---
 
-<!-- passenger-dashboard.component.ts -->
+`<!--- passenger-dashboard.component.ts -->`
 
 - there will be multiple `<passenger-detail>` elements
 
@@ -450,7 +450,7 @@ export class PassengerDetailComponent implements OnChanges {
 * injected via constructor and private declaration
 * this is a synchronous call
 
-<!-- passenger-dashboard.service.ts -->
+`<!--- passenger-dashboard.service.ts -->`
 
 ```ts
 import { Passenger } from './models/passenger.interface';
@@ -475,7 +475,7 @@ export class PassengerDashboardService {
 }
 ```
 
-<!-- passenger-dashboard.component.ts -->
+`<!--- passenger-dashboard.component.ts -->`
 
 ```ts
 import { PassengerDashboardService } from '';
@@ -488,7 +488,7 @@ export class PassengerDashboardComponent {
 }
 ```
 
-<!-- passenger-dashboard.module.ts -->
+`<!--- passenger-dashboard.module.ts -->`
 
 ```ts
 import { PassengerDashboardService } from './passenger-dashboard.service';
@@ -507,7 +507,7 @@ export class PassengerDashboardModule {}
 - then mark the class as @Injectable, that tells angular we can inject things into the classes' constructor and allow dependency injection in other classes
 - otherwise there will be 'Error: Can't resolve all parameters for PassengerDashboardService: (?). At SyntaxError.BaseError [as constructor]'
 
-<!-- passenger-dashboard.module.ts -->
+`<!--- passenger-dashboard.module.ts -->`
 
 ```ts
 import { HttpModule } from '@angular/http';
@@ -517,7 +517,7 @@ import { HttpModule } from '@angular/http';
 })
 ```
 
-<!-- passenger-dashboard.service.ts -->
+`<!--- passenger-dashboard.service.ts -->`
 
 ```ts
 import { Injectable } from '@angular/core';
@@ -534,7 +534,7 @@ export class PassengerDashboardService {
 - webpack.config sets up the json server to setup the api/ and .json
 - the path to the end point created is the structure of the object inside the json
 
-  <!-- webpack.config.js extract -->
+`<!--- webpack.config.js extract -->`
 
 ```json
 var jsonServer = require('json-server');
@@ -559,7 +559,7 @@ module.exports = {
 ```
 
 - convert data to json and move data out of the service into a .json file,
-  <!-- db.json -->
+  `<!--- db.json -->`
 
 ```json
 {
@@ -587,7 +587,7 @@ module.exports = {
   because the array 'passengers' is bound directly and injected into the `<passenger-count [items]="passengers">` as an input,
   and the template inside checks items.length which doesnt exist yet,
   so make it a safe navigation by adding '?' on the template assignment
-  <!-- passenger-dashboard.service.ts -->
+  `<!--- passenger-dashboard.service.ts -->`
 
 ```ts
 import { Observable } from 'rxjs/Observable';
@@ -608,7 +608,7 @@ export class PassengerDashboardService {
 }
 ```
 
-<!-- passenger-dashboard.component.ts -->
+`<!--- passenger-dashboard.component.ts -->`
 
 ```ts
 export class PassengerDashboardComponent implements OnInit {
@@ -624,7 +624,7 @@ export class PassengerDashboardComponent implements OnInit {
 }
 ```
 
-<!-- passenger-count.component.ts -->
+`<!--- passenger-count.component.ts -->`
 
 ```ts
 @Component({
@@ -646,7 +646,7 @@ export class PassengerCountComponent {
 
 - the services' updatePassenger() method returns an Observable that we can subscribe to in passenger-dashboard.component.ts
 
-  <!-- passenger-dashboard.service.ts -->
+`<!--- passenger-dashboard.service.ts -->`
 
 ```ts
 import { Observable } from 'rxjs/Observable';
@@ -669,7 +669,7 @@ export class PassengerDashboardService {
   }
 ```
 
-<!-- passenger-dashboard.component.ts -->
+`<!--- passenger-dashboard.component.ts -->`
 
 ```ts
   handleEdit(event:Passenger){
@@ -700,7 +700,7 @@ export class PassengerDashboardService {
 - creating custom headers incase not always using same application type like application json
 - Request header options gets added to .put() method
 
-<!-- passenger-dashboard.service.ts -->
+`<!--- passenger-dashboard.service.ts -->`
 
 ```ts
   import { Http, Response, Headers, RequestOptions } from '@angular/http';
@@ -726,7 +726,7 @@ export class PassengerDashboardService {
 - method calls .toPromise().then() instead of .map()
 - passenger-dashboard.component uses '.subscribe()' with the service which must be changed to .then()
 
-<!-- passenger-dashboard.service.ts -->
+`<!--- passenger-dashboard.service.ts -->`
 
 ```ts
 import 'rxjs/add/operator/toPromise';
@@ -737,7 +737,7 @@ getPassengers():Promise<Passenger[]>{
 
 ```
 
-<!-- passenger-dashboard.component.ts snippet-->
+`<!--- passenger-dashboard.component.ts snippet-->`
 
 ```ts
 handleRemove(event:Passenger){
@@ -757,7 +757,7 @@ handleRemove(event:Passenger){
 * chain on the .catch() to Observable call,
 * passenger-dashboard.component.ts which uses passenger-dashboard.service can do errorHandling using the second parameter to the subscribe()
 
-<!-- passenger-dashboard.service.ts -->
+`<!--- passenger-dashboard.service.ts -->`
 
 ```ts
 import 'rxjs/add/operator/catch';
@@ -769,7 +769,7 @@ getPassengers():Observable<Passenger[]>{
 }
 ```
 
-<!-- passenger-dashboard.component.ts -->
+`<!--- passenger-dashboard.component.ts -->`
 
 ```ts
 ngOnInit(){
@@ -787,13 +787,13 @@ ngOnInit(){
 
 - create a smart component (containers folder) called passenger-viewer.component.ts
 
-  <!-- app.components.ts -->
+`<!--- app.components.ts -->`
 
 ```ts
 template: `<div class="app"><passenger-viewer></passenger-viewer></div>`;
 ```
 
-  <!-- !pasenger-dashboard.module.ts -->
+`<!--- !pasenger-dashboard.module.ts -->`
 
 ```ts
 import { PassengerViewerComponent } from './containers/passenger-viewer/passenger-viewer.component';
@@ -804,7 +804,7 @@ import { PassengerViewerComponent } from './containers/passenger-viewer/passenge
 })
 ```
 
-  <!-- passenger-viewer.component.ts -->
+`<!--- passenger-viewer.component.ts -->`
 
 ```ts
 import { Component, OnInit } from '@angular/core';
@@ -829,7 +829,7 @@ export class PassengerViewerComponent implements OnInit {
 }
 ```
 
-<!-- passenger-dashboard.service snippet-->
+`<!--- passenger-dashboard.service snippet-->`
 
 ```ts
   getPassenger(id:number):Observable<Passenger>{
@@ -839,7 +839,7 @@ export class PassengerViewerComponent implements OnInit {
 
 ### form stateless component
 
-<!-- passenger-viewer.component.ts snippet-->
+`<!--- passenger-viewer.component.ts snippet-->`
 
 ```ts
 @Component({
@@ -848,7 +848,7 @@ export class PassengerViewerComponent implements OnInit {
 })
 ```
 
-<!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 import { Component, Input } from '@angular/core';
@@ -869,7 +869,7 @@ export class PassengerFormComponent {
 }
 ```
 
-<!-- passenger-dashboard.module.ts -->
+`<!--- passenger-dashboard.module.ts -->`
 
 ```ts
 import { FormsModule } from '@angular/forms';
@@ -892,7 +892,7 @@ import { PassengerFormComponent } from './components/passenger-form/passenger-fo
 - add ngModel as a standalone attribute
 - create a one way binding to [ngModel]="detail.fullname" which takes the detail object and create a one-way binding from ngModel
 
-<!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 @Component({
@@ -938,7 +938,7 @@ export class PassengerFormComponent {
 </div>
 ```
 
-<!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 export class PassengerFormComponent {
@@ -965,7 +965,7 @@ export class PassengerFormComponent {
   </label>
 ```
 
-<!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 export class PassengerFormComponent {
@@ -986,7 +986,7 @@ export class PassengerFormComponent {
 * [ngModel] binds any existing model data that is in the class to the select
 * [selected] checks which one is selected in initial data model
 
-<!-- baggage.interface -->
+`<!--- baggage.interface -->`
 
 ```ts
 export interface Baggage {
@@ -995,7 +995,7 @@ export interface Baggage {
 }
 ```
 
-  <!-- passenger-form.component -->
+`<!--- passenger-form.component -->`
 
 ```ts
 import { Baggage } from '../../models/baggage.interface';
@@ -1008,7 +1008,7 @@ template: `
     </option>
   </select>
 
-  <!-- select with ngValue -->
+`<!--- select with ngValue -->`
   <select name="baggage" [ngModel]="detail?.baggage">
     <option *ngFor="let item of baggage" [ngValue]="item.key">
       {{item.value}}
@@ -1058,7 +1058,7 @@ export class PassengerFormComponent{
 
 * can also use .touched for validation
 
-  <!-- passenger-form.component.scss -->
+`<!--- passenger-form.component.scss -->`
 
 ```scss
 div {
@@ -1070,7 +1070,7 @@ div {
 }
 ```
 
-  <!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 <input type="text" name="fullname" #fullname="ngModel" required [ngModel]="detail?.fullname">
@@ -1094,7 +1094,7 @@ div {
 
 * button does not need binding to click as it is type 'submit' which causes event to bubble up to the form and calls the forms' submit handler
 
-<!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 <button type="submit" [disabled]="form.invalid">Update Passenger</button>
@@ -1116,7 +1116,7 @@ div {
 
 * the passenger-viewer.component calls the update method of the service, and we then subscribe to the callback
 
-  <!-- passenger-form.component.ts -->
+`<!--- passenger-form.component.ts -->`
 
 ```ts
 import { Input, Output, EventEmitter} from '@angular/core';
@@ -1136,7 +1136,7 @@ handleSubmit(passenger:Passenger, isValid:boolean){
 }
 ```
 
-<!-- passenger-viewer.components.ts -->
+`<!--- passenger-viewer.components.ts -->`
 
 ```ts
 <passenger-form [detail]="passenger" (update)="OnUpdatePassenger($event)"></passenger-form>
@@ -1159,13 +1159,13 @@ OnUpdatePassenger(event:Passenger){
   required: in index.html head, base element href="/"
 - in app.module.ts import { RouterModule, Routes } from '@angular/router';
 
-  <!-- index.html -->
+`<!--- index.html -->`
 
 ```html
 <base href="/" />
 ```
 
-<!-- app.module.ts -->
+`<!--- app.module.ts -->`
 
 ```ts
 import { RouterModule } from '@angular/router';
@@ -1181,7 +1181,7 @@ import { RouterModule } from '@angular/router';
 - app.component changes to using `<router-outlet>`
 - wildcards use double star ** {path:'**', component:'NotFoundComponent'}
 
-<!-- app.module.ts -->
+`<!--- app.module.ts -->`
 
 ```ts
 import { RouterModule } from '@angular/router';
@@ -1201,7 +1201,7 @@ const routes:Routes = [
 })
 ```
 
-<!-- home-component.ts -->
+`<!--- home-component.ts -->`
 
 ```ts
 @Component({
@@ -1213,7 +1213,7 @@ const routes:Routes = [
 export class HomeComponent {}
 ```
 
-<!-- not-found.component.ts -->
+`<!--- not-found.component.ts -->`
 
 ```ts
 @Component({
@@ -1225,7 +1225,7 @@ export class HomeComponent {}
 export class NotFoundComponent {}
 ```
 
-<!-- app.component.ts -->
+`<!--- app.component.ts -->`
 
 ```ts
 @Component({
@@ -1255,14 +1255,14 @@ export class AppComponent {}
 
 * the home button stays active even when we hit the 404, this is because its technally still matching the empty route when it hits the base match, the routerLink="/" needs [routerLinkActiveOptions]="{exact:true}" which binds to the expression
 
-<!-- app.component.ts -->
+`<!--- app.component.ts -->`
 
 ```ts
   <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">home</a>
   <a routerLink="/oops" routerLinkActive="active">404</a>
 ```
 
-<!-- app.component.scss -->
+`<!--- app.component.scss -->`
 
 ```scss
 .nav {
@@ -1292,7 +1292,7 @@ export class AppComponent {}
 * use an interface to describe the navigation,
 * in dynamic nav, use [routerLinkActiveOptions] to bind to the route that is active
 
-<!-- app.component.ts -->
+`<!--- app.component.ts -->`
 
 ```ts
 interface Nav {
@@ -1345,7 +1345,7 @@ export class AppComponent {
 
 * change the decorator by removing the exports, everything gets pulled into the root module
 
-  <!-- passenger-dashboard.module -->
+`<!--- passenger-dashboard.module -->`
 
 ```ts
 import { RouterModule,Routes } from '@angular/router';
@@ -1360,7 +1360,7 @@ const routes:Routes = [{
 
 ```
 
-<!-- app.component.ts -->
+`<!--- app.component.ts -->`
 
 ```ts
 export class AppComponent {
@@ -1392,7 +1392,7 @@ export class AppComponent {
 
 - adding dynamic route, we create a new object, and path:':id'
 
-  <!-- passenger-dashboard.module -->
+`<!--- passenger-dashboard.module -->`
 
 ```ts
 import { RouterModule,Routes } from '@angular/router';
@@ -1430,7 +1430,7 @@ const routes:Routes = [{
 4. subscribe to the service,
 5. the data we get back we assign to a local variable passenger
 
-<!-- passenger-viewer.component -->
+`<!--- passenger-viewer.component -->`
 
 ```ts
 import { Router, ActivatedRoute } from '@angular/router';
@@ -1469,7 +1469,7 @@ export class PassengerViewerComponent {
 - inject router into the parent component,
 - navigate with the event id, this.router.navigate(['/passengers', event.id]);
 
-<!-- passenger-viewer.component.ts -->
+`<!--- passenger-viewer.component.ts -->`
 
 ```ts
   @Component({
@@ -1481,7 +1481,7 @@ export class PassengerViewerComponent {
   }
 ```
 
-<!-- passenger-detail.component.ts -->
+`<!--- passenger-detail.component.ts -->`
 
 ```ts
 @Component({
@@ -1502,7 +1502,7 @@ export class PassengerDetailComponent implements OnChanges {
 }
 ```
 
-<!-- passenger-dashboard.component.ts -->
+`<!--- passenger-dashboard.component.ts -->`
 
 ```ts
 import { Router } from '@angular/router';
