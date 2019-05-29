@@ -719,7 +719,7 @@ export class PassengerDashboardService {
 
 ```
 
-## http promisses (NOTE: PROMISSES ARE OPTIONAL AS OPPOSED TO USING RXJS/SUBSCRIPTIONS)
+## http promiss (NOTE: PROMISSES ARE OPTIONAL AS OPPOSED TO USING RXJS/SUBSCRIPTIONS)
 
 - instead of importing map, import toPromise;
 - method returns a Promise type

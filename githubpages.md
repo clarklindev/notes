@@ -9,6 +9,7 @@ ng build --prod --output-path docs
 * under GitHub Pages section, choose source
 * you want to select 'master branch / docs folder'
 * make sure index.html base href points to this <base href="."/>
+* call ng build generates new files in the docs folder
 
 ## non angular git repositories
 
