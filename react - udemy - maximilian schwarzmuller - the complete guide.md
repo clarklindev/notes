@@ -59,6 +59,83 @@
 
 ---
 
+## 02 Refresher on basic javascript
+
+### let vs const
+
+- 'let' is the new 'var'
+- 'const' is assigned once
+
+```js
+const myName = 'Max';
+console.log(myName);
+
+myName = 'Manu';
+console.log(myName); //error as myName is a const
+```
+
+### arrow functions
+
+- const myFunc = () => {}
+- solves issues with 'this' keyword, 'this' keeps its context when used in a arrow function
+
+```js
+const printMyName = name => {
+	console.log(name);
+};
+
+// or FOR ONLY ONE ARGUMENT or () => {}
+const printMyName = name => {
+	console.log(name);
+};
+
+//or IF ONLY RETURNING SOMETHING
+const multiply = number => {
+	return number * 2;
+};
+
+//CAN BE WRITTEN same as ABOVE
+const multiply = number => number * 2;
+```
+
+### Exports and Imports
+
+- writing modular code by spliting up js into multiple files
+- using 'export default' keyword marks as default export of this file, when importing this, we can import as any name we want eg. import something from './person.js'
+- note we have to include the extension .js when importing without Typescript
+- possible to having multiple exports
+- when we import, we import by name { baseData} from './utility.js'
+- can import named exports using eg. {smth as Smith}
+- can also `import * as bundled from './utility.js'`
+
+```js
+// person.js
+
+const person = {
+	name: 'Max'
+};
+export default person;
+```
+
+```js
+// utility.js
+export const clean = ()=>{ ...}
+export const baseData = 10;
+```
+
+```js
+// app.js
+import person from './person.js'; //refers to default export
+import { baseData, clean } from './utility.js';
+```
+
+### classes properties, and methods
+
+- properties are variables attached to classes
+- methods are functions attached to classes
+
+---
+
 # JSX
 
 - wrap in () to write in multiple lines
@@ -68,3 +145,7 @@
 - props received from function(props) arguments
 - single curly brackets {} to access props eg. `{props.name}`
 - ReactDOM.render() should render a single element ONLY
+
+```
+
+```
