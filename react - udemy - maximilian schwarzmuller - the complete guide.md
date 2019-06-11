@@ -131,8 +131,63 @@ import { baseData, clean } from './utility.js';
 
 ### classes properties, and methods
 
-- properties are variables attached to classes
-- methods are functions attached to classes
+https://codepen.io/anon/pen/OeJzvd
+
+- 'properties' are variables attached to classes
+- 'methods' are functions attached to classes
+- class is instantiated with 'new' keyword
+- classes support inheritance, note the child class needs to call super() to invoke the parent class.
+- classes are comparable to constructor functions, inheritance is comparible to prototypes
+
+### spread/rest operator
+
+- ... used to split up array elements or object properties
+
+```js
+const newArray = [...oldArray, 1, 2];
+const newObject = { ...oldObject, newProp: 5 };
+```
+
+- ... is also the rest operator, used to merge a list of function arguments into an array
+
+```js
+function sortArgs(....args){
+  return args.sort();
+}
+
+sortArgs(3,2,1,4);
+```
+
+### destructuring
+
+- easily extract array elements or object properties and store time in variables
+- array desctructuring, if you want to skip and element, just use empty space
+  `const numbers = [1,2,3]; [num1, ,num3] = numbers;`
+
+```js
+// Array Destructuring
+[a, b] = ['Hello', 'Max']; //creates variables 'a' and 'b'
+console.log(a); //Hello
+console.log(b); //Max
+
+const numbers = [1,2,3];
+[num1, ,num3] = numbers;
+console.log(num1, num3);
+
+//Object desctructuring
+{name} = {name:'Max', age:28}
+console.log(name);  //Max
+console.log(age); //undefined
+```
+
+### reference and primitive types
+
+- primitive types are string, boolean and numbers, assigning variables to these create a copy
+- reference types are array and object, assigning variables to these create a reference to the original
+
+### reference array functions
+
+filter, map, sort, reduce returns new array
 
 ---
 
