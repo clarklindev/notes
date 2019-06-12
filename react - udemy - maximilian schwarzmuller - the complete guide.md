@@ -313,6 +313,7 @@ export default App;
 #### How to define a component (Class based Component)
 
 - class based components are also referred to as "containers", "smart" or "stateful" components
+- can have state
 
 ```js
 // App.js
@@ -395,6 +396,7 @@ React.createElement(
 - `import React from 'react';`
 - in the App.js, import Person from './Person/Person'; (note Capital letter 'Person' so React knows it is a custom Component)
 - functional components are 'presentational' or 'dumb', 'stateless'
+- there is no state property in functional component
 
 ```js
 // Person/Person.js
@@ -527,4 +529,53 @@ switchNameHandler = () => {
 render(){
   return (<button onClick={this.switchNameHandler} />);
 }
+```
+
+### Passing Method References Between Components
+
+- passing reference of a function into a component as a prop
+- from the component, we use props and access the property via props.click
+
+```js
+// App.js
+// passing switchNameHandler into the Person component
+<Person click={this.switchNameHandler} />
+```
+
+```js
+//Person.js
+<p onClick={props.click}>
+```
+
+#### passing in props into a method
+
+- using bind syntax we can pass in props
+  OR
+- using arrow function to pass in props (NOTE: more INEFFICIENT rather use bind method)
+
+```js
+//App.js
+
+switchNameHandler = newName => {
+	console.log('was clicked!');
+	this.setState({
+		persons: [{ name: newName, age: 28 }, { name: 'Manu', age: 29 }]
+	});
+};
+```
+
+```js
+//using bind/ prop syntax
+<Person
+  name={}
+  age={}
+  click={this.switchNameHandler.bind(this, 'Max!')}
+/>
+```
+
+```js
+//using arrow syntax
+<button onClick={() => this.switchNameHandler('Maximilian!!')}>
+	Switch name
+</button>
 ```
