@@ -310,7 +310,9 @@ export default App;
 - the class extends Component
 - it needs to have the render() method
 
-#### How to define a component
+#### How to define a component (Class based Component)
+
+- class based components are also referred to as "containers", "smart" or "stateful" components
 
 ```js
 // App.js
@@ -386,12 +388,13 @@ React.createElement(
 - react returns single root element from render()
 - in react 16, return() can be multiple elements via JSON
 
-### React functional component
+### React functional component as opposed to Class based Component
 
 - convention is to use Capital letter for folder, eg. Person
 - creating components with bare function that returns jsx (recommended)
 - `import React from 'react';`
 - in the App.js, import Person from './Person/Person'; (note Capital letter 'Person' so React knows it is a custom Component)
+- functional components are 'presentational' or 'dumb', 'stateless'
 
 ```js
 // Person/Person.js
