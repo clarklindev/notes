@@ -424,3 +424,25 @@ export default App;
 
 - wrap in single curly braces
 - eg. `{Math.floor(Math.random() * 30 )}`
+
+### Props (dynamic content from html to class)
+
+```js
+//App.js
+<Person name="Max" age="30"/>
+<Person name="Clark" age="25"/>
+```
+
+```js
+//Person.js
+import React from 'react';
+
+const person = props => {
+	return (
+		<p>
+			I'm {props.name} and i'm {props.age}
+		</p>
+	);
+};
+export default person;
+```
