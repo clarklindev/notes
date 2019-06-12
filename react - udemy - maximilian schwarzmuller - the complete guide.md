@@ -480,3 +480,16 @@ class App extends Component {
 	}
 }
 ```
+
+### Handling Events with Methods
+
+- supported events https://reactjs.org/docs/events.html#supported-events
+- click handler with onClick={this.methodName}
+
+```js
+switchNameHandler = () => {
+	console.log('was clicked!');
+};
+
+return <button onClick={this.switchNameHandler} />;
+```
