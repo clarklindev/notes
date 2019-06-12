@@ -446,3 +446,7 @@ const person = props => {
 };
 export default person;
 ```
+
+### Children Property - Passing data between opening tag and closing tag and receiving in JSX with props.children
+
+- in JSX, return() using {props.children} will receive what is passed between opening and closing tag `<Person>hello</Person>`
