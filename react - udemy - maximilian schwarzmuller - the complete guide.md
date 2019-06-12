@@ -302,12 +302,52 @@ export default App;
 
 ---
 
+### React Components
+
+- render single root component
+- inside the root component, nest all other components
+- the App.js imports React and Component
+- the class extends Component
+- it needs to have the render() method
+
+#### How to define a component
+
+```js
+// App.js
+import React, { Component} from 'react';
+import './App.css';
+
+class App extends Component{
+  render(){
+    return(
+
+    );
+  }
+}
+export default App;
+```
+
+```js
+//index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import registerServiceWorker from './registerServiceWorker';
+
+ReactDOM.render(<App />, document.getElementById('root'));
+registerServiceWorker();
+```
+
+---
+
 # JSX
 
 - wrap in () to write in multiple lines
 - react functions written with capital letter can be rendered as an element
 - eg. `function Person() can be reference in JSX via <Person/>`
 - we use 'className' instead of 'class'
+- sometimes replaces .js with .jsx (jsx convention is to use .js)
 - props received from function(props) arguments
 - single curly brackets {} to access props eg. `{props.name}`
 - ReactDOM.render() should render a single element ONLY
