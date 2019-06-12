@@ -191,6 +191,117 @@ filter, map, sort, reduce returns new array
 
 ---
 
+# 03 Understanding the Base Features Syntax
+
+### build workflow
+
+- Dependency management: NPM or Yarn
+- Bundler: Webpack
+- Compiler: Babel
+- Development server
+
+### using Create react app
+
+- https://facebook.github.io/create-react-app/docs/getting-started
+- https://github.com/facebook/create-react-app
+- maintained by facebook community
+- official tool for creating react projects 'create react app'
+- requires npm 5.2+
+- requires node >= 8.10 (development)
+
+#### OPTIONAL: adding typescript
+
+- to add typescript to the app https://facebook.github.io/create-react-app/docs/adding-typescript
+  - note: requires >= react-scripts@2.1.0
+- to add typescript to an existing Create React App project, install
+- after the install, rename file to be a typescript file (.tsx) and restart dev server
+
+```
+npm install --save typescript @types/node @types/react @types/react-dom @types/jest
+or
+yarn add typescript @types/node @types/react @types/react-dom @types/jest
+
+```
+
+#### Quick start NEW APP
+
+```
+<!-- using npx -->
+npx create-react-app my-app
+
+<!-- using npm 6+ -->
+npm init react-app my-app
+
+<!-- yarn 0.25+ -->
+yarn create react-app my-app
+
+<!-- or with typescript -->
+npx create-react-app my-app --typescript
+yarn create react-app my-app --typescript
+
+```
+
+#### Running the app
+
+cd my-app
+npm start
+
+cd my-app
+yarn start
+
+then open in browser `http:/localhost:3000`
+
+### production build
+
+- build folder
+- optimizes for best performance
+- minifies files, filesnames include hashes
+
+```
+npm run build
+```
+
+### Folder structure
+
+<!-- public/index.html -->
+
+```html
+<div id="root"></div>
+```
+
+<!-- src/index.js -->
+
+```js
+import App from './App';
+ReactDOM.render(<App />, document.getElementById('root'));
+```
+
+<!-- App.js -->
+
+```js
+import React, { Component} from 'react';
+import './App.css';
+
+class App extends Component{
+  render() {
+    return (
+      //jsx here...
+    );
+  }
+}
+export default App;
+```
+
+<!-- App.css -->
+
+- global styling
+
+<!-- index.css -->
+
+- global styling
+
+---
+
 # JSX
 
 - wrap in () to write in multiple lines
@@ -200,7 +311,3 @@ filter, map, sort, reduce returns new array
 - props received from function(props) arguments
 - single curly brackets {} to access props eg. `{props.name}`
 - ReactDOM.render() should render a single element ONLY
-
-```
-
-```
