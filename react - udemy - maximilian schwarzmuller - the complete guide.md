@@ -491,5 +491,40 @@ switchNameHandler = () => {
 	console.log('was clicked!');
 };
 
-return <button onClick={this.switchNameHandler} />;
+render(){
+  return (<button onClick={this.switchNameHandler} />);
+}
+```
+
+### manipulating state on click
+
+- we dont update state by direct assignment
+- by extending Component we have access to this.setState() made available by React
+- setState({}) merges whatever we define inside with the existing state, leaves everything else untouched
+
+#### react updates the DOM when
+
+- when state changes
+- when props changes
+
+```js
+state = {
+  persons: [{ name: 'Max', age: 28 }, { name: 'Manu', age: 29 }],
+  otherState: 'some other state'
+};
+
+switchNameHandler = () => {
+	console.log('was clicked!');
+  //DONT DO THIS: this.state.persons[0].name = "Maximilian";
+  this.setState({
+    persons: [
+      { name: 'Maximilian', age:28},
+      { name: 'Manu', age:29},
+    ]
+  });
+};
+
+render(){
+  return (<button onClick={this.switchNameHandler} />);
+}
 ```
