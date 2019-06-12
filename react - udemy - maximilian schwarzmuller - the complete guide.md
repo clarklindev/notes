@@ -379,3 +379,9 @@ React.createElement(
 	React.createElement('h1', null, 'Does this work now?')
 );
 ```
+
+### JSX restrictions
+
+- reserved words: class, must use className
+- react returns single root element from render()
+- in react 16, return() can be multiple elements via JSON
