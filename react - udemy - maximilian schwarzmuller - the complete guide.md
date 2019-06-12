@@ -565,6 +565,7 @@ switchNameHandler = newName => {
 ```
 
 ```js
+// App.js
 //using bind/ prop syntax
 <Person
   name={}
@@ -574,8 +575,65 @@ switchNameHandler = newName => {
 ```
 
 ```js
+// App.js
 //using arrow syntax
 <button onClick={() => this.switchNameHandler('Maximilian!!')}>
 	Switch name
 </button>
+```
+
+### Two-way data binding / 2-way data binding
+
+- to make it 2-way data bind, we listen to input changes and we read the initial value
+- pass into the `<Person/>` component the onChangeHandler, here nameChangedHandler() as `changed={this.nameChangedHandler}`
+- in Person component, create an `<input>`
+- listen to `onChange=""` which fires when value changes
+
+- the other part is setting it to initial value `value={props.name}`
+
+```js
+//App.js
+state = {
+  persons: [
+    { name: 'Max', age: 28 },
+    { name: 'Manu', age: 29 },
+  ],
+  otherState: 'some other value'
+}
+
+switchNameHandler = newName => {
+	console.log('was clicked!');
+	this.setState({
+		persons: [{ name: newName, age: 28 }, { name: 'Manu', age: 29 }]
+	});
+};
+
+nameChangedHandler = event => {
+	this.setState({
+		persons: [{ name: 'Max', age: 28 }, { name: event.target.value, age: 25 }]
+	});
+};
+
+render(){
+  return (
+    <Person name={this.state.persons[0].name} changed={this.nameChangedHandler}/>
+  );
+}
+```
+
+```js
+//Person.js
+import React from 'react';
+
+const person = props => {
+	return (
+		<div>
+			<input type="text" onChange={props.changed} value={props.name} />
+		</div>
+	);
+};
+```
+
+```
+
 ```
