@@ -385,3 +385,34 @@ React.createElement(
 - reserved words: class, must use className
 - react returns single root element from render()
 - in react 16, return() can be multiple elements via JSON
+
+### React functional component
+
+- convention is to use Capital letter for folder, eg. Person
+- creating components with bare function that returns jsx (recommended)
+- `import React from 'react';`
+- in the App.js, import Person from './Person/Person'; (note Capital letter 'Person' so React knows it is a custom Component)
+
+```js
+// Person/Person.js
+import React from 'react';
+const person = () => {
+	return <p>hello</p>;
+};
+export default person;
+```
+
+```js
+//App.js
+import Person from './Person/Person';
+class App extends Component {
+	render() {
+		return (
+			<div className="app">
+				<Person />
+			</div>
+		);
+	}
+}
+export default App;
+```
