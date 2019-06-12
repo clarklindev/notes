@@ -450,3 +450,33 @@ export default person;
 ### Children Property - Passing data between opening tag and closing tag and receiving in JSX with props.children
 
 - in JSX, return() using {props.children} will receive what is passed between opening and closing tag `<Person>hello</Person>`
+
+### props State
+
+- 'state' special property that extends Component (class based Component)
+- state is managed from inside
+- state is a js object
+- if state changes, react updates the DOM
+
+```js
+//App.js
+class App extends Component {
+	state = {
+		persons: [{ name: 'Max', age: 28 }, { name: 'Manu', age: 29 }]
+	};
+	render() {
+		return (
+			<div>
+				<Person
+					name={this.state.person[0].name}
+					age={this.state.person[0].age}
+				/>
+				<Person
+					name={this.state.person[1].name}
+					age={this.state.person[1].age}
+				/>
+			</div>
+		);
+	}
+}
+```
