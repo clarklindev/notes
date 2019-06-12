@@ -634,6 +634,55 @@ const person = props => {
 };
 ```
 
+### adding styling with stylesheets (METHOD 1 of 2)
+
+- css style files are global, we limit the scope by creating classes that associate with the element
+- the css is not linked into the project by default
+- thanks to Webpack we can import css into the js (need to include the .css extension)
+- these style tags are injected by webpack, it has automatic pre-fixing
+
+```js
+// Person.js
+import './Person.css';
+
+return <div className="Person" />;
 ```
 
+```css
+/* Person.css */
+.Person {
+	width: 60%;
+	margin: 16px auto;
+	border: 1px solid #eee;
+	box-shadow: 0 2px 3px #ccc;
+	padding: 16px;
+	text-align: center;
+}
+```
+
+### inline styling (METHOD 2 of 2)
+
+- using inline styling, the css is scoped to a specific component that it is added to
+- limitation is it is difficult to add hover state, so best use METHOD 1 if want to do that
+- add style object in render() {} method,
+- style gets property value pairs (values are strings)
+- bind with style property (normal inline css property) the style object with `style={style}`
+
+```js
+//App.js
+
+render() {
+  const style={
+    backgroundColor: 'white',
+    font:'inherit',
+    border: '1px solid blue',
+    padding: '8px',
+    cursor: 'pointer'
+  }
+
+
+  return (
+    <button style={style}></button>
+  );
+}
 ```
