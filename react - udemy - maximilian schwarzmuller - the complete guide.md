@@ -339,9 +339,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();
 ```
 
----
-
-# JSX
+### JSX
 
 - wrap in () to write in multiple lines
 - react functions written with capital letter can be rendered as an element
@@ -351,3 +349,33 @@ registerServiceWorker();
 - props received from function(props) arguments
 - single curly brackets {} to access props eg. `{props.name}`
 - ReactDOM.render() should render a single element ONLY
+
+#### jsx example
+
+```js
+//jsx
+render(){
+  return(
+    <div className="App">
+      <h1>Hi, Im react app</h1>
+    </div>
+  );
+}
+```
+
+#### under the hood, jsx gets compiled to JS
+
+- syntax:
+
+```
+React.createElement(element, object of props, value)
+```
+
+```js
+//example
+React.createElement(
+	'div', //element or component
+	{ className: 'App' }, //props
+	React.createElement('h1', null, 'Does this work now?')
+);
+```
