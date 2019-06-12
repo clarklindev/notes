@@ -419,3 +419,8 @@ class App extends Component {
 }
 export default App;
 ```
+
+### Dynamic content in JSX
+
+- wrap in single curly braces
+- eg. `{Math.floor(Math.random() * 30 )}`
