@@ -498,6 +498,69 @@ render(){
 }
 ```
 
+### Manipulating the State in functional components with Hooks (UPDATE with react 16.8+)
+
+- basically a collection of functions exposed to you by React which you can use in functional components
+- remove import {Component }
+- remove the render() method, just return (jsx)
+- state moves out the class,
+- handler functions (switchNameHandler) removed from the class
+- import React, {useState} from 'react';
+- react hook functions start with 'use'
+- you can use as many `useState()` calls as you want
+- to use useState, we pass it the initial state,
+- useState ALWAYS returns an array with 2 elements
+- the first element will always be the current state,
+- the second element will always be a function which allows us to update the state (which react is aware of and rerender component)
+- we use array destructuring to pull out what we want `[currentState, updateFunctionToSetState]` eg: [personState, setPersonState]
+- then in the code, instead of this.state property reference, we have a reference to this.personState to access the state,
+- when we want to update the state, we have access to setPersonState()
+- we use the setPersonState() function declared in the array destructuring from useState() call to update the state
+- NB!! when using react hooks, the function that upstates the state in useState() does NOT merge whatever you pass to the update with old state, it replaces.
+- NB!! class based components, only have one state property -> and it automatically handles merges of state with old state
+- Best practice is to have useState() manage a single concept and call it multiple times for each state you want to manage
+
+```js
+// react 16.8+ using hooks... becomes
+
+// import {Component} from 'react'; //removed
+import './App.css';
+import React, { useState } from 'react';
+
+// class App extends Component{ //removed
+const app = props => {
+	const [personState, setPersonState] = useState({
+		persons: [{ name: 'Max', age: 28 }, { name: 'Manu', age: 29 }],
+		// otherState: 'some other value' //removed to its own useState() call below
+	});
+  const [otherState, setOtherState] = useState('some other value');
+
+  const switchNameHandler = () => {
+    //class based method
+    // this.setState({
+    //   persons: [{ name: 'Maximilian', age: 28 }, { name: 'Manu', age: 25 }],
+    // });
+
+    //we use the setPersonState() function declared above in array destructuring from useState() call to update
+    setPersonState({
+      persons: [{ name: 'Maximilian', age: 28 }, { name: 'Manu', age: 25 }],
+      // otherState: personsState.otherState; //otherState managed by its own useState()
+    });
+  }
+
+	return (
+    // <button onClick={this.switchNameHandler}></button> //this keyword removed as it is not a class anymore
+    <button onClick={switchNameHandler}></button>
+		<Person
+			name={personsState.persons[0].name}
+			age={personsState.person[0].age}
+		/>
+	);
+};
+// export default App; //removed
+export default app;
+```
+
 ### manipulating state on click
 
 - we dont update state by direct assignment
