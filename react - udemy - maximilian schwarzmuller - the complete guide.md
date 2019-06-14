@@ -815,3 +815,45 @@ if (this.state.showPersons) {
 	);
 }
 ```
+
+### list state, updating with IMMUTABILITY
+
+- with lists, and the .map() call, we have access to an index
+- index helps React know which item in the list is being updated/deleted
+- TEMPORARY SOLUTION:
+
+  - map() through array
+  - pass in index into handler function
+  - take array and splice
+  - handler .splices(index, 1) to removes from index position 1 element
+
+- IMMUTABILE SOLUTION (CORRECT METHOD):
+  - use spread operator and create a copy of array [...this.state.persons]
+  - or array.slice()
+
+```js
+deletePersonHandler = personIndex => {
+	//const persons = this.state.persons; //note this is by reference and we need to actually do my copy (see below)
+
+	//IMMUTABLE
+	const persons = this.state.persons.slice(); //or persons = [...this.state.persons]
+	persons.splice(personIndex, 1);
+	this.setState({ persons: persons });
+};
+
+if (this.state.showPersons) {
+	persons = (
+		<div>
+			{this.state.persons.map((person, index) => {
+				return (
+					<Person
+						click={() => this.deletePersonHandler(index)}
+						name={person.name}
+						age={person.age}
+					/>
+				);
+			})}
+		</div>
+	);
+}
+```
