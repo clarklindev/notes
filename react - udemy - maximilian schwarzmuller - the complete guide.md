@@ -391,12 +391,14 @@ React.createElement(
 
 ### React functional component as opposed to Class based Component
 
-- convention is to use Capital letter for folder, eg. Person
+- convention is to use Capital letter for folder, eg. Person but export as a lowercase for function component and import with Capital
 - creating components with bare function that returns jsx (recommended)
 - `import React from 'react';`
 - in the App.js, import Person from './Person/Person'; (note Capital letter 'Person' so React knows it is a custom Component)
 - functional components are 'presentational' or 'dumb', 'stateless'
 - there is no state property in functional component
+
+<!-- boilerplate jsx function -->
 
 ```js
 // Person/Person.js
@@ -409,7 +411,7 @@ export default person;
 
 ```js
 //App.js
-import Person from './Person/Person';
+import Person from './Person/Person'; //note no .js needed
 class App extends Component {
 	render() {
 		return (
@@ -748,4 +750,29 @@ render() {
     <button style={style}></button>
   );
 }
+```
+
+---
+
+### base syntax
+
+git repo: git@github.com:clarklindeveloper/react-udemy-maximilian.git
+
+assignment solution: https://github.com/clarklindeveloper/react-udemy-maximilian/tree/master/base-syntax--assignment-problem
+
+---
+
+## Working with Lists and Conditionals
+
+### Rendering Content Conditionally
+
+- showing content coditionally (if condition true, show) we use itinery operator {(test state) ? jsx block : null }
+- return ({ test === true ? jsx : null})
+- alternative way is to define a variable and assign to null (inside the return(){})
+- then an if condition, test if it is true, assign variable some jsx value, and in the return
+
+```js
+return (
+  { test === true ? jsx : null}
+)
 ```
