@@ -776,3 +776,25 @@ return (
   { test === true ? jsx : null}
 )
 ```
+
+### Handling Dynamic Content The JavaScript Way
+
+- Better way to write conditional content (above) instead of ternarary operator
+
+```js
+render(){
+  let persons = null;
+
+  if (this.state.showPersons) {
+    persons = (
+      <div>
+        <Person />
+        <Person />
+        <Person />
+      </div>
+    );
+  }
+
+  return <div className="App">{persons}</div>;
+}
+```
