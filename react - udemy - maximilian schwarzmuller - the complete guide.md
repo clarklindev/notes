@@ -798,3 +798,20 @@ render(){
   return <div className="App">{persons}</div>;
 }
 ```
+
+### Outputting Lists
+
+- using map executes function on every element in array of map
+- return something..
+
+```js
+if (this.state.showPersons) {
+	persons = (
+		<div>
+			{this.state.persons.map(person => {
+				return <Person name={person.name} age={person.age} />;
+			})}
+		</div>
+	);
+}
+```
