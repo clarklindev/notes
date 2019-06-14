@@ -816,7 +816,7 @@ if (this.state.showPersons) {
 }
 ```
 
-### list state, updating with IMMUTABILITY
+### list state, updating with IMMUTABILITY, key property, updating on input change
 
 - with lists, and the .map() call, we have access to an index
 - index helps React know which item in the list is being updated/deleted
@@ -828,32 +828,79 @@ if (this.state.showPersons) {
   - handler .splices(index, 1) to removes from index position 1 element
 
 - IMMUTABILE SOLUTION (CORRECT METHOD):
+
   - use spread operator and create a copy of array [...this.state.persons]
   - or array.slice()
 
+- 'key' property helps react update list efficiently by keeping track of elements that updated for rerendering
+
+  - make use of unique id (usually not index, but 'unique' property from state here.. eg id)
+
+- Updating on input change
+  - (App.js) changed={event => this.nameChangedHandler(event, person.id)}, this syntax uses arrow function to retain 'this' scope of class
+  - we pass into a handler the 'event' to get what the user entered in the input,
+  - we also pass the id of item to update
+  - add to <Person changed={(event) => this.nameChangeHandler(event, person.id)}> to handle changing name
+  - we need to find the index or item (person) to update use .findIndex() or .find(), returns true/false
+  - personIndex = state.persons.findIndex(p=> {return p.id === id}); //p represents each item in persons, check if same as item clicked
+  - const person = { ...this.state.persons[personIndex]}
+  - OR const person = Object.assign({}, this.state.persons[personIndex])
+  - so we say person.name = event.target.value; //update name with the input value from event
+  - const persons = [...this.state.persons];
+  - make the update: persons[personIndex] = person;
+  - update state this.setState({persons:persons})
+
 ```js
+// App.js
+state = {
+	persons: [
+		{ id: 'asdas', name: 'Max', age: 24 },
+		{ id: 'werff', name: 'Manu', age: 23 },
+		{ id: 'dfsdf', name: 'Stephanie', age: 22 }
+	]
+};
+
+nameChangedHandler = (event, id) => {
+  const personIndex = this.state.persons.findIndex(p => {
+    return p.id === id;
+  });
+  const person = {...this.state.persons[personIndex]}
+
+  person.name = event.target.value;
+
+  const persons = [...this.state.persons];
+  persons[personIndex] = person;
+
+  this.setState({persons: persons});
+
+};
+
 deletePersonHandler = personIndex => {
 	//const persons = this.state.persons; //note this is by reference and we need to actually do my copy (see below)
 
 	//IMMUTABLE
-	const persons = this.state.persons.slice(); //or persons = [...this.state.persons]
+	const persons = [...this.state.persons] // OR persons = this.state.persons.slice();
 	persons.splice(personIndex, 1);
 	this.setState({ persons: persons });
 };
 
-if (this.state.showPersons) {
-	persons = (
-		<div>
-			{this.state.persons.map((person, index) => {
-				return (
-					<Person
-						click={() => this.deletePersonHandler(index)}
-						name={person.name}
-						age={person.age}
-					/>
-				);
-			})}
-		</div>
-	);
+render (){
+  if (this.state.showPersons) {
+    persons = (
+      <div>
+        {this.state.persons.map((person, index) => {
+          return (
+            <Person
+              click={() => this.deletePersonHandler(index)}
+              name={person.name}
+              age={person.age}
+              key={person.id}
+              changed={event => this.nameChangedHandler(event, person.id)}
+            />
+          );
+        })}
+      </div>
+    );
+  }
 }
 ```
