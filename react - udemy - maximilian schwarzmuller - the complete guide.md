@@ -1084,3 +1084,64 @@ return (
 //Person.js
 return <div className={classes.Person} />;
 ```
+
+### CSS PSEUDO SELECTORS
+
+- remove inline styling and js styling from code
+- doing it CSS module style, add styling into .css file
+- see below, react returns classes defined in css file, classes.Red, as a string
+  and any class applied, also works for nested classes, even if its to just a sub selector
+eg. in css, .App button.Red{} applies only to buttons but we access via classes.Red
+
+```js
+//App.js
+
+// remove const style = {} from render(){}
+// const style = {
+//   backgroundColor: 'green',
+//   color: 'white',
+//   font: 'inherit',
+//   border: '1px solid blue',
+//   padding: '8px',
+//   cursor: 'pointer'
+// }
+let btnClass = '';
+
+if (this.state.showPersons) {
+	btnClass = classes.Red;
+}
+
+// remove
+// style.backgroundColor='red';
+
+//remove setting style with style={style}
+<button
+	className={btnClass}
+	//style={style}
+/>;
+```
+
+```css
+/* App.css */
+.App button {
+	border: 1px solid blue;
+	padding: 8px;
+	backgroundcolor: green;
+	font: inherit;
+	color: white;
+}
+
+.App button:hover {
+	background-color: lightgreen;
+	color: black;
+}
+
+.App button.Red {
+	background-color: red;
+}
+
+.App button.Red:hover {
+	background-color: salmon;
+	color: black;
+}
+```
