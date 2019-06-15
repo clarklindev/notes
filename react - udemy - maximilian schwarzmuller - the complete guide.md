@@ -924,3 +924,37 @@ if (this.state.showPersons) {
 	style.backgroundColor = 'red';
 }
 ```
+
+### Setting Class dynamically
+
+- OPTION:
+- can define a variable = [];
+- assign classes in an array, then join the array elements with .join(' ')
+- use if statement to test and push elements into the array
+
+```css
+/* App.css */
+.App {
+	text-align: center;
+}
+.red {
+	color: red;
+}
+.bold {
+	font-weight: bold;
+}
+```
+
+```js
+// App.js
+//let classes = ['red', 'bold'].join(' '); //"red bold"
+
+let classes = [];
+if(this.state.persons <= 2){
+  classes.push('red'); //classes = ['red']
+}
+if(this.state.persons <=1){
+  classes.push('bold'); //classes = ['red', 'bold']
+}
+return <p className={classes.join(' ')} />;
+```
