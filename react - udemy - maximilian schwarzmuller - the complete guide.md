@@ -904,3 +904,23 @@ render (){
   }
 }
 ```
+
+---
+
+## Styling React Components - Elements
+
+- disadvantage of inline styling - cant use pseudo selectors
+  advantage of inline styling is scoping limited to component
+
+- external css styling makes styling global
+
+### Setting Styles Dynamically
+
+- because everything is javascript,
+  we can overwrite styling dynamically by updating the style object
+
+```js
+if (this.state.showPersons) {
+	style.backgroundColor = 'red';
+}
+```
