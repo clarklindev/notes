@@ -1087,11 +1087,13 @@ return <div className={classes.Person} />;
 
 ### CSS PSEUDO SELECTORS
 
+- think about it as, CSS modules give you access to an js oject eg 'classes' which gives you access to a string version of your css styles of css class, but adjusted to be unique
+
 - remove inline styling and js styling from code
 - doing it CSS module style, add styling into .css file
 - see below, react returns classes defined in css file, classes.Red, as a string
   and any class applied, also works for nested classes, even if its to just a sub selector
-eg. in css, .App button.Red{} applies only to buttons but we access via classes.Red
+  eg. in css, .App button.Red{} applies only to buttons but we access via classes.Red
 
 ```js
 //App.js
@@ -1145,3 +1147,7 @@ if (this.state.showPersons) {
 	color: black;
 }
 ```
+
+### CSS MEDIA QUERIES
+
+- media queries just work as normal in the external css file, and you apply the .class and react will automatically pick up the media query
