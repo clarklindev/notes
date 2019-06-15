@@ -1150,4 +1150,76 @@ if (this.state.showPersons) {
 
 ### CSS MEDIA QUERIES
 
-- media queries just work as normal in the external css file, and you apply the .class and react will automatically pick up the media query
+- media queries just work as normal in the external css file, and you apply the chclass and react will automatically pick up the media query
+
+## Debugging
+
+- Chrome browser tools to check for errors
+- finding logical errors via source maps and debug breakpoint (forward/back)
+- React developer tools https://github.com/facebook/react-devtools to inspect/toggle state of app/components
+
+#### ErrorBoundaries
+
+- Error boundaries is new with React 16
+  - used for when you know an error will be thrown but are not sure when it will happen
+  - eg. Person is a component that 'might' throw new Error('something went wrong');
+  - allows you to create a wrapper component around the component that might throw error,
+  - the wrapper component is called an ErrorBoundary but you can call the component anything you like (extends Component)
+  - give the ErrorBoundary class state default hasError:false
+  - componentDidCatch(error, info) => {} is a method passed in by React and it is called when the ErrorBoundary throws an error
+  - inside componentDidCatch(), set state hasError: true,
+  - in production you see what you render in ErrorBoundary
+  - then render(){} does an if/else to render error or this.props.children
+  - in App.js the key moves from the Person component of the map() to the wrapping ErrorBoundary component
+
+```js
+// ErrorBoundary/ErrorBoundary.js
+class ErrorBoundary extends Component {
+	state = {
+		hasError: false,
+		errorMessage: ''
+	};
+
+	componentDidCatch = (error, info) => {
+		this.setState({ hasError: true, errorMessage: error });
+	};
+
+	render() {
+		if (this.state.hasError) {
+			return <h1>{this.state.errorMessage}</h1>;
+		} else {
+			return this.props.children;
+		}
+	}
+}
+export default ErrorBoundary;
+```
+
+```js
+// App.js
+
+import ErrorBoundary from './ErrorBoundary/ErrorBoundary';
+
+class App extends Component {
+	state = {
+    persons:[{id, name, age}]
+		showPersons: false
+	};
+
+	render() {
+		if (this.state.showPersons) {
+			persons = (
+				<div>
+					{this.state.persons.map((person, index) => {
+						return (
+							<ErrorBoundary key={person.id}>
+								<Person />
+							</ErrorBoundary>
+						);
+					})}
+				</div>
+			);
+		}
+	}
+}
+```
