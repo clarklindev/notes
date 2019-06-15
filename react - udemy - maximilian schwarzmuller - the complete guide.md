@@ -1042,6 +1042,8 @@ export default Radium(person);
 
 - under test: `/\.css\$/`
 - add to `options:{modules:true , localIdentName: '[name]__[local]__[hash:base64:5]'}`
+- CSS module configuration will break all previous imports with this syntax `import './Person.css'`
+- change to allow access to the Module via js object `import classes from './Person.css'`
 - this automatically generated unique name,
 - class is now scoped to the component where it is imported
 - NB need to restart local server!!!
@@ -1076,4 +1078,9 @@ return (
   <div className={classes.App}>
     <p className={assignedClasses.join(' ')}>some text</p>
   </div>
+```
+
+```js
+//Person.js
+return <div className={classes.Person} />;
 ```
