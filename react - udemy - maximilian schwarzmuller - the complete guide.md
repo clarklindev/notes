@@ -950,11 +950,81 @@ if (this.state.showPersons) {
 //let classes = ['red', 'bold'].join(' '); //"red bold"
 
 let classes = [];
-if(this.state.persons <= 2){
-  classes.push('red'); //classes = ['red']
+if (this.state.persons <= 2) {
+	classes.push('red'); //classes = ['red']
 }
-if(this.state.persons <=1){
-  classes.push('bold'); //classes = ['red', 'bold']
+if (this.state.persons <= 1) {
+	classes.push('bold'); //classes = ['red', 'bold']
 }
 return <p className={classes.join(' ')} />;
+```
+
+### Adding and using Radium
+
+- Radium is a third party package to add functionality of media-queries and pseudo classes into inline styling
+
+`npm install --save radium`
+
+- import into any .js `import Radium from 'radium';`
+
+- wrap the export default class or function with Radium
+
+```js
+export default Radium(app);
+```
+
+- after Radium added,
+
+INLINE
+
+- you can use pseudo selectors wrapped by quotations
+
+#### In object definition
+
+```js
+import Radium from 'radium';
+
+const style = {
+	':hover': {
+		backgroundColor: 'lightgreen',
+		color: 'black'
+	}
+};
+```
+
+#### reasign wrap in square brackets
+
+```js
+style.backgroundColor = 'red';
+style[':hover'] = {
+	backgroundColor: 'lightred',
+	color: 'black'
+};
+```
+
+#### Radium for media-queries
+
+- import Radium from 'radium';
+- export default Radium(person);
+- adding media queries via Radium, we need to wrap @media selector in string quotes: '@media (min-width: 600px)':{}
+- for transforming selectors (@media etc) we need to wrap the return() root element with `<StyleRoot></StyleRoot>`
+
+```js
+import Radium from 'radium';
+
+const style = {
+  '@media (min-width: 500px)':{
+    width:'450px'
+  }
+}
+return (
+  <StyleRoot>
+    <div className="app">
+      <div style={style}>
+    </div>
+  </StyleRoot>
+)
+
+export default Radium(person);
+
 ```
