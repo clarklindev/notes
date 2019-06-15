@@ -959,7 +959,7 @@ if (this.state.persons <= 1) {
 return <p className={classes.join(' ')} />;
 ```
 
-### Adding and using Radium
+### Adding and using Radium / NOTE: ALTERNATIVE TO RADIUM IS SCOPED CSS MODULES
 
 - Radium is a third party package to add functionality of media-queries and pseudo classes into inline styling
 
@@ -1027,4 +1027,53 @@ return (
 
 export default Radium(person);
 
+```
+
+### CSS MODULES
+
+- CSS Modules uses external css scoped to the js file (without Radium)
+- https://github.com/css-modules/css-modules
+- all class names and animation names are scoped locally by default
+- run 'npm run eject' converts to react managed configurable project
+- we need to edit configuration for BOTH files below:
+
+  - config/webpack.config.dev.js
+  - config/webpack.config.prod.js
+
+- under test: `/\.css\$/`
+- add to `options:{modules:true , localIdentName: '[name]__[local]__[hash:base64:5]'}`
+- this automatically generated unique name,
+- class is now scoped to the component where it is imported
+- NB need to restart local server!!!
+
+```js
+//config/webpack.config.dev.js
+//config/webpack.config.prod.js
+options: {
+	//add below
+	modules: true,
+	localIdentName: '[name]__[local]__[hash:base64:5]'
+}
+```
+
+- now when importing CSS Module, from App.css, we get access to a js Object with the css classes as properties: `import classes from './App.css';`
+  'classes' can be whatever you want to represent the css Object
+- now we can acess the css class via the property of the import className={classes.App} instead of className="App"
+
+```js
+//App.js
+import classes from './App.css'; //'classes' can be whatever you want to represent css Object
+
+const assignedClasses = [];
+
+if(){
+  assignedClasses.push(classes.red);
+}
+if(){
+  assignedClasses.push(classes.bold);
+}
+return (
+  <div className={classes.App}>
+    <p className={assignedClasses.join(' ')}>some text</p>
+  </div>
 ```
