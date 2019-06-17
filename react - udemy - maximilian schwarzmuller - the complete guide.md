@@ -1223,3 +1223,43 @@ class App extends Component {
 	}
 }
 ```
+
+---
+
+## 07. Diving Deeper into Components & React Internals
+
+- container components (state managing components) shouldnt be involved with UI rendering too much. ie. render() method should be rather lean an not container too much JSX
+- eg moving mapping and rendering of a list out into its own Component and passing the list data in as a prop
+
+### folder structure
+
+- index.js
+- assets/
+- containers/
+  -App.css
+  -App.js
+  -App.test.js
+- components/
+  -persons/
+  -persons/person/
+
+### splitting an app into components
+
+- Class based components for state management
+- function based component that receives props
+
+#### Class-based
+
+- extends Component
+- has access to state
+- lifecycle hooks
+- access to props via this.props (class property)
+- when to use: if you need to manage state, or access to lifecycle hooks and you dont want to use react hooks
+
+#### Functional Component
+
+- const XY = props => {}
+- access to State(useState())
+- no access to Lifecycle hooks
+- access to state via props.state (argument)
+- when to use: statemanagement via react hooks, if using older version of react, use functional component for presentation components
