@@ -1405,36 +1405,40 @@ useEffect(() => {
 - only called when component is removed (cleaned up)
 - clean up is called depending on the argument passed to useEffect(),
 
+case 1 - passin empty array as 2nd argument: useEffect() CALLED only when component rendered AND unmounted
 
-  case 1 - passin empty array as 2nd argument: useEffect() CALLED only when component rendered AND unmounted
+```js
+useEffect(() => {
+	// add return function
+	const timer = setTimeout(() => {
+		alert('saved data to cloud!');
+	}, 1000);
 
-  ```js
-  useEffect(() => {
-    // add return function
-    return () => {
-      console.log('cleanup work in useEffect');
-    };
-  }, []);
-  ```
-    
-  case 2 - no 2nd argument - CALLED for every update cycle
+	return () => {
+		clearTimeout(timer); //cleanning up before time finshed removes alert
+		console.log('cleanup work in useEffect');
+	};
+}, []);
+```
 
-  ```js
-  useEffect(() => {
-    // add return function
-    return () => {
-      console.log('cleanup work in useEffect');
-    };
-  });
-  ```
+case 2 - no 2nd argument - CALLED for every update cycle
 
-  case 3 - 2nd argument an array with all data that component should watch, function runs when that data changes and cleanup too..
+```js
+useEffect(() => {
+	// add return function
+	return () => {
+		console.log('cleanup work in useEffect');
+	};
+});
+```
 
-  ```js
-  useEffect(() => {
-    // add return function
-    return () => {
-      console.log('cleanup work in useEffect');
-    };
-  }, [props.persons]);
-  ```
+case 3 - 2nd argument an array with all data that component should watch, function runs when that data changes and cleanup too..
+
+```js
+useEffect(() => {
+	// add return function
+	return () => {
+		console.log('cleanup work in useEffect');
+	};
+}, [props.persons]);
+```
