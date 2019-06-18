@@ -1500,3 +1500,47 @@ export default React.memo(cockpit);
 - first does old virtual dom vs re-rendered virtual dom comparison (virtual dom is DOM in javascript)
 - comparison notes difference, reaches out to real DOM and updates only the differences
 - updating real DOM is slow and hence first done in virtual DOM
+
+### Rendering Adjacent JSX Elements
+
+- this lesson refers to RULE when we return () only a single root JSX element in a Component
+- ie. not allow to return adjacent elements as part of root
+
+METHOD 1 - Array
+
+- with lists .map() returns multiple elements, and React allows us to return this, as long as every element has a key
+- ALTERNATIVE is to wrap return in [] which is an array and we separate our elements with ,
+- we add our own UNIQUE key="" identifier to each element
+- removes the need to wrapping element for styling or structuring by using an array and giving keys
+
+METHOD 2 - HOC
+
+- create a wrapping component without rendering actual html code but is simply there to fulfil REACT requirement of having a wrapping component
+- create hoc/ folder are basically 'higher order components'
+- components that wrap other components
+- create a file (WINDOWS hoc/Auxiliary.js or on MAC hoc/Aux.js)
+- empty wrapper that returns the .children
+- now it fulfils the single expression return..
+
+```js
+// Auxiliary.js
+const aux = props => props.children;
+export default aux;
+```
+
+- import the Aux
+- now we can use the <Aux> tag to import all the other jsx
+
+```js
+// Persons.js
+import Aux from '../../../hoc/Aux';
+
+render(){
+  return (
+    <Aux>
+      ...child content
+    </Aux>
+  );
+}
+
+```
