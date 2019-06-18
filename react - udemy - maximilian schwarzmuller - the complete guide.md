@@ -1254,7 +1254,10 @@ class App extends Component {
 - has access to state
 - lifecycle hooks
 - access to props via this.props (class property)
-- when to use: if you need to manage state, or access to lifecycle hooks and you dont want to use react hooks
+- when to use:
+
+  - if you need to manage state,
+  - or access to lifecycle hooks and you dont want to use react hooks
 
 #### Functional Component
 
@@ -1262,4 +1265,91 @@ class App extends Component {
 - access to State(useState())
 - no access to Lifecycle hooks
 - access to state via props.state (argument)
-- when to use: statemanagement via react hooks, if using older version of react, use functional component for presentation components
+- when to use:
+  - statemanagement via react hooks,
+  - if using older version of react, use functional component for presentation components
+
+### Class Component Lifecycle Overview
+
+- Component Lifecycle
+  - constructor()
+  - getDerivedStateFromProps()
+  - ShouldComponentUpdate()
+  - getSnapshotBeforeUpdate()
+  - componentDidUpdate()
+  - componentDidCatch()
+  - componentDidMount()
+  - componentWillUnmount()
+  - render()
+
+#### Component Lifecycle - Creation
+
+SEQUENCE
+
+1. constructor(props)
+
+- default ES6 class feature
+- if you add your own constructor and you pass in props, you have to call super(props)
+- DONT CAUSE SIDE EEFFECTS (eg. sending http request, storing to local storage, sending analytics to google)
+- USED FOR: basic initialization (eg setting initial state)
+  - inside constructor this.state = {} , NOTE: not this.setState() as there is no initial state to merge with
+  - set state outside constructor state = {}
+
+2. getDerivedStateFromProps(props, state) (REACT 16.3)
+
+- USED FOR: when props change, you can sync state to them (RARE cases)
+- DONT CAUSE SIDE EEFFECTS (eg. sending http request, storing to local storage, sending analytics to google)
+- static getDerivedStateFromProps(props, state) NOTE: it is a static method (from react)
+- here you should return updated state,
+
+```js
+static getDerivedStateFromProps(props, state){
+  return state; //return the updated state
+}
+```
+
+3. render()
+
+USED FOR: prepare and structure JSX code
+
+4. render child components
+
+5. componentDidMount()
+
+- DO: CAUSE SIDE-EFFECTS (make http requests)
+- Dont call update state synchronously, but rather Async or in then() block
+
+```js
+componentDidMount(){
+  //make http request
+}
+```
+
+#### Component Lifecycle - Updating (props)
+
+1. getDerivedStateFromProps(props, state)
+
+- USED FOR: when props change, you can sync state to them (RARE cases)
+- DONT CAUSE SIDE EFFECTS (eg. sending http request, storing to local storage, sending analytics to google)
+
+2. shouldComponentUpdate(nextProps, nextState)
+
+- allows you to cancel the update process!
+- DONT CAUSE SIDE-EFFECTS
+- needs to return true/false
+
+3. getSnapshotBeforeUpdate(prevProps, prevState)
+
+- last minute DOM operations
+- DONT CAUSE SIDE-EFFECTS
+
+4. render()
+
+- Prepare & Structure your JSX Code
+
+5. Update child Component Props
+
+6. componentDidUpdate()
+
+- DO: CAUSE SIDE-EFFECTS (make http requests)
+- Dont call update state synchronously, but rather Async or in then() block
