@@ -1478,3 +1478,11 @@ shouldComponentUpdate(nextProps, nextState){
 ```js
 export default React.memo(cockpit);
 ```
+
+### When should you optimize?
+
+- definitely DONT add wrap every function component with React.memo()
+- definitely DONT add shouldComponentUpdate to every class Component
+- components that update always need to update everytime parent updates - you will have to update - then the check is unecessary
+- is this component part of a parent component that could change related to something that does not affect me at all, then you should implement the check...(ie. current component not interested in changes related to parent)
+- if all cases where parent updates, then you need to update too, then you should not implement shouldComponentUpdate() or React.memo()
