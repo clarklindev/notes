@@ -1486,3 +1486,10 @@ export default React.memo(cockpit);
 - components that update always need to update everytime parent updates - you will have to update - then the check is unecessary
 - is this component part of a parent component that could change related to something that does not affect me at all, then you should implement the check...(ie. current component not interested in changes related to parent)
 - if all cases where parent updates, then you need to update too, then you should not implement shouldComponentUpdate() or React.memo()
+
+### PureComponents instead of shouldComponentUpdate
+
+- if you have a scenario where you check all the props instead of one or two, then you can not use shouldComponentUpdate,
+- rather extend PureComponent
+- shouldComponentUpdate() and componentWillUpdate() becomes unecessary as Purecomponent
+  already implements shouldComponentUpdate with a COMPLETE PROPS COMPARISON check
