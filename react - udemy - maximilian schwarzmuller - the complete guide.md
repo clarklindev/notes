@@ -1390,3 +1390,51 @@ useEffect(() => {
 - solution is to add second argument (array of all dependency fields) `useEffect(()=>{}, [props.persons]);`
 - ONLY RUN ONCE - to call effect only when component runs for first time, the second argument should be empty array. - same effect as componentDidMount()
 - if you have different effects that depend on different data, create more useEffect() calls
+
+### cleaning up with lifecycle hooks and useEffects()
+
+- eg removing listeners or something like htat
+
+#### cleanup with lifecycle hook - componentWillUnmount(){}
+
+- here can include any code to include before removing component
+
+#### cleaning up with hooks - useEffects()
+
+- can also be used to do cleanup work, by adding a anonymous return () function before the end of the function passed to UseEffect()
+- only called when component is removed (cleaned up)
+- clean up is called depending on the argument passed to useEffect(),
+
+
+  case 1 - passin empty array as 2nd argument: useEffect() CALLED only when component rendered AND unmounted
+
+  ```js
+  useEffect(() => {
+    // add return function
+    return () => {
+      console.log('cleanup work in useEffect');
+    };
+  }, []);
+  ```
+    
+  case 2 - no 2nd argument - CALLED for every update cycle
+
+  ```js
+  useEffect(() => {
+    // add return function
+    return () => {
+      console.log('cleanup work in useEffect');
+    };
+  });
+  ```
+
+  case 3 - 2nd argument an array with all data that component should watch, function runs when that data changes and cleanup too..
+
+  ```js
+  useEffect(() => {
+    // add return function
+    return () => {
+      console.log('cleanup work in useEffect');
+    };
+  }, [props.persons]);
+  ```
