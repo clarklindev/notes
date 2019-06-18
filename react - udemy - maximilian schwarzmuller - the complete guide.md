@@ -1551,3 +1551,32 @@ render(){
 - `<React.Fragment></React.Fragment>`
 - or if you import Fragment, import React, { Component, Fragment } from 'react'; then use with just `<Fragment></Fragment>`
 - same effect as `<Aux></Aux>` wrapper
+
+### Higher Order Components (HOC) - Introduction
+
+- Higher order components wrap another component and then maybe some extra logic
+- useful for wrapping (eg. error handling) additional something useful
+- higher order component file names are in CapitalCamel case
+- hoc/ folder
+
+```js
+// example hoc component WithClass that wraps content and allows passing in of classes via a prop
+//hoc/WithClass.js example
+
+import React from 'react';
+const withClass = props => (
+	<div className={props.classes}>{props.children}</div>
+);
+export default withClass;
+```
+
+```js
+//app.js
+import WithClass from '../hoc/WithClass';
+
+// <div className={classes.App}>
+// </div>
+
+//replaced with
+<WithClass classes={classes.App} />;
+```
