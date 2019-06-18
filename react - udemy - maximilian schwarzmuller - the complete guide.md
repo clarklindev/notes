@@ -1442,3 +1442,28 @@ useEffect(() => {
 	};
 }, [props.persons]);
 ```
+
+### Using shouldComponentUpdate for Optimization
+
+```js
+//Persons.js
+shouldComponentUpdate(nextProps, nextState){
+return true; //update
+}
+```
+
+- scenario a component `<Persons>` has shouldComponentUpdate() set to return true; whenever something changes on component, we update
+- App contains the `<Persons>` component, so everytime a change happens in App.js happens, Persons still gets rerendered too
+- we can fix and prevent this by checking inside Persons component if a change should occur by comparing if props have updated
+- NOTE: persons here is an array (reference type) and we are comparing their pointers (if content of pointer changed but pointer is still the same, then the update wouldnt run, but we have been working arrays by creating a copy with spread operator [...array] which updates the pointer of array in memory)
+
+```js
+//Persons.js
+shouldComponentUpdate(nextProps, nextState){
+  if(nextProps.persons !== this.props.persons){
+    return true; //update
+  }else{
+    return false;
+  }
+}
+```
