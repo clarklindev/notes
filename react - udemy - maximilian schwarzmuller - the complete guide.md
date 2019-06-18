@@ -1274,11 +1274,11 @@ class App extends Component {
 - Component Lifecycle
   - constructor()
   - getDerivedStateFromProps()
-  - ShouldComponentUpdate()
+  - NB!! ShouldComponentUpdate()
   - getSnapshotBeforeUpdate()
-  - componentDidUpdate()
+  - NB!! componentDidUpdate()
   - componentDidCatch()
-  - componentDidMount()
+  - NB!! componentDidMount()
   - componentWillUnmount()
   - render()
 
@@ -1353,3 +1353,40 @@ componentDidMount(){
 
 - DO: CAUSE SIDE-EFFECTS (make http requests)
 - Dont call update state synchronously, but rather Async or in then() block
+- Most used hook...
+
+#### Component Lifecycle - Updating (state)
+
+shouldComponentUpdate(nextProps, nextState){
+return false; //prevents component from updating
+}
+
+componentDidUpdate(){
+
+}
+
+---
+
+### Using useEffect() in Functional Components (Managing state in functional components)
+
+- using right version of react, we can use react hooks
+- no access to component lifecycle methods
+- useEffect() function is the react hook solution
+- it covers functionality of all class-based lifecycle hooks combined into a single react hook
+- import React, {useEffect} from 'react';
+- useEffect() is a function that takes in a 'function that will run for every render cycle' of the component
+- runs for compnentDidMount, componentDidUpdate in one effect
+- create multiple useEffects()
+
+```js
+useEffect(() => {
+	console.log('useEffect');
+});
+```
+
+### controlling when useEffect() executes
+
+- to control when useEffect() executes, - we list all the variables/data used in effect in an array as an additional argument
+- solution is to add second argument (array of all dependency fields) `useEffect(()=>{}, [props.persons]);`
+- ONLY RUN ONCE - to call effect only when component runs for first time, the second argument should be empty array. - same effect as componentDidMount()
+- if you have different effects that depend on different data, create more useEffect() calls
