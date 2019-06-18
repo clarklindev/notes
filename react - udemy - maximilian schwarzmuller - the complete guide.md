@@ -1467,3 +1467,14 @@ shouldComponentUpdate(nextProps, nextState){
   }
 }
 ```
+
+### Optimizing Functional Components with React.memo()
+
+- react optimization for functional components
+- wrap functional component that might not need to update with every change in the parent component with export default React.memo()
+- react stores a snapshot of the component and only if its input changes, then rerender it. otherwise if inputs do not change, react will give back the stored snapshot
+- by externalizing the check from inside the component (props.persons.length) to outside personsLength = {this.state.persons.length} the component will only change if the passed input changes
+
+```js
+export default React.memo(cockpit);
+```
