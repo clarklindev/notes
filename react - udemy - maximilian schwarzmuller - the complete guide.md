@@ -1544,3 +1544,10 @@ render(){
 }
 
 ```
+
+### Using React.Fragment (react 16.2)
+
+- React.fragment is reacts own way of wrapping element shipped with react (SAME AS AUX)
+- `<React.Fragment></React.Fragment>`
+- or if you import Fragment, import React, { Component, Fragment } from 'react'; then use with just `<Fragment></Fragment>`
+- same effect as `<Aux></Aux>` wrapper
