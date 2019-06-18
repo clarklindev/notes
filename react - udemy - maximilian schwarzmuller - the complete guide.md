@@ -1518,7 +1518,7 @@ METHOD 2 - HOC
 - create a wrapping component without rendering actual html code but is simply there to fulfil REACT requirement of having a wrapping component
 - create hoc/ folder are basically 'higher order components'
 - components that wrap other components
-- create a file (WINDOWS hoc/Auxiliary.js or on MAC hoc/Aux.js)
+- create a file (WINDOWS hoc/Auxiliary.js or on MAC hoc/Aux.js) - in .Zip files on windows Aux.js is not allowed
 - empty wrapper that returns the .children
 - now it fulfils the single expression return..
 
