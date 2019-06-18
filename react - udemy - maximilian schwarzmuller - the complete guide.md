@@ -1493,3 +1493,10 @@ export default React.memo(cockpit);
 - rather extend PureComponent
 - shouldComponentUpdate() and componentWillUpdate() becomes unecessary as Purecomponent
   already implements shouldComponentUpdate with a COMPLETE PROPS COMPARISON check
+
+### How React Updates the DOM
+
+- (class/functional components) render() method does not automatically render to DOM
+- first does old virtual dom vs re-rendered virtual dom comparison (virtual dom is DOM in javascript)
+- comparison notes difference, reaches out to real DOM and updates only the differences
+- updating real DOM is slow and hence first done in virtual DOM
