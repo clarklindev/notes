@@ -1692,3 +1692,47 @@ Person.propTypes = {
 	changed: PropTypes.func
 };
 ```
+
+### Using Ref
+
+```js
+// normal javascript method of selecting specific item then giving focus
+componentDidMount(){
+  document.querySelector('input').focus();
+}
+```
+
+METHOD 1 - ONLY WORKS IN CLASS BASED COMPONENTS (SUPPORT FOR OLDER VERSIONS OF REACT)
+
+- jsx giving reference to a specific element with the use of ref=
+- on any jsx element, add property ref=
+- which is associated with an anonymous function and the argument the function receives is a reference to the element 'ref' is put on.. eg (inpulEl) is a reference to <input>
+- we are saving this inputEl in a global property inputElement.
+- because componentDidMount() is called after render(), we have access to this.inputElement and it can receive .focus
+
+```js
+componentDidMount(){
+  this.inputElement.focus();
+}
+
+<input ref={(inputEl)=>{this.inputElement = inputEl}}>
+```
+
+METHOD 2 (REACT 16.3) - USING CONSTRUCTOR METHOD
+
+- in constructor(), create a property this.inputElementRef = and assign to React.createRef();
+- this says inputElementRef is a reference, and we can now ref={this.inputElementRef}
+- now in componentDidMount() we have access to the class property this.inputElementRef.focus();
+
+```js
+  constructor(){
+    this.inputElementRef = React.creatRef();
+  }
+
+  componentDidMount(){
+    this.inputElementRef.focus();
+  }
+
+  <input ref={this.inputElementRef}
+
+```
