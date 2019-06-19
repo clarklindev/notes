@@ -1646,3 +1646,25 @@ const withClass = (WrappedComponent, className) => {
 	);
 };
 ```
+
+### Setting State Correctly
+
+- angular holds state updates until convenient time to udpate, although this could be instant, there is a possibility it is lagged.
+- When setState() depends on previous value, there is another method of calling setState() for accurate updating of state with the most up to date values of previous state,
+- optional syntax - receive 2 arguments (oldstate, current props)=>{ return the new state object}
+
+```js
+// less accurate method
+// this.setState({
+// persons:persons,
+// changeCounter: this.state.changeCounter + 1
+// })
+
+// accurate method (recommended method for updating state depending on old state)
+this.setState((prevState, props) => {
+	return {
+		persons: persons,
+		changeCounter: prevState.changeCounter + 1
+	};
+});
+```
