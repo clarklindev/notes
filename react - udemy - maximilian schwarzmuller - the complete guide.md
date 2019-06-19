@@ -1599,7 +1599,7 @@ const withClass = props => (
 - this is the export method which calls the regular js function.
 - regular js function that returns a component function . import with lowercase 'withClass'
 - and change filename to lowercase withClass.js
-- 1st argument is a wrapped component, MUST Start with capital character (as is reference to a component)
+- 1st argument is a wrapped component (name it anything you want), MUST Start with capital character (as is reference to a component)
 - 2nd argument is something that you need in your HOC (as many arguments as required)
 - body returns a functional component
 - USAGE: we dont wrap the component with this HOC, instead where we export the component, call the HOC
@@ -1624,4 +1624,25 @@ import classes from './App.css';
 import withClass from '../hoc/withClass';
 ...
 export default withClass(App, classes.App);
+```
+
+### Passing Unknown Props
+
+- Person uses withClass hoc so its export default is `export default withClass(Person, classes.Person)`
+
+* what this means is whatever withClass exports, is Person, the functional component syntax returned from withClass returns props related to whatever is wrapped...
+* so we have access to props of the WrappedComponent `return props=>()` which is Person
+* cant set props via <WrappedComponent props={props}/> because JSX takes all attributes you add and compbines them in a `props` object
+* need to just pass it into WrappedComponent by spreading the props object
+
+PROBLEM: using the withClass hoc like export default withClass(Person, classes.Person), looses the properties associated with Person (as we dont pass in props), here WrappedComponent refers to the element that was wrapped passed in with withClass()
+
+```js
+const withClass = (WrappedComponent, className) => {
+	return props => (
+		<div className={className}>
+			<WrappedComponent {...props} />
+		</div>
+	);
+};
 ```
