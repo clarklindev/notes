@@ -1580,3 +1580,48 @@ import WithClass from '../hoc/WithClass';
 //replaced with
 <WithClass classes={classes.App} />;
 ```
+
+### Another Form of HOC creation
+
+#### METHOD 1 - syntax for normal functional component
+
+- wrapping element method used for more decoration and styling and DOM changing (JSX)
+
+```js
+const withClass = props => (
+	<div className={props.classes}>{props.children}</div>
+);
+```
+
+#### METHOD 2 - regular js function
+
+- used for more logic related type HOC where focus is more behind the scenes, not so much the JSX
+- this is the export method which calls the regular js function.
+- regular js function that returns a component function . import with lowercase 'withClass'
+- and change filename to lowercase withClass.js
+- 1st argument is a wrapped component, MUST Start with capital character (as is reference to a component)
+- 2nd argument is something that you need in your HOC (as many arguments as required)
+- body returns a functional component
+- USAGE: we dont wrap the component with this HOC, instead where we export the component, call the HOC
+  `export default withClass(App, classes.App);`
+
+```js
+import React from 'react';
+
+const withClass = (WrappedComponent, className) => {
+	return props => (
+		<div className={className}>
+			<WrappedComponent />
+		</div>
+	);
+};
+export default withClass;
+```
+
+```js
+// App.js
+import classes from './App.css';
+import withClass from '../hoc/withClass';
+...
+export default withClass(App, classes.App);
+```
