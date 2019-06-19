@@ -1693,7 +1693,7 @@ Person.propTypes = {
 };
 ```
 
-### Using Ref
+### Using Ref (in Class Based COMPONENTS)
 
 ```js
 // normal javascript method of selecting specific item then giving focus
@@ -1735,4 +1735,30 @@ METHOD 2 (REACT 16.3) - USING CONSTRUCTOR METHOD
 
   <input ref={this.inputElementRef}
 
+```
+
+### refs in React Hooks (FUNCTIONAL Components)
+
+- start off by setting up reference
+- import React, {useRef} from 'react';
+- declare property const toggleBtnRef = useRef(null), and pass in default value null
+- in the return(), set ref attribute `<button ref={toggleBtnRef}></button>`
+- immitate a btn click `toggleBtnRef.current.click();` higher up in the function but it throws an error because react didnt have a chance to initialize the code with the code that actually does the initilization in the ref={}, so at the time of calling click() the button is undefined,
+- we fix this with useEffect(), useEffect() with [] as second prop, runs only once after return() has rendered for first time and then cleans up when unmounted
+
+```js
+import {useRef} from 'react';
+const cockpit = props => {
+  const toggleBtnRef = useRef(null);
+
+  useEffect(()=>{
+    toggleBtnRef.current.click();
+  }
+
+  return (
+    <div>
+      <button ref={toggleBtnRef}></button>
+    </div>
+  );
+}
 ```
