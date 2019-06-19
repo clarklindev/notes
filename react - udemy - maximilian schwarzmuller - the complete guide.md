@@ -1668,3 +1668,27 @@ this.setState((prevState, props) => {
 	};
 });
 ```
+
+### Using PropTypes
+
+- tries to cater for incorrect usage of Component and the props it accepts and the allows declaring of prop type
+- npm install --save prop-types
+- react team adds optional prop-types
+- helps with throwing errors for incorrect passing in of prop type (prevents incorrect usage of component)
+- USAGE: import PropTypes from 'prop-types';
+- work on both class based component and functional components
+- for class and functional Component: after class definition, add an object to the Class called propTypes = {}
+- set up key - value pairs where keys are prop names, and value should be type based on the import 'Proptypes' properties
+- now if you pass-in the wrong type for the argument, then error will be flagged
+
+```js
+import PropTypes from 'prop-types';
+class Person extends Component {}
+
+Person.propTypes = {
+	click: PropTypes.func,
+	name: PropTypes.string,
+	age: PropTypes.number,
+	changed: PropTypes.func
+};
+```
