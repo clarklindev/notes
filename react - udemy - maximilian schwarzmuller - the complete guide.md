@@ -1762,3 +1762,11 @@ const cockpit = props => {
   );
 }
 ```
+
+### Understanding Prop Chain Problems
+
+* when you have components that pass down props just so child components can use it even though, all the components inbetween dont need it.
+* eg. in App.js state, we manage authentication state, then we update this state in Cockpit on button click, but we are interested in this state in Person and need to forward it thorugh the prop via Persons component.
+* this leads to redundancy and less reusable
+* SOLUTION: CONTEXT API - react feature that tries to solve the problem of needing certain data (state) in multiple components and you dont want to pass that state across multiple layers
+of components just to get it from Component A (at the top) to Component D (at the bottom) when components B, C dont care about it.
