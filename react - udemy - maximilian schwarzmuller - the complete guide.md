@@ -1820,14 +1820,15 @@ return (
 			}}
 		>
 			// content
-			{this.state.showCockpit ? 
-      <Cockpit 
-        title={this.props.appTitle}
-        showPersons = {this.state.showPersons}
-        personsLength= {this.state.persons.length}
-        clicked = {this.togglePersonsHandler}
-        // login = {this.loginHandler}
-      /> : null}
+			{this.state.showCockpit ? (
+				<Cockpit
+					title={this.props.appTitle}
+					showPersons={this.state.showPersons}
+					personsLength={this.state.persons.length}
+					clicked={this.togglePersonsHandler}
+					// login = {this.loginHandler}
+				/>
+			) : null}
 			{persons}
 		</AuthContext.Provider>
 	</Aux>
@@ -1898,5 +1899,68 @@ const cockpit = props => {
 	);
 
 
+};
+```
+
+### contextType & useContext() UPPATE TO PREVIOUS LESSON...
+
+- more elegant way than above to use context API in class based components
+- althernative METHOD in CLASS BASED components
+- alternative METHOD in FUNCTIONAL components
+
+METHOD in CLASS BASED components (react 16.6)
+
+- above method no way to access context as it is only available in return () so not accessible componentDidMount, we fix this by...
+- adding static property called contextType `static contextType`, it has to be named such and has to be static
+- static contextType = AuthContext;
+- react now gives you access to a this.context property inside the class
+- we can now access context in places like componentDidMount, where previously we couldnt access it
+- we can also update the way we access context in the return,
+
+```js
+// Person.js
+import AuthContext from '../../../context/auth-context';
+
+class Person extends Component {
+	static contextType = AuthContext;
+
+	render() {
+		return (
+			<Aux>
+				// <AuthContext.Consumer>
+				// 	{context =>
+				// 		context.authenticated ? <p>Authenticated!</p> : <p>Please Log in</p>
+				// 	}
+				// </AuthContext.Consumer>
+
+        { this.context.authenticated? <p>Authenticated!</p> : <p>Please Log in</p>}
+			</Aux>
+		);
+	}
+}
+```
+
+METHOD in FUNCTIONAL components
+
+- with Hooks, React gives us access to useContext hook
+- we have now access to context anywhere inside function body
+- we pass in our imported AuthContext object as a prop to useContext(AuthContext) and react makes the connection
+
+```js
+import React, { useEffect, useRef, useContext } from 'react';
+import AuthContext from '../../context/auth-context';
+
+const cockpit = props => {
+	const authContext = useContext(AuthContext);
+	console.log(authContext.authenticated);
+
+	return (
+		<div>
+			// {context => <button onClick={context.login}>Log in</button>}
+
+      //with useContext() hook becomes
+      <button onClick={authContext.login}>Log in</button>
+		</div>
+	);
 };
 ```
