@@ -1765,8 +1765,138 @@ const cockpit = props => {
 
 ### Understanding Prop Chain Problems
 
-* when you have components that pass down props just so child components can use it even though, all the components inbetween dont need it.
-* eg. in App.js state, we manage authentication state, then we update this state in Cockpit on button click, but we are interested in this state in Person and need to forward it thorugh the prop via Persons component.
-* this leads to redundancy and less reusable
-* SOLUTION: CONTEXT API - react feature that tries to solve the problem of needing certain data (state) in multiple components and you dont want to pass that state across multiple layers
-of components just to get it from Component A (at the top) to Component D (at the bottom) when components B, C dont care about it.
+- when you have components that pass down props just so child components can use it even though, all the components inbetween dont need it.
+- eg. in App.js state, we manage authentication state, then we update this state in Cockpit on button click, but we are interested in this state in Person and need to forward it thorugh the prop via Persons component.
+- this leads to redundancy and less reusable
+- SOLUTION: CONTEXT API - react feature that tries to solve the problem of needing certain data (state) in multiple components and you dont want to pass that state across multiple layers
+  of components just to get it from Component A (at the top) to Component D (at the bottom) when components B, C dont care about it.
+
+### Context API
+
+- context solves the need for passing down props via components layer by layer to reach a target component
+- create folder context/
+- eg. context/auth-context.js
+- React.createContext({}), can initialize with default values, default values help with auto completion
+- it is a globally available js object.. that can be passed between components without using props.
+- the context jsx wraps other DOM elements
+- import AuthContext from '../context/auth-context';
+- AuthContext can now be used as a component and it should wrap all parts of application that require access to the context
+- add .Provider to AuthContext.Provider, Provider JSX component on AuthContext Object,
+- Provider takes a value= prop, dafault values only apply when you dont set any value={{}} and we set the value to the same as our default values set in authContext { authenticated: false, login: () => {} }
+- react will re-render only when state or props change, so only changing something in Context Object will not cause a re-render.
+- so state is still managed at the <AuthContext.Provider value={{ authenticated: this.state.authenticated,login:this.loginHandler }}> level
+- authenticated, and login are now accessible by Cockpit and Persons because they in the .Provider wrapper
+- we access this inside of Persons.js, we have to import it, import AuthContext from '../../context/auth-context';
+- note we "Provider", "Consumer" the context by wrapping return with `<AuthContext.Consumer></AuthContext.Consumer>`
+- also note: what was returned was JSX so we also need to wrap with {}, BUT <AuthContext.Consumer> takes a function not JSX as a child between the opening and closing tag, that takes context as an argument .ie in Persons.js <Person /> will have access to context object `<AuthContext.Consumer>{(context)=>{}}</AuthContext.Consumer>`
+- BUUUUUUT we wanted to skip the Persons handling context and target Person directly
+- so remove everything we added, and add to Person.js instead add to Person, including isAuth={this.props.isAuthenticated}
+- remember we are wrapping everything that needs this Context
+- we can now access the context properties .authenticated
+- for Cockpit.js we can do the same and import AuthContext and access context directly, then this removes the need to pass in loginHandler from App.js as we can now get this from Context directly
+
+```js
+// context/auth-context.js
+import React from 'react';
+const authContext = React.createContext({
+	authenticated: false,
+	login: () => {}
+});
+
+export default authContext;
+```
+
+```js
+// App.js
+import React, { Component } from 'react';
+import AuthContext from '../context/auth-context';
+
+return (
+	<Aux>
+		<AuthContext.Provider
+			value={{
+				authenticated: this.state.authenticated,
+				login: this.loginHandler
+			}}
+		>
+			// content
+			{this.state.showCockpit ? 
+      <Cockpit 
+        title={this.props.appTitle}
+        showPersons = {this.state.showPersons}
+        personsLength= {this.state.persons.length}
+        clicked = {this.togglePersonsHandler}
+        // login = {this.loginHandler}
+      /> : null}
+			{persons}
+		</AuthContext.Provider>
+	</Aux>
+);
+```
+
+```js
+// Persons.js
+// import AuthContext from '../../context/auth-context';
+
+//Consume the context
+return
+	// <AuthContext.Consumer>
+	// {context =>
+	this.props.persons.map((person, index) => {
+		return (<Person
+      click={}
+      name={}
+      age={}
+      key={}
+      changed={}
+      // isAuth={this.props.isAuthenticated}
+    />
+	  );
+	});
+  //}
+	// </AuthContext.Consumer>
+);
+```
+
+```js
+// Person.js
+import AuthContext from '../../../context/auth-context';
+
+render(){
+  return (
+    <Aux>
+      <AuthContext.Consumer>
+        {(context)=> this.props.isAuth? <p>Authenticated!</p> : <p>Please Log in</p>}
+
+        //above becomes
+        {(context)=> context.authenticated? <p>Authenticated!</p> : <p>Please Log in</p>}
+
+      </AuthContext.Consumer>
+    </Aux>
+  );
+}
+```
+
+```js
+// Cockpit.js
+import AuthContext from '../../context/auth-context';
+
+const cockpit = props => {
+
+  ...
+
+
+	return (
+		<div>
+			<h1 />
+			<p />
+			<button />
+			<AuthContext.Consumer>
+				{context => <button onClick={context.login}>Log in</button>}
+			</AuthContext.Consumer>;
+		</div>
+	);
+
+
+};
+```
