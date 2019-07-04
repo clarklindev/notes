@@ -2246,3 +2246,64 @@ postDataHandler = () => {
 
 <button onClick={this.postDataHandler} />;
 ```
+
+## Sending a DELETE Request
+
+- delete() takes a url
+- same url style as fetching a single post
+- status code 200 indicates successful
+
+```js
+// FullPost.js
+import axios from 'axios';
+
+deletePostHandler = () => {
+	axios
+		.delete('https://jsonplaceholder.typicode.com/posts/' + this.props.id)
+		.then(response => {
+			console.log(response);
+		});
+};
+
+<button onClick={this.deletePostHandler}>Delete</button>;
+```
+
+## Handling errors locally
+
+- axios uses promises so we have access to .catch() method
+- it passes an error object through when error is caught
+- save state of error
+- use error state to show / hide error content vs non-error content
+
+```js
+// Blog.js
+
+state = {
+  error:false
+}
+
+componentDidMount(){
+  axios.get('https://jsonplaceholder.typicode.com/postsssss')
+  .then(response=>{})
+  .catch(error=>{
+    this.setState({error:true});
+    console.log(error);
+  });
+}
+
+render(){
+  let posts = <p style={{textAlign:'center'}}>Something went wrong</p>
+  if(!this.state.error){
+    posts = this.state.posts.map(post =>{
+      return <Post
+        key={post.id}
+        title={post.title}
+        author={post.author}
+        clicked={()=>this.postSelectedHandler(post.id)}
+        />;
+    });
+  }
+}
+
+
+```
