@@ -2086,8 +2086,18 @@ render(){
 
 ### making posts selectable
 
+- add clicked listener on the post,
+- add a handler
+- add State to track selectedPostId
+- setState for a selected Post with the click handler
+- pass into FullPost the state.selec  tedPostId
+- in FullPost check with if(this.props.id) then show the post
+
 ```js
 // Blog.js
+state = {
+  selectedPostId: null
+}
 
 componentDidMount(){
  axios.get('https://jsonplaceholder.typicode.com/posts')
@@ -2101,11 +2111,11 @@ componentDidMount(){
       });
       this.setState({posts: updatedPosts});
       console.log(response);
-    }); 
+    });
 }
 
 postSelectedHandler = (id) => {
-  
+  this.setState({selectedPostId: id});
 }
 
 render(){
@@ -2114,7 +2124,10 @@ render(){
   });
 
   return (
-    <div>{ posts }</div>
+    <section className="Posts">{ posts }</div>
+    <section>
+      <FullPost id={this.state.selectedPostId}/>
+    </section>
   );
 }
 ```
@@ -2126,4 +2139,24 @@ const post = props => (
 		<h1>props.title</h1>
 	</div>
 );
+```
+
+```js
+// FullPost.js
+...
+class FullPost extends Component{
+
+  render(){
+    let post = <p>Please select a post</p>
+    if (this.props.id){
+      post = (<div className="FullPost">
+        <h1>title</h1>
+        <p>Content</p>
+        <div><button className="Delete">Delete</button></div>
+      </div>);
+    }
+    return post;
+  }
+}
+
 ```
