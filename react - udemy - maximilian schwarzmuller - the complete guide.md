@@ -2213,3 +2213,36 @@ class FullPost extends Component{
 }
 
 ```
+
+## POST data to server
+
+- import axios from 'axios'
+- .post() takes url and data we want to send (object)
+- we save state of props and pass it into the post()
+- use promise based .then(response=>{}) and .catch()
+
+```js
+// NewPost.js
+import axios from 'axios';
+
+state = {
+	title: '',
+	content: '',
+	author: 'Max'
+};
+
+postDataHandler = () => {
+	const post = {
+		title: this.state.title,
+		content: this.state.content,
+		author: this.state.author
+	};
+	axios
+		.post('https://jsonplaceholder.typicode.com/posts', post)
+		.then(response => {
+			console.log(response);
+		});
+};
+
+<button onClick={this.postDataHandler} />;
+```
