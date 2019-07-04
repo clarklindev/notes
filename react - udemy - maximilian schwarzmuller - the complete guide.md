@@ -2010,7 +2010,9 @@ componentDidMount(){
 
 - save the retrieved data into state
 - place inside then block
+
 * add key prop
+
 ```js
 // Blog.js
 import axios from 'axios';
@@ -2047,3 +2049,39 @@ const post = props => (
 	</div>
 );
 ```
+
+### Transforming Data
+
+- limiting posts to restrict returned posts before rendering
+- call .slice(); on response, response.data.slice(0, 4); to only save 4
+- can also manipulate the data returned by updating the data with map and adding additional attributes
+
+```js
+// Blog.js
+
+componentDidMount(){
+ axios.get('https://jsonplaceholder.typicode.com/posts')
+    .then(response =>{
+      const posts = response.data.slice(0,4);
+      const updatedPosts = posts.map(post => {
+        return {
+          ...post,
+          author: 'Max'
+        }
+      });
+      this.setState({posts: updatedPosts});
+      console.log(response);
+    }); 
+}
+render(){
+  const posts = this.state.posts.map(post => {
+    return <Post key={post.id} title={post.title} author={post.author}/>;
+  });
+
+  return (
+    <div>{ posts }</div>
+  );
+}
+```
+### making posts selectable
+
