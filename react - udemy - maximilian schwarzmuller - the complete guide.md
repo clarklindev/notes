@@ -1957,16 +1957,93 @@ const cockpit = props => {
 	return (
 		<div>
 			// {context => <button onClick={context.login}>Log in</button>}
-
-      //with useContext() hook becomes
-      <button onClick={authContext.login}>Log in</button>
+			//with useContext() hook becomes
+			<button onClick={authContext.login}>Log in</button>
 		</div>
 	);
 };
 ```
 
 ---
-# 09. Reaching out to the Web (Http  Ajax)
 
-* sending http requests from react application to server
-* SPA have even more decoupled application from backend
+# Reaching out to the Web (Http Ajax)
+
+- sending http requests from react application to server
+- SPA have even more decoupled application from backend
+- server has RESTful API (exposing API endpoints)
+- jasonplaceholder.typicode.com backend rest api / send dummy and fetch dummy data, returns array of js objects of dummy posts
+- ajax request using axios (3rd party) or XMLHttpRequest (cumbersome way of manually writing request..)
+- returns .json from server
+
+### introducing axios
+
+- axios is a promise based http client for the browser and node.js
+
+```
+npm install axios --save
+
+import axios from 'axios';
+```
+
+### Creating a Http Request to GET Data
+
+- axios provides axios.get('url', secondargument)
+- second argument can be specific configuration
+- the get() request happens async
+- get() returns a promise so we can chain then() on it.
+- uses .then() promises to cater for async and it takes a function as an input that gets called when resolved (when data is there)
+- then() receives a response object as an input automatically received by axios
+- lifecycle hook for sideeffect (http) is componentDidMount()
+
+```js
+import axios from 'axios';
+
+componentDidMount(){
+  axios.get('https://jsonplaceholder.typicode.com/posts')
+    .then(response =>{
+      console.log(response);
+    });
+}
+```
+
+### Rendering Fetched Data to the Screen
+
+- save the retrieved data into state
+- place inside then block
+* add key prop
+```js
+// Blog.js
+import axios from 'axios';
+
+state = {
+  posts : [];
+}
+
+componentDidMount(){
+  axios.get('https://jsonplaceholder.typicode.com/posts')
+    .then(response =>{
+      console.log(response);
+      this.setState({posts: response.data})
+    });
+}
+
+render(){
+  const posts = this.state.posts.map(post => {
+    return <Post key={post.id} title={post.title}/>;
+  });
+
+  return (
+    <div>{ posts }</div>
+  );
+}
+
+```
+
+```js
+// Post.js
+const post = props => (
+	<div>
+		<h1>props.title</h1>
+	</div>
+);
+```
