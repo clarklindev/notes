@@ -2354,3 +2354,24 @@ axios.interceptors.response.use(
 	}
 );
 ```
+
+## Setting a Default Global Configuration for Axios
+
+- somethings you dont want to setup an interceptor but want to setup a global configuration for axios
+- can use axios.defaults to set defaults in a common starting url (index.js)
+- setting .defaults.baseURL which allows us to cut this common url portion out form all the axios REST method calls
+- can also set headers' .common (common headers - general headers which are set for all types of requests)
+
+becomes:
+
+- axios.get('/posts')
+- axios.get('/posts/' + this.post.id)
+- axios.delete('/posts/' + this.props.id)
+- axios.post('/posts', data)
+
+```js
+// index.js
+axios.defaults.baseURL = 'https://jsonplaceholder.typicode.com';
+axios.defaults.headers.common['Authorization'] = 'AUTH TOKEN'; //can set to an auth token
+axios.defaults.headers.post['Content-Type'] = 'application/json'; //setting header for specific
+```
