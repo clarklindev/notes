@@ -2307,3 +2307,50 @@ render(){
 
 
 ```
+
+## Adding Interceptors to Execute Code Globally
+
+- interceptors interupt the normal flow of events
+- allows us to execute functions for requests leaving app AND reponse returning to app
+- useful for special headers
+- logging / handling errors globally
+- axios.interceptors are shared across project
+
+### request /response
+
+- axios.interceptors.request.use(request=>{}); to register a new request interceptor
+- axios.interceptors.response.use(response=>{}); to register a new response interceptor
+- the interceptor takes a function as the input which receives the request
+- NB the interceptor needs to return the request otherwise you are blocking the request
+
+### request errors / response errors
+
+- interceptors can handle second function besides the request/response config function, it can log errors
+- also need to return Promise.reject(error) so we still forward the error to the component
+
+```js
+// index.js
+import axios from 'axios';
+axios.interceptors.request.use(
+	request => {
+		console.log(request);
+		//edit request
+		return request;
+	},
+	error => {
+		console.log(error);
+		return Promise.reject(error);
+	}
+);
+
+axios.interceptors.response.use(
+	response => {
+		console.log(response);
+		return response;
+	},
+	error => {
+		console.log(error);
+		return Promise.reject(error);
+	}
+);
+```
