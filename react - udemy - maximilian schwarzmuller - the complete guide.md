@@ -2090,8 +2090,40 @@ render(){
 - add a handler
 - add State to track selectedPostId
 - setState for a selected Post with the click handler
-- pass into FullPost the state.selec  tedPostId
+- pass into FullPost the state.selec tedPostId
 - in FullPost check with if(this.props.id) then show the post
+
+### Fetching Data on Update (without Creating Infinite Loops)
+
+- lifecycle hook for updating
+  1. componentWillReceiveProps(nextProps)
+  2. shouldComponentUpdate(nextProps, nextState)
+  3. componentWillUpdate(nextProps, nextState)
+  4. render()
+  5. update child component props
+  6. componentDidUpdate() ... cause side effects here!!!
+- important: dont want to cause infinite loop in componentDidUpdate()
+- in componentDidUpdate() make .get() request with axios
+- add checks for if the prop.id exists
+- and if prop.id exists, show that its loading
+- then if state loadedPost .id exists, change content of post to the data
+
+### infite loop problem
+
+- code is in inifinite request because we update state in componentDidUpdate() and when state updates, re-render happens
+- so prevent inifinite loop by adding check to see if !this.state.loadedPost (if the state is null)
+- or if the post is loaded but its id is different from props.id (id is not same as what we got from prop.id)
+- ..then its a new post, call get()
+
+```js
+componentDidUpdate(){
+  if(this.props.id){
+    if(!this.state.loadedPost || this.state.loadedPost.id !== this.props.id){
+       axios.get('https://jsonplaceholder.typicode.com/posts/' + this.props.id)
+    }
+  }
+}
+```
 
 ```js
 // Blog.js
@@ -2143,15 +2175,36 @@ const post = props => (
 
 ```js
 // FullPost.js
+
+import axios from 'axios';
+
 ...
 class FullPost extends Component{
 
+  state = {
+    loadedPost: null
+  }
+  componentDidUpdate(){
+    if(this.props.id){
+      if(!this.state.loadedPost || (this.state.loadedPost.id !== this.props.id )){
+        axios.get('https://jsonplaceholder.typicode.com/posts/' + this.props.id)
+          .then(response => {
+            console.log(response);
+            this.setState({loadedPost: response.data})
+          })
+      }
+    }
+  }
+
   render(){
     let post = <p>Please select a post</p>
-    if (this.props.id){
+    if(this.props.id){
+      post = <p>loading</p>
+    }
+    if(this.state.loadedPost){
       post = (<div className="FullPost">
-        <h1>title</h1>
-        <p>Content</p>
+        <h1>{this.state.loadedPost.title}</h1>
+        <p>{this.state.loadedPost.body}</p>
         <div><button className="Delete">Delete</button></div>
       </div>);
     }
