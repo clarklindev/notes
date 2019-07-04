@@ -2383,7 +2383,7 @@ axios.defaults.headers.post['Content-Type'] = 'application/json'; //setting head
 * dont forget to export the instance
 * axios.create(); and pass in a config object
 * then import into the file using this specific instance import axios from '../../axios';
- 
+
 ```js
 // axios.js
 import axios from 'axios';
