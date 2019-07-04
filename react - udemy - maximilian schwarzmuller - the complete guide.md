@@ -1964,3 +1964,9 @@ const cockpit = props => {
 	);
 };
 ```
+
+---
+# 09. Reaching out to the Web (Http  Ajax)
+
+* sending http requests from react application to server
+* SPA have even more decoupled application from backend
