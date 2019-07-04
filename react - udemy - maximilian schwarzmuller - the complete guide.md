@@ -2071,7 +2071,7 @@ componentDidMount(){
       });
       this.setState({posts: updatedPosts});
       console.log(response);
-    }); 
+    });
 }
 render(){
   const posts = this.state.posts.map(post => {
@@ -2083,5 +2083,47 @@ render(){
   );
 }
 ```
+
 ### making posts selectable
 
+```js
+// Blog.js
+
+componentDidMount(){
+ axios.get('https://jsonplaceholder.typicode.com/posts')
+    .then(response =>{
+      const posts = response.data.slice(0,4);
+      const updatedPosts = posts.map(post => {
+        return {
+          ...post,
+          author: 'Max'
+        }
+      });
+      this.setState({posts: updatedPosts});
+      console.log(response);
+    }); 
+}
+
+postSelectedHandler = (id) => {
+  
+}
+
+render(){
+  const posts = this.state.posts.map(post => {
+    return <Post key={post.id} title={post.title} author={post.author} clicked={()=> this.postSelectedHandler(post.id)}/>;
+  });
+
+  return (
+    <div>{ posts }</div>
+  );
+}
+```
+
+```js
+// Post.js
+const post = props => (
+	<div onClick={props.clicked}>
+		<h1>props.title</h1>
+	</div>
+);
+```
