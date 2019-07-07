@@ -2551,3 +2551,22 @@ render(){
   * match :{isExact:, params:, path:, url:}
   * location: {hash:, key:, pathname:, search:, }
   * history: {action:, goBack:, goForward:, push:, replace:}
+
+## The withRouter HOC & Route Props
+
+* getting information to components not loaded via Route (see previous lesson)
+* we can pass 'match', 'location', and 'history' intot the subcomponent via this.props.x
+* there is an easier way to give access to non-container components,
+* import {withRouter} from 'react-router-dom' is a HOC 
+* we wrap our export with withRouter()
+* the withRouter adds match, location, history to nearest loaded route  
+  so post will get routing information for 'posts'
+
+```js
+import {withRouter} from 'react-router-dom'
+
+const post = (props)=>{
+}
+
+export default withRouter(post);
+```
