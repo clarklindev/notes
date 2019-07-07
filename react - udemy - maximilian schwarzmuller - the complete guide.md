@@ -2608,3 +2608,35 @@ export default withRouter(post);
   color: orange;
 }
 ```
+
+## Passing Route Parameters
+
+* posting an id from url (Ie.. getting parameters from url)
+* we can add a flexible, variable route parameter with :then any name of choice (dynamic portion to the url)
+* when defining the <Route path="/:dynamicname"> 
+* paths are parsed top-down calling the first match (specific to less specific) eg. /new-post is more specific that /:id
+* wrap the DOM html part with <Link to={'/'+post.id}> <Post clicked={()=> this.postSelectedHandler(post.id)}/> </Link>
+* up to this point the app should allow user to click on a Post <Link> and the url should update 
+```js
+// Blog.js
+import {FullPost} from './FullPost/FullPost';
+
+<Route path="/" exact component={Posts}>
+<Route path="/new-post" component={NewPost}>
+<Route path="/:id" component={FullPost}>
+```
+
+```js
+// Posts.js
+import {Link} from 'react-router-dom';
+
+render (){
+  posts = this.state.posts.map(post => {
+    return (
+    <Link to={'/'+post.id} key={post.id}>
+      <Post title={post.title} author={post.author} clicked={()=> this.postSelectedHandler(post.id)}/>
+    </Link>
+    );  
+  });
+}
+```
