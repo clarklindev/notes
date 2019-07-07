@@ -2914,3 +2914,9 @@ render(){
 }
 
 ```
+## Using the History Prop to Redirect (Replace)
+
+* its easier enough to redirect with props.history available on every component that is wrapped by <BrowserRouter>
+* this.props.history.push('/posts');
+* different between .push() and <Redirect> is that Redirect replaces the current page on the stack, it doesnt push a new one
+* this.props.history.replace('/posts') does same as what <Redirect> does, it replaces the current page on the stack
