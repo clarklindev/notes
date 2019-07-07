@@ -2763,3 +2763,29 @@ now all routes are rendered if they match the path,
   <Route path="/:id" exact component={FullPost}/>
 </Switch>
 ```
+## Navigating Programmatically
+
+* taking advantage of the history object of the params
+* goBack(), goForward(), 
+* push() pushes on stack of navigation, this.props.history.push(); 
+* we can push() props of string <Link to="/"> or an Object same prop as when using <Link to={{pathname:'/'+id}}>Home</Link>
+
+```js
+// Posts.js
+import {Link} from 'react-router-dom';
+
+postSelectedHandler = (id) =>{
+  // this.props.history.push({pathname:'/'+id});
+  this.props.history.push('/'+id);
+}
+
+render (){
+  posts = this.state.posts.map(post => {
+    return (
+    <Link to={'/'+post.id} key={post.id}>
+      <Post title={post.title} author={post.author} clicked={()=> this.postSelectedHandler(post.id)}/>
+    </Link>
+    );
+  });
+}
+```
