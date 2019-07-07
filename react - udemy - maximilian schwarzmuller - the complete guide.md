@@ -2864,3 +2864,53 @@ loadData() {
 }
 
 ```
+## Redirecting Requests
+
+* import { Redirect} from 'react-router-dom';
+* inside <Switch> statement, use <Redirect>
+* <Redirect> does not render content, it redirects
+* prop syntax for route path is from="" to=""
+* NB: using <Redirect> outside of <Switch>, then you cannot specify 'from' property 
+
+```js
+<Switch>
+  <Route path="/posts" component={Posts}/>
+  <Redirect from="/" to="/posts"/>
+</Switch>
+
+```
+## Conditional Redirects (outside of <Switch>)
+
+* <Redirect to="/posts"> can allow us to redirect the url once say a form has submitted or .post() has completed
+* import {Redirect} from 'react-router-dom';
+* <Redirect> used outside <Switch> can only have 'to' prop, cant have 'from' prop
+* render() method does re-render when redirects so we need some conditional state to determine if we need to render redirect
+
+```js
+// NewPost.js
+
+import {Redirect} from 'react-router-dom';
+state = {
+  submitted: false
+}
+postDataHandler = () => {
+  axios.post().then(response=>{
+    this.setState({submitted: true});
+  })
+}
+render(){
+  let redirect = null;
+  if(this.state.submitted){
+    redirect =  <Redirect to="/posts" />
+  }
+  return (
+    <div className="NewPost">
+      {redirect}
+      <h1>Add a post</h1>
+      ...
+      <button onClick={this.postDataHandler}>Add Post</button>
+    </div>
+  );
+}
+
+```
