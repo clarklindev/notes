@@ -45,7 +45,7 @@
   - in the component we use single curly braces and accessed via {props.name}, {props.age}
 
   - refactor js code to now render only once using 'app' variable
-
+  - comment/comments : to make a block comment in JSX the correct syntax is wrap with {/* */}
   ```
   var app = (
     <div>
@@ -2396,3 +2396,158 @@ instance.defaults.headers.common['Authorization'] = 'AUTH TOKEN FROM INSTANCE';
 
 export default instance;
 ```
+
+## Routing
+
+* routing is not part of the core of react
+* 3rd party feature routing
+* turns into more like a framework
+
+### Routing and SPAs
+
+* SPA is single page app, but we want to provide the normal web experience 
+* showing different pages for different urls
+* trick is that we dont have multiple html files, we use javascript to render different
+pages for different paths
+* routing is about parsing this path, and showing the appropriate jsx/component in our app
+* the router package has to
+  1. parse the url/path (in the client) to understand where the user wants to go
+  2. developer cofigures different paths
+  3. router reads the configuration
+  4. render / load approriate JSX component
+
+# setting up links
+
+* use <header><nav><ul><li><a href="/">
+* style ul, hide list-style:none
+* style a, text-decoration: none
+* style a:hover, a:active
+
+```js
+<!-- Blog.js -->
+render(){
+  return (
+    <div className="Blog">
+      <header>
+        <nav>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/new-post">New Post</a></li>
+          </ul>
+        </nav>
+      </header>
+      <section className="Posts">
+        {posts}
+      </section>
+    </div>
+  );
+}
+
+```
+
+## Setting Up the Router Package
+
+* install react-router
+* and react-router-dom
+* enable routing in react app (in index.js or app.js) 
+* (app.js) import {BrowswerRouter} from 'react-router-dom';
+* wrap the part of app which should be able to render routes with <BrowserRouter>
+* the file with dynamic content that will be loaded must import { Route } from 'react-router-dom';
+* <Route> with 'path' property 
+* usage: <Route path="/" exact/>
+* <Route exact> fixes problem with route matches that start with "/" and makes this route specific for exact match
+* without 'exact' content is rendered for all paths that contain path='/' match
+* eg. <Route path="/" render={()=><h1>Home2</h1>}/> is rendered on all routes that contain '/'
+* you can use as many <Route path="" exact> with the same path or exact as you want and it will be rendered
+
+## RENDER vs COMPONENT
+### ROUTE 'render' jsx method
+* usage: <Route path="/" exact render={()=>jsx here} />
+* 'render' prop which is a function that says what happens when we reach this path...render JSX
+
+### ROUTE 'component' method
+* render components when the path matches
+* component needs to be a reference to function/class we want to use
+* so the component needs to be imported eg. import {Posts} from './Posts/Posts';
+* usage: <Route path="/" exact component={Posts}>
+
+```js
+import {Posts} from './Posts/Posts';
+<Route path="/" exact component={Posts}/>
+```
+ 
+
+```
+npm install --save react-router react-router-dom
+```
+
+```js
+// App.js
+
+import {BrowserRouter} from 'react-router-dom';
+
+class App extends Component{
+  render () {
+    return (
+      <BrowserRouter>
+        <div className="App">
+        </div>
+      </BrowserRouter>
+    );
+  }
+}
+```
+
+```js
+// Blog.js
+import { Route } from 'react-router-dom';
+
+render(){
+  return (
+    <div className="Blog">
+      <header>
+        <nav>
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/new-post">New Post</a></li>
+          </ul>
+        </nav>
+      </header>
+      <Route path="/" exact render={()=><h1>Home</h1>}/>
+      <Route path="/path" component={Posts}/>
+    </div>
+  );
+}
+
+```
+## Switching Between Pages
+
+* currently switching between routes causes reloading
+* instead we want only a re-render by changing the links and instead prevent reloading page and let react-router handle the render
+
+## Using Links to Switch Pages
+
+* import { Route, Link } from 'react-router-dom';
+* replace <a> tag with <Link>
+* use 'to' property to tell router where to link to (:string)
+* to can also be js object where we configure {{pathname: '/new-post', hash:'#submit', submit:'?quick-submit=true'}} 
+  * 'pathname' is the path (string)
+  * 'hash' tag is jumping to a id specific point eg. hash:'#submit'
+  * 'search' allows query params eg. submit:'?quick-submit=true'
+
+
+```js
+// <a href="/">Home</a>
+<Link to="/">Home</Link>
+<Link to={{pathname:'', hash:'#', search:'?quick-submit=true'}}>New Post</Link>
+
+```
+
+## Using Routing-Related Props
+
+* react router gives us extra information through props : history, location, match
+* history prop object also has push method which allows us to push a new page programatically without a <Link>
+* can view props in componentDidMount(){console.log(this.props)}
+  * match :{isExact:, params:, path:, url:}
+  * location: {hash:, key:, pathname:, search:, }
+  * history: {action:, goBack:, goForward:, push:, replace:}
