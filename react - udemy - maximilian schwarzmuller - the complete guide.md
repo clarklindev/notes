@@ -2746,3 +2746,20 @@ or
 ```
 
 React router makes it easy to extract the fragment. You can simply access props.location.hash
+
+## using Switch to load a single route
+
+* with the router sequence of dynamic after specific (as bellow) it also causes some problems,
+now all routes are rendered if they match the path, 
+`<Route path="/new-post" component={NewPost} /><Route path="/:id" exact component={FullPost} />`
+* we can tell react router to load only one route at a time by wraping with <Switch>
+* use import {Switch} from 'react-router-dom';
+* load only first route from given set of routes and stop after that. note: Route switch is important
+* can put Route's inside and outside of Switch to give more flexibility
+```js
+<Switch>
+  <Route path="/" exact component={Posts}/>
+  <Route path="/new-post" component={NewPost}/>
+  <Route path="/:id" exact component={FullPost}/>
+</Switch>
+```
