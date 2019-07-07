@@ -2582,6 +2582,7 @@ export default withRouter(post);
 - and we can append the subpath dynamically <Link to={{pathname: this.props.match.url+ '/subpath'}}>
 
 ## styling the active route (NavLink instead of Link)
+
 - import {NavLink} from 'react-router-dom';
 - <Link> replaced with <NavLink> to allow us access to additional properties allowing styling
 - <Link> and <NavLink> get rendered as <a href=""> tags automatically behind the scenes
@@ -2595,35 +2596,44 @@ export default withRouter(post);
 <nav>
 	<ul>
 		<li>
-			<NavLink to="/" exact activeClassName="my-active" activeStyle={{color: 'orange', textDecoration:'underline'}}>Home</NavLink>
+			<NavLink
+				to="/"
+				exact
+				activeClassName="my-active"
+				activeStyle={{ color: 'orange', textDecoration: 'underline' }}
+			>
+				Home
+			</NavLink>
 		</li>
 	</ul>
 </nav>
 ```
+
 ```css
 /* Blog.css */
 .Blog a:hover,
 .Blog a:active,
-.Blog a.active{
-  color: orange;
+.Blog a.active {
+	color: orange;
 }
 ```
 
 ## Passing Route Parameters
 
-* posting an id from url (Ie.. getting parameters from url)
-* we can add a flexible, variable route parameter with :then any name of choice (dynamic portion to the url)
-* when defining the <Route path="/:dynamicname"> 
-* paths are parsed top-down calling the first match (specific to less specific) eg. /new-post is more specific that /:id
-* wrap the DOM html part with <Link to={'/'+post.id}> <Post clicked={()=> this.postSelectedHandler(post.id)}/> </Link>
-* up to this point the app should allow user to click on a Post <Link> and the url should update 
+- posting an id from url (Ie.. getting parameters from url)
+- we can add a flexible, variable route parameter with :then any name of choice (dynamic portion to the url)
+- when defining the <Route path="/:dynamicname">
+- paths are parsed top-down calling the first match (specific to less specific) eg. /new-post is more specific that /:id
+- wrap the DOM html part with <Link to={'/'+post.id}> <Post clicked={()=> this.postSelectedHandler(post.id)}/> </Link>
+- up to this point the app should allow user to click on a Post <Link> and the url should update
+
 ```js
 // Blog.js
 import {FullPost} from './FullPost/FullPost';
 
-<Route path="/" exact component={Posts}>
-<Route path="/new-post" component={NewPost}>
-<Route path="/:id" component={FullPost}>
+<Route path="/" exact component={Posts}/>
+<Route path="/new-post" component={NewPost}/>
+<Route path="/:id" component={FullPost}/>
 ```
 
 ```js
@@ -2636,7 +2646,103 @@ render (){
     <Link to={'/'+post.id} key={post.id}>
       <Post title={post.title} author={post.author} clicked={()=> this.postSelectedHandler(post.id)}/>
     </Link>
-    );  
+    );
   });
 }
 ```
+
+## Extracting route parameters
+
+- the router is routing with <Route path="/:id" component={FullPost}>
+- extracting what we need from browser url
+- since the way posts are loaded changes, we now clicking on something and the url updates,
+- we are now not looking for an update, but rather if component mounted
+  we change from componentDidUpdate() to componentDidMount()
+- we can now extract from the route which matched to <Route path="/:id"> the dynamic url this.props.match.params.id
+- the .id is the same as what we setup <Route path="/:id" />
+
+```js
+// FullPost.js
+
+  // componentDidUpdate(){}
+
+  componentDidMount(){
+    if(this.props.match.params.id){
+      if (
+				!this.state.loadedPost ||
+				this.state.loadedPost !== this.props.match.params.id
+			) {
+				axios.get('/posts/' + this.props.match.params.id).then(response => {
+					// console.log(response);
+					this.setState({ loadedPost: response.data });
+				});
+			}
+    }
+  }
+```
+
+You learned how to extract route parameters (=> :id etc).
+
+- But how do you extract search (also referred to as "query") parameters (=> ?something=somevalue at the end of the URL)?
+- How do you extract the fragment (=> #something at the end of the URL)?
+
+### Query Params:
+
+You can pass them easily like this:
+
+```js
+<Link to="/my-path?start=5">Go to Start</Link>
+```
+
+or
+
+```js
+<Link
+	to={{
+		pathname: '/my-path',
+		search: '?start=5'
+	}}
+>
+	Go to Start
+</Link>
+```
+
+- React router makes it easy to get access to the search string: props.location.search .
+- But that will only give you something like ?start=5
+- You probably want to get the key-value pair, without the ? and the = . Here's a snippet which allows you to easily extract that information:
+
+```js
+componentDidMount() {
+    const query = new URLSearchParams(this.props.location.search);
+    for (let param of query.entries()) {
+        console.log(param); // yields ['start', '5']
+    }
+}
+```
+
+URLSearchParams is a built-in object, shipping with vanilla JavaScript. It returns an object, which exposes the entries() method. entries() returns an Iterator - basically a construct which can be used in a for...of... loop (as shown above).
+
+When looping through query.entries() , you get arrays where the first element is the key name (e.g. start ) and the second element is the assigned value (e.g. 5 ).
+
+### #(hash param) / Fragment:
+
+You can pass it easily like this:
+
+```js
+<Link to="/my-path#start-position">Go to Start</Link>
+```
+
+or
+
+```js
+<Link
+	to={{
+		pathname: '/my-path',
+		hash: 'start-position'
+	}}
+>
+	Go to Start
+</Link>
+```
+
+React router makes it easy to extract the fragment. You can simply access props.location.hash
