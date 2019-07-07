@@ -2829,3 +2829,38 @@ import FullPost from '../FullPost/FullPost';
   )
  
 ```
+
+## Creating Dynamic Nested Routes
+
+* if you are loading a component that is already loaded, react router doesnt replace the component everytime, it reuses it, 
+* so in the previous example, component might not update its data even tho the route in the url updated,
+  this is because we were using only componentDidMount() but we need to also use componentDidUpdate()
+* also note this component is not receiving an id via props anymore, we are using the this.props.match.params.id directly from url
+* if( !this.state.loadedPost || (this.state.loadedPost && this.state.loadedPost.id != this.props.match.params.id)) prevents infinite loop
+* NOTE: != is single equals denoting just equality..not same type because state.loadedPost.id is a number and params.id passes back a string 
+* can also use unary operator + to do conversion from string to number type state.loadedPost.id !== +this.props.match.params.id
+
+```js
+// FullPost.js
+componentDidUpdate() {
+  this.loadData();
+}
+
+componentDidMount(){
+  this.loadData();
+}
+loadData() {
+  //check to prevent infinite loop...
+  if(this.props.match.params.id){
+    //if the state loadedPost doesnt exist
+    if( !this.state.loadedPost || 
+    (this.state.loadedPost && this.state.loadedPost.id != this.props.match.params.id)){
+      axios.get('/posts/'+ this.props.match.params.id)
+        .then(
+          this.setState({loadedPost:response.data})
+        )
+    }
+  }
+}
+
+```
