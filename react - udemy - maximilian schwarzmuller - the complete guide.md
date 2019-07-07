@@ -2772,7 +2772,7 @@ now all routes are rendered if they match the path,
 
 ```js
 // Posts.js
-import {Link} from 'react-router-dom';
+// import {Link} from 'react-router-dom';
 
 postSelectedHandler = (id) =>{
   // this.props.history.push({pathname:'/'+id});
@@ -2782,10 +2782,50 @@ postSelectedHandler = (id) =>{
 render (){
   posts = this.state.posts.map(post => {
     return (
-    <Link to={'/'+post.id} key={post.id}>
-      <Post title={post.title} author={post.author} clicked={()=> this.postSelectedHandler(post.id)}/>
-    </Link>
+    // <Link to={'/'+post.id} key={post.id}>
+      <Post key={post.id} title={post.title} author={post.author} clicked={()=> this.postSelectedHandler(post.id)}/>
+    // </Link>
     );
   });
 }
+```
+
+## Understanding Nested Routes
+
+* sometimes you want nested routes, loading something like a component, inside of another component also loaded via routing
+* you can use the <Route> component wherever you want in the application as long as the part you are using it is wrapped up the hierarchy by <BrowserRouter> component
+* in the nested Component, the <Route path={this.props.match.url + '/:id'} exact component={FullPost}>
+* updating code (refactor), Blog.js wont load FullPost anymore, 
+  * Blog.js has a <Route path="/" exact component="{Posts}"> will load Posts
+  * Posts.js will load FullPost <Route path="/:id" exact component={FullPost}/>
+* even though the <Route> is inside Posts.js as long as everything that needs access to routing is wrapped by <BrowserRouter> component up the DOM
+* BUT since implementation of the nested route, route / loads Posts component, and Posts Component loads FullPost, the route will never match because route path='/' is specified as exact, so Post will never get rendered
+* FIX, remove 'exact' from <Route path="/"> so it matches everything starting with / 
+* FIX: move it down below the <Route path="/new-post">
+* wrap with Switch so only single path is called
+* the nested routes should be relative ie. path should be appended to whatever the current route is responsible for the nested route (Posts Component)
+* Posts.js adjust the nested <Route path="/:id" by getting the current path dynamically <Route path={this.path.match.url+'/:id'}> exact component={FullPost}/>
+
+```js
+// Blog.js
+<Switch>
+  <Route path="/new-post" component={NewPost}/>
+  <Route path="/" component={Posts}/>
+</Switch>
+```
+
+```js
+// Posts.js
+import {Route} from 'react-router-dom';
+import FullPost from '../FullPost/FullPost';
+
+  return (
+    <div>
+      <section className="Posts">
+        {posts}
+      </section>
+      <Route path={this.path.match.url+'/:id'} exact component={FullPost}/>
+    </div>
+  )
+ 
 ```
