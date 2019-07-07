@@ -2575,6 +2575,7 @@ export default withRouter(post);
 
 * Default is absolute pathing
 * with routing 'to=' always treats it as an absolute path ie. appended directly to domain with or without leading /
+* use relative pathing if you want to navigate relative to your existing path
 * relative path is appended to the end of current path by building a dynamic path, 
 * current path is accessed via <Link to={{pathname: this.props.match.url}}>
 * and we can append the subpath dynamically <Link to={{pathname: this.props.match.url+ '/subpath'}}>
