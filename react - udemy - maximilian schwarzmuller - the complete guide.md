@@ -45,7 +45,8 @@
   - in the component we use single curly braces and accessed via {props.name}, {props.age}
 
   - refactor js code to now render only once using 'app' variable
-  - comment/comments : to make a block comment in JSX the correct syntax is wrap with {/* */}
+  - comment/comments : to make a block comment in JSX the correct syntax is wrap with {/\* \*/}
+
   ```
   var app = (
     <div>
@@ -2378,18 +2379,18 @@ axios.defaults.headers.post['Content-Type'] = 'application/json'; //setting head
 
 ## Creating and Using Axios Instances
 
-* creating instances of axios allows us to have multiple configuration settings
-* create axios.js on same level as index.js 
-* dont forget to export the instance
-* axios.create(); and pass in a config object
-* then import into the file using this specific instance import axios from '../../axios';
+- creating instances of axios allows us to have multiple configuration settings
+- create axios.js on same level as index.js
+- dont forget to export the instance
+- axios.create(); and pass in a config object
+- then import into the file using this specific instance import axios from '../../axios';
 
 ```js
 // axios.js
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://jsonplaceholder.typicode.com'
+	baseURL: 'https://jsonplaceholder.typicode.com'
 });
 
 instance.defaults.headers.common['Authorization'] = 'AUTH TOKEN FROM INSTANCE';
@@ -2399,18 +2400,18 @@ export default instance;
 
 ## Routing
 
-* routing is not part of the core of react
-* 3rd party feature routing
-* turns into more like a framework
+- routing is not part of the core of react
+- 3rd party feature routing
+- turns into more like a framework
 
 ### Routing and SPAs
 
-* SPA is single page app, but we want to provide the normal web experience 
-* showing different pages for different urls
-* trick is that we dont have multiple html files, we use javascript to render different
-pages for different paths
-* routing is about parsing this path, and showing the appropriate jsx/component in our app
-* the router package has to
+- SPA is single page app, but we want to provide the normal web experience
+- showing different pages for different urls
+- trick is that we dont have multiple html files, we use javascript to render different
+  pages for different paths
+- routing is about parsing this path, and showing the appropriate jsx/component in our app
+- the router package has to
   1. parse the url/path (in the client) to understand where the user wants to go
   2. developer cofigures different paths
   3. router reads the configuration
@@ -2418,10 +2419,10 @@ pages for different paths
 
 # setting up links
 
-* use <header><nav><ul><li><a href="/">
-* style ul, hide list-style:none
-* style a, text-decoration: none
-* style a:hover, a:active
+- use <header><nav><ul><li><a href="/">
+- style ul, hide list-style:none
+- style a, text-decoration: none
+- style a:hover, a:active
 
 ```js
 <!-- Blog.js -->
@@ -2447,35 +2448,37 @@ render(){
 
 ## Setting Up the Router Package
 
-* install react-router
-* and react-router-dom
-* enable routing in react app (in index.js or app.js) 
-* (app.js) import {BrowswerRouter} from 'react-router-dom';
-* wrap the part of app which should be able to render routes with <BrowserRouter>
-* the file with dynamic content that will be loaded must import { Route } from 'react-router-dom';
-* <Route> with 'path' property 
-* usage: <Route path="/" exact/>
-* <Route exact> fixes problem with route matches that start with "/" and makes this route specific for exact match
-* without 'exact' content is rendered for all paths that contain path='/' match
-* eg. <Route path="/" render={()=><h1>Home2</h1>}/> is rendered on all routes that contain '/'
-* you can use as many <Route path="" exact> with the same path or exact as you want and it will be rendered
+- install react-router
+- and react-router-dom
+- enable routing in react app (in index.js or app.js)
+- (app.js) import {BrowswerRouter} from 'react-router-dom';
+- wrap the part of app which should be able to render routes with <BrowserRouter>
+- the file with dynamic content that will be loaded must import { Route } from 'react-router-dom';
+- <Route> with 'path' property
+- usage: <Route path="/" exact/>
+- <Route exact> fixes problem with route matches that start with "/" and makes this route specific for exact match
+- without 'exact' content is rendered for all paths that contain path='/' match
+- eg. <Route path="/" render={()=><h1>Home2</h1>}/> is rendered on all routes that contain '/'
+- you can use as many <Route path="" exact> with the same path or exact as you want and it will be rendered
 
 ## RENDER vs COMPONENT
+
 ### ROUTE 'render' jsx method
-* usage: <Route path="/" exact render={()=>jsx here} />
-* 'render' prop which is a function that says what happens when we reach this path...render JSX
+
+- usage: <Route path="/" exact render={()=>jsx here} />
+- 'render' prop which is a function that says what happens when we reach this path...render JSX
 
 ### ROUTE 'component' method
-* render components when the path matches
-* component needs to be a reference to function/class we want to use
-* so the component needs to be imported eg. import {Posts} from './Posts/Posts';
-* usage: <Route path="/" exact component={Posts}>
+
+- render components when the path matches
+- component needs to be a reference to function/class we want to use
+- so the component needs to be imported eg. import {Posts} from './Posts/Posts';
+- usage: <Route path="/" exact component={Posts}>
 
 ```js
-import {Posts} from './Posts/Posts';
-<Route path="/" exact component={Posts}/>
+import { Posts } from './Posts/Posts';
+<Route path="/" exact component={Posts} />;
 ```
- 
 
 ```
 npm install --save react-router react-router-dom
@@ -2484,17 +2487,16 @@ npm install --save react-router react-router-dom
 ```js
 // App.js
 
-import {BrowserRouter} from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 
-class App extends Component{
-  render () {
-    return (
-      <BrowserRouter>
-        <div className="App">
-        </div>
-      </BrowserRouter>
-    );
-  }
+class App extends Component {
+	render() {
+		return (
+			<BrowserRouter>
+				<div className="App" />
+			</BrowserRouter>
+		);
+	}
 }
 ```
 
@@ -2520,21 +2522,21 @@ render(){
 }
 
 ```
+
 ## Switching Between Pages
 
-* currently switching between routes causes reloading
-* instead we want only a re-render by changing the links and instead prevent reloading page and let react-router handle the render
+- currently switching between routes causes reloading
+- instead we want only a re-render by changing the links and instead prevent reloading page and let react-router handle the render
 
 ## Using Links to Switch Pages
 
-* import { Route, Link } from 'react-router-dom';
-* replace <a> tag with <Link>
-* use 'to' property to tell router where to link to (:string)
-* to can also be js object where we configure {{pathname: '/new-post', hash:'#submit', submit:'?quick-submit=true'}} 
-  * 'pathname' is the path (string)
-  * 'hash' tag is jumping to a id specific point eg. hash:'#submit'
-  * 'search' allows query params eg. submit:'?quick-submit=true'
-
+- import { Route, Link } from 'react-router-dom';
+- replace <a> tag with <Link>
+- use 'to' property to tell router where to link to (:string)
+- to can also be js object where we configure {{pathname: '/new-post', hash:'#submit', submit:'?quick-submit=true'}}
+  - 'pathname' is the path (string)
+  - 'hash' tag is jumping to a id specific point eg. hash:'#submit'
+  - 'search' allows query params eg. submit:'?quick-submit=true'
 
 ```js
 // <a href="/">Home</a>
@@ -2545,38 +2547,64 @@ render(){
 
 ## Using Routing-Related Props
 
-* react router gives us extra information through props : history, location, match
-* history prop object also has push method which allows us to push a new page programatically without a <Link>
-* can view props in componentDidMount(){console.log(this.props)}
-  * match :{isExact:, params:, path:, url:}
-  * location: {hash:, key:, pathname:, search:, }
-  * history: {action:, goBack:, goForward:, push:, replace:}
+- react router gives us extra information through props : history, location, match
+- history prop object also has push method which allows us to push a new page programatically without a <Link>
+- can view props in componentDidMount(){console.log(this.props)}
+  - match :{isExact:, params:, path:, url:}
+  - location: {hash:, key:, pathname:, search:, }
+  - history: {action:, goBack:, goForward:, push:, replace:}
 
 ## The withRouter HOC & Route Props
 
-* getting information to components not loaded via Route (see previous lesson)
-* we can pass 'match', 'location', and 'history' intot the subcomponent via this.props.x
-* there is an easier way to give access to non-container components,
-* import {withRouter} from 'react-router-dom' is a HOC 
-* we wrap our export with withRouter()
-* the withRouter adds match, location, history to nearest loaded route  
+- getting information to components not loaded via Route (see previous lesson)
+- we can pass 'match', 'location', and 'history' intot the subcomponent via this.props.x
+- there is an easier way to give access to non-container components,
+- import {withRouter} from 'react-router-dom' is a HOC
+- we wrap our export with withRouter()
+- the withRouter adds match, location, history to nearest loaded route  
   so post will get routing information for 'posts'
 
 ```js
-import {withRouter} from 'react-router-dom'
+import { withRouter } from 'react-router-dom';
 
-const post = (props)=>{
-}
+const post = props => {};
 
 export default withRouter(post);
 ```
 
 ## Routing - Absolute vs Relative Paths
 
-* Default is absolute pathing
-* with routing 'to=' always treats it as an absolute path ie. appended directly to domain with or without leading /
-* use relative pathing if you want to navigate relative to your existing path
-* relative path is appended to the end of current path by building a dynamic path, 
-* current path is accessed via <Link to={{pathname: this.props.match.url}}>
-* and we can append the subpath dynamically <Link to={{pathname: this.props.match.url+ '/subpath'}}>
+- Default is absolute pathing
+- with routing 'to=' always treats it as an absolute path ie. appended directly to domain with or without leading /
+- use relative pathing if you want to navigate relative to your existing path
+- relative path is appended to the end of current path by building a dynamic path,
+- current path is accessed via <Link to={{pathname: this.props.match.url}}>
+- and we can append the subpath dynamically <Link to={{pathname: this.props.match.url+ '/subpath'}}>
 
+## styling the active route (NavLink instead of Link)
+- import {NavLink} from 'react-router-dom';
+- <Link> replaced with <NavLink> to allow us access to additional properties allowing styling
+- <Link> and <NavLink> get rendered as <a href=""> tags automatically behind the scenes
+- now a default 'active' class is added to the dom of the active route which we can style
+- just as <Route path="/" exact /> we can specify exact on <NavLink> match for root /
+- specify 'exact' on the active link else the dom adds the class to all matches the css will be active for all links that match starting with /
+- to name our own classes for active state, instead of automatically getting '.active' class, use activeClassName="" eg. activeClassName="my-active" and then can style with .my-active
+- or use activeStyle={{ }} to add 'inline' styling activeStyle={{color: orange, textDecoration:'underline'}}
+
+```js
+<nav>
+	<ul>
+		<li>
+			<NavLink to="/" exact activeClassName="my-active" activeStyle={{color: 'orange', textDecoration:'underline'}}>Home</NavLink>
+		</li>
+	</ul>
+</nav>
+```
+```css
+/* Blog.css */
+.Blog a:hover,
+.Blog a:active,
+.Blog a.active{
+  color: orange;
+}
+```
