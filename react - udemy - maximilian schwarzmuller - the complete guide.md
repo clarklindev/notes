@@ -2935,3 +2935,15 @@ render(){
 </Switch>
 ```
 
+## Handling the 404 Case (Unknown Routes)
+
+* accessing a route that is unknown, we called `<Redirect>`
+* handling unknown routes with `<Route>` with NO path="" prop you can define component={} or render={()=><h1>Not Found</h1>}
+* wont work with root route `<Redirect from="/">` 
+* the 404 route should always be last to catch all routes, thats why it wont work with `Redirect from="/">`
+```js
+<Route path="/posts" component={Posts}/>
+<Route render={()=> <h1>Not Found</h1>}/> //or use this <Route component={}/>
+// <Redirect from="/" to="/posts"/>
+```
+
