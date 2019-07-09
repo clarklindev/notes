@@ -3097,7 +3097,7 @@ class App extends Component{
 * this is because the server handles all routes first, but on the server there is only index.html,
 * react routing is client side and the server wouldnt know what to do with a route unless it is accessed via index.html
 
-## NB: if the path where we deploy is not the root / but something else like domain.com/my-app/
+## NB: if the path where we deploy is not the root / like domain.com/ but something else like domain.com/my-app/
 
 * by default `<BrowserRouter>` points to basename="/"
 * configure <BrowserRouter basename="/my-app">
