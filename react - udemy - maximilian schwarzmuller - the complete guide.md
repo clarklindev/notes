@@ -3019,4 +3019,73 @@ render (){
 }
 ```
 
-## Lazy Loading with React Suspense (16.6)
+## Lazy Loading with React Suspense (16.6) (ALTERNATIVE METHOD FOR LAZY LOADING)
+
+* REQUIREMENTS react 16.6 and higher, DOES NOT WORK FOR SERVER SIDE RENDERING YET
+* has .lazy() to load components asynchronously, defering loading until required
+* NOTE: `<React.Framgent>` was added in 16.2 which acts like `<Aux>` in that the dom element is not rendered and acts as a wrapping element
+* so instead of importing like `import Posts from './containers/Posts'` we need to use a dynamic import()
+1. create a const Reference and assign to React.lazy();
+2. pass in an anonymous function to lazy(()=> import('./containers/Posts')) that returns dynamic import() call, and we pass into import() the path we want
+3. in the render() , we pass to render prop, anonymous function that returns react feature `<Suspense>`
+4. eg `<Route path="/posts" render={()=>(<Suspense></Suspense>)}>`
+5. and between the Suspense DOM element, we pass it the const we created (Posts) as an element `<Posts/>`
+6. `<Suspense>` has a fallback prop which we can set to show something (its essentially a fallback while it is still loading) while react postpones the rendering of the lazy component 
+* the advantage of using the Suspense method is Async rendering and that it is not tied to routing, can use for conditional rendering
+
+```js
+// import Posts from './containers/Posts';
+import User from './containers/User';
+
+const Posts = React.lazy(()=> import('./containers/Posts'));
+
+class App extends Component{
+  render() {
+    return (
+      <BrowserRouter>
+        <React.Fragment>
+          <nav>
+            <NavLink to="/user">User Page</NavLink>
+            <NavLink to="/posts">Posts Page</NavLink>
+          </nav>
+          <Route path="/" component={Welcome} exact/>
+          <Route path="/user" component={User}/>
+          // <Route path="/posts" component={Posts}/>
+          <Route path="/posts" render={()=>(<Suspense fallback={<h1>loading...</h1>}><Posts/></Suspense>)}/>
+        </React.Fragment>
+      </BrowserRouter>      
+    );
+  }
+}
+```
+
+###  example .lazy() not used for Routing
+```js
+// App.js
+
+class App extends Component{
+  state = {showPosts:false};
+
+  modeHandler = () => {
+    this.setState(prevState=>{
+      return {showPosts: !prevState.showPosts};
+    })
+  }
+
+  render(){
+    return (
+      <React.Fragment>
+        <button onClick={this.modeHandler}>Toggle Mode</button>
+
+        {this.state.showPosts ? (
+          <Suspense fallback={<div>Loading...</div>}>
+          <Posts/>
+          </Suspense>
+        ): (<User/>
+        )}
+      </React.Fragment>
+    );
+  }
+
+}
+```
