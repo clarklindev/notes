@@ -2946,4 +2946,77 @@ render(){
 <Route render={()=> <h1>Not Found</h1>}/> //or use this <Route component={}/>
 // <Redirect from="/" to="/posts"/>
 ```
+## Loading Routes Lazily
 
+* GOAL: loading when needed
+* code gets loaded even tho we have not accessed the path just by defining the <Route component={NewPost}>, it should only load when we access it
+* Lazy Loading or code splitting is when we load only when we need it (good for loading different feature areas)
+* works with REQUIRED: CRA (create react app) or react router 4
+
+### asyncComponent
+* basically this function receives a function, save it in state, the render method checks if the state is set, and if it is, render() the component
+* we need a Higher order Component (HOC) create a file hoc/asyncComponent.js should help load component asynchronously (only when needed)
+* asyncComponent receives an component argument (we call it eg importComponent) which is a function
+* it returns a class that extends Component with render() method
+* we set a state with 'component' property which initially is null, and will be set to the dynamically loaded component
+* we set 'component' prop in componentDidMount() by calling the passed in function importComponent() 
+* that function returns a promise which we subscribe to .then(), we receive an argument which will have a .default property which will be the component we want to load dynamically
+* assign that to 'component' state
+* in render() check if the 'component' state is set, if it is set, then return the component, else return null;
+
+### how to use asyncComponent
+* basically we import the asyncComponent, create a const AsyncComponent, that calls the asyncComponent() function and we pass in an anonymous function that returns import(), which is only executed when the calling function is executed, it can be executed in render() by rendering te const we created {AsyncComponent}
+* whenever you are importing something with import x from '', you inform webpack about the dependency and it is included in the bundle
+* to load when needed, remove the import 
+* and then import the hoc asyncComponent we created above
+* define a const AsyncComponent = asyncComponent(()=>{return import();}) we are returning an anonymous function that returns an import() as a function
+* import() is the syntax for dynamic import, we pass in the same path as what we would normally point to with import x from 'x';
+* with import(), whatever is passed into import() is only executed when the asnycComponent(()=>{}) return function is executed
+* and this function (asyncComponent) is only executed when we render it to the screen usage would be in render() <Route path="/new-post" component={asyncComponent}>
+* we can see this works by development tools - Network shows loading chunk.js
+
+```js
+// hoc/asyncComponent.js
+import React, {Component} from 'react';
+
+const asyncComponent = (importComponent) => {
+  return class extends Component {
+    state = {
+      component: null
+    }
+
+    componentDidMount(){
+      importComponent().then(comp=>{
+        this.setState({component:comp.default});
+      })
+    }
+
+    render (){
+      const C = this.state.component;
+      return C ? <C {...this.props}/> : null;
+    };
+  }
+}
+
+export default asyncComponent;
+```
+
+```js
+// Blog.js
+// import NewPost from './NewPost/NewPost';
+import asyncComponent from '../../hoc/asyncComponent';
+
+const AsyncNewPost = asyncComponent(()=>{
+  return import('./NewPost/NewPost');
+});
+
+render (){
+  return (
+    <Switch>
+      {this.state.auth? <Route path="/new-post" component={AsyncNewPost}/> : null}
+    </Switch>
+  );
+}
+```
+
+## Lazy Loading with React Suspense (16.6)
