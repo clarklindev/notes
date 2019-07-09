@@ -3089,3 +3089,15 @@ class App extends Component{
 
 }
 ```
+
+## Routing and Server Deployment
+
+* when in development, the server is already setup, but once we have deployed to a server it is important to point all routes to the index.html
+* SERVER CONFIGURATION: ALWAYS FORWARD ALL ROUTING TO THE INDEX.html regardless if the route exists,
+* this is because the server handles all routes first, but on the server there is only index.html,
+* react routing is client side and the server wouldnt know what to do with a route unless it is accessed via index.html
+
+## NB: if the path where we deploy is not the root / but something else like domain.com/my-app/
+
+* by default `<BrowserRouter>` points to basename="/"
+* configure <BrowserRouter basename="/my-app">
