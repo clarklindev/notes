@@ -2419,7 +2419,7 @@ export default instance;
 
 # setting up links
 
-- use <header><nav><ul><li><a href="/">
+- use `<header><nav><ul><li><a href="/">`
 - style ul, hide list-style:none
 - style a, text-decoration: none
 - style a:hover, a:active
@@ -2455,10 +2455,10 @@ render(){
 - wrap the part of app which should be able to render routes with <BrowserRouter>
 - the file with dynamic content that will be loaded must import { Route } from 'react-router-dom';
 - <Route> with 'path' property
-- usage: <Route path="/" exact/>
+- usage: `<Route path="/" exact/>`
 - <Route exact> fixes problem with route matches that start with "/" and makes this route specific for exact match
 - without 'exact' content is rendered for all paths that contain path='/' match
-- eg. <Route path="/" render={()=><h1>Home2</h1>}/> is rendered on all routes that contain '/'
+- eg. `<Route path="/" render={()=><h1>Home2</h1>}/>` is rendered on all routes that contain '/'
 - you can use as many <Route path="" exact> with the same path or exact as you want and it will be rendered
 
 ## RENDER vs COMPONENT
@@ -2531,7 +2531,7 @@ render(){
 ## Using Links to Switch Pages
 
 - import { Route, Link } from 'react-router-dom';
-- replace <a> tag with <Link>
+- replace `<a>` tag with <Link>
 - use 'to' property to tell router where to link to (:string)
 - to can also be js object where we configure {{pathname: '/new-post', hash:'#submit', submit:'?quick-submit=true'}}
   - 'pathname' is the path (string)
@@ -2583,11 +2583,11 @@ export default withRouter(post);
 
 ## styling the active route (NavLink instead of Link)
 
-- import {NavLink} from 'react-router-dom';
-- <Link> replaced with <NavLink> to allow us access to additional properties allowing styling
-- <Link> and <NavLink> get rendered as <a href=""> tags automatically behind the scenes
+- `import {NavLink} from 'react-router-dom';`
+- `<Link>` replaced with `<NavLink>` to allow us access to additional properties allowing styling
+- `<Link>` and `<NavLink>` get rendered as `<a href="">` tags automatically behind the scenes
 - now a default 'active' class is added to the dom of the active route which we can style
-- just as <Route path="/" exact /> we can specify exact on <NavLink> match for root /
+- just as `<Route path="/" exact />` we can specify exact on `<NavLink>` match for root /
 - specify 'exact' on the active link else the dom adds the class to all matches the css will be active for all links that match starting with /
 - to name our own classes for active state, instead of automatically getting '.active' class, use activeClassName="" eg. activeClassName="my-active" and then can style with .my-active
 - or use activeStyle={{ }} to add 'inline' styling activeStyle={{color: orange, textDecoration:'underline'}}
@@ -2622,10 +2622,10 @@ export default withRouter(post);
 
 - posting an id from url (Ie.. getting parameters from url)
 - we can add a flexible, variable route parameter with :then any name of choice (dynamic portion to the url)
-- when defining the <Route path="/:dynamicname">
+- when defining the `<Route path="/:dynamicname">`
 - paths are parsed top-down calling the first match (specific to less specific) eg. /new-post is more specific that /:id
-- wrap the DOM html part with <Link to={'/'+post.id}> <Post clicked={()=> this.postSelectedHandler(post.id)}/> </Link>
-- up to this point the app should allow user to click on a Post <Link> and the url should update
+- wrap the DOM html part with `<Link to={'/'+post.id}> <Post clicked={()=> this.postSelectedHandler(post.id)}/></Link>`
+- up to this point the app should allow user to click on a Post `<Link>` and the url should update
 
 ```js
 // Blog.js
@@ -2653,13 +2653,13 @@ render (){
 
 ## Extracting route parameters
 
-- the router is routing with <Route path="/:id" component={FullPost}>
+- the router is routing with `<Route path="/:id" component={FullPost}>`
 - extracting what we need from browser url
 - since the way posts are loaded changes, we now clicking on something and the url updates,
 - we are now not looking for an update, but rather if component mounted
   we change from componentDidUpdate() to componentDidMount()
 - we can now extract from the route which matched to <Route path="/:id"> the dynamic url this.props.match.params.id
-- the .id is the same as what we setup <Route path="/:id" />
+- the .id is the same as what we setup `<Route path="/:id" />`
 
 ```js
 // FullPost.js
@@ -2867,10 +2867,10 @@ loadData() {
 ## Redirecting Requests
 
 * import { Redirect} from 'react-router-dom';
-* inside <Switch> statement, use <Redirect>
+* inside `<Switch>` statement, use `<Redirect>`
 * <Redirect> does not render content, it redirects
 * prop syntax for route path is from="" to=""
-* NB: using <Redirect> outside of <Switch>, then you cannot specify 'from' property 
+* NB: using `<Redirect>` outside of `<Switch>`, then you cannot specify 'from' property 
 
 ```js
 <Switch>
