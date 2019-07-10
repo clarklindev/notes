@@ -42,12 +42,12 @@
   - to make html reusable, we use props added
   - `<Person name="Max" age="28">` and receive it in the constructor function Person(args)
   - props contains all the attributes
-  - in the component we use single curly braces and accessed via {props.name}, {props.age}
+  - in the component we use single curly braces and accessed via `{props.name}`, `{props.age}`
 
   - refactor js code to now render only once using 'app' variable
   - comment/comments : to make a block comment in JSX the correct syntax is wrap with {/\* \*/}
 
-  ```
+  ```js
   var app = (
     <div>
       <Person name="Rob" age="30"/>
