@@ -2545,9 +2545,9 @@ render(){
 - currently switching between routes causes reloading
 - instead we want only a re-render by changing the links and instead prevent reloading page and let react-router handle the render
 
-## Using Links to Switch Pages
+## Using Links to Switch Pages / NavLink
 
-- import { Route, Link } from 'react-router-dom';
+- import { Route, Link, NavLink } from 'react-router-dom';
 - replace `<a>` tag with <Link>
 - use 'to' property to tell router where to link to (:string)
 - to can also be js object where we configure {{pathname: '/new-post', hash:'#submit', submit:'?quick-submit=true'}}
@@ -2675,7 +2675,7 @@ render (){
 - since the way posts are loaded changes, we now clicking on something and the url updates,
 - we are now not looking for an update, but rather if component mounted
   we change from componentDidUpdate() to componentDidMount()
-- we can now extract from the route which matched to <Route path="/:id"> the dynamic url this.props.match.params.id
+- we can now extract from the route which matched to `<Route path="/:id">` the dynamic url `this.props.match.params.id`
 - the .id is the same as what we setup `<Route path="/:id" />`
 
 ```js
@@ -2687,7 +2687,7 @@ render (){
     if(this.props.match.params.id){
       if (
 				!this.state.loadedPost ||
-				this.state.loadedPost !== this.props.match.params.id
+				this.state.loadedPost != this.props.match.params.id
 			) {
 				axios.get('/posts/' + this.props.match.params.id).then(response => {
 					// console.log(response);
@@ -2819,6 +2819,12 @@ render (){
 * BUT since implementation of the nested route, route / loads Posts component, and Posts Component loads FullPost, the route will never match because route path='/' is specified as exact, so Post will never get rendered
 * FIX, remove 'exact' from <Route path="/"> so it matches everything starting with / 
 * FIX: move it down below the <Route path="/new-post">
+
+### Switch
+```
+import {Switch } from 'react-router-dom';
+
+```
 * wrap with Switch so only single path is called
 * the nested routes should be relative ie. path should be appended to whatever the current route is responsible for the nested route (Posts Component)
 * Posts.js adjust the nested <Route path="/:id" by getting the current path dynamically <Route path={this.path.match.url+'/:id'}> exact component={FullPost}/>
@@ -2936,7 +2942,7 @@ render(){
 * its easier enough to redirect with props.history available on every component that is wrapped by <BrowserRouter>
 * this.props.history.push('/posts');
 * difference between .push() and <Redirect> is that Redirect replaces the current page on the stack, it doesnt push a new one
-* this.props.history.replace('/posts') does same as what <Redirect> does, it replaces the current page on the stack
+* this.props.history.replace('/posts') does same as what `<Redirect>` does, it replaces the current page on the stack
 
 ## Working with Guards
 
