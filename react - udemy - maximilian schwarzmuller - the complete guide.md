@@ -2466,7 +2466,8 @@ import {BrowswerRouter} from 'react-router-dom';
   <div class="App"><Blog/></div>
 </BrowserRouter>
 ```
-- the file with dynamic content that will be loaded must 
+## Setting Up and Rendering Routes
+- the file that will hold dynamic content must 
 ```
 import { Route } from 'react-router-dom';
 ```
