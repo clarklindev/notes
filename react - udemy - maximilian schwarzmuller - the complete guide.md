@@ -2450,10 +2450,26 @@ render(){
 
 - install react-router
 - and react-router-dom
+```
+npm install --save react-router react-router-dom
+```
 - enable routing in react app (in index.js or app.js)
-- (app.js) import {BrowswerRouter} from 'react-router-dom';
-- wrap the part of app which should be able to render routes with <BrowserRouter>
-- the file with dynamic content that will be loaded must import { Route } from 'react-router-dom';
+- (app.js) 
+
+```js
+import {BrowswerRouter} from 'react-router-dom';
+```
+
+- wrap the part of app which should be able to render routes with `<BrowserRouter>`
+```js
+<BrowserRouter>
+  <div class="App"><Blog/></div>
+</BrowserRouter>
+```
+- the file with dynamic content that will be loaded must 
+```
+import { Route } from 'react-router-dom';
+```
 - <Route> with 'path' property
 - usage: `<Route path="/" exact/>`
 - <Route exact> fixes problem with route matches that start with "/" and makes this route specific for exact match

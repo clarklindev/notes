@@ -19,6 +19,7 @@ render(){
 - we attach what we want to expose to outside DOM
 - eg. render(){return this.props.render({//expose stuff here})}
 - essentially render() method takes an object and you can attach any data you want the outside to get access to
+- at the same time we are given data and methods through props in ComponentA
 
 ### OUTSIDE component
 
@@ -32,30 +33,56 @@ render(){
 
 - import ComponentA
 - add own methods to class
-- our methods can be passed to <ComponentA> too
+- our methods can be passed to <ComponentA> to be used by ComponentA without ComponentA knowing what it does
 - render() {return (<ComponentA render={({//props})=>()}>);}
 
 ### Example: search filter
 
+### https://blog.logrocket.com/modern-component-reusability-render-props-in-react-scoped-slots-in-vue-ff3c5b2dc899/
+
 - ComponentA (Search filter functionality)
 - ComponentB makes use of ComponentA
-- ComponentA has:
-  - DOM (input)
-  - <UL> results list
-  - as well as the filter method
 
-* technique for sharing code between React components using a prop whose value is a function
+- ComponentA:
+- has the functionality for filter
+- is a renderless component (doesnt render markup)
+- receives function to filter via prop
+- has a method (searchList method) which uses this function to get filtered results
+- filters list of options, based on query string
+- using special render prop to render an element
 
-- nice tutorial regarding reusable code using render props,
-- type into an input to filter a list.
+// exposes searchList: the function to call when input value changes
+// exposes results: search results
+// receives options (set of data to filter)
+// receives filter function
 
-- https://blog.logrocket.com/modern-component-reusability-render-props-in-react-scoped-slots-in-vue-ff3c5b2dc899/
+ComponentA STEPS:
 
-- render prop = access data from the child component in the parent DOM
+1. props.options save in state as 'results'
+2. searchList(event) is function used for filtering
+   - this function uses props.filterMethod(props.options, event.target.value)
+   - this function uses props.options
+   - this function uses event.target.value
+3. const results = props.filterMethod
+4. setState({results:results});
+5. render() return this.props.render({results:this.state.results, searchList:(event)=>this.searchList(event)})
+6. ComponentA doesnt know what the DOM element will be, it only knows the function it should call: searchList(event)
+7. attaching searchList method to input `<input onChange={searchList}` allows us access to event.target
+8. note: the filterMethod is passed in as a prop so we can change way to filter
 
-```js
-<DataProvider render={data => <h1>Hello {data.target}</h1>} />
-```
+ComponentB STEPS:
+
+- props.options passed into componentB
+- define filterMethod (a blind filter method) that doesnt know what is its data, or what its searching for
+- filterMethod(props.options, query) that returns filtered array (props.options.filter(each=> toLowerCase().includes(query.toLowerCase()) ))
+- where does 'query' come from? the prop that is unknown until used by ComponentA
+- ComponentB has access to ComponentA render props: {results, searchList}
+- ComponentA's exposed render prop searchList allows us to call `<input onChange={searchList}/>` that internally calls - searchList calls props.filterMethod(props.options, event.target.value), and event.target is `<input>`
+- in render(), DOM input `<input onChange={searchList(event)}/>`
+- in render(), DOM UL `<ul>{results.map(option=>(<li></li>))}</ul>` or however we want to render the result.
+- in render(), `<ComponentA options={props.options} filterMethod={this.filterMethod} render={({results, searchList})=>()}/>`
+
+### https://reactjs.org/docs/render-props.html
 
 - As the cursor moves around the screen, the component displays its (x, y) coordinates in a `<p>`.
 
