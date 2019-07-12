@@ -147,3 +147,30 @@ class MouseTracker extends React.Component {
 	}
 }
 ```
+
+### using render props to pass props into component from `<Router>`
+
+https://tylermcginnis.com/react-router-pass-props-to-components/
+
+### WRONG:
+
+Though technically this will work, it’s not the best solution. The reason for this is because of performance. According to the official docs…
+
+"When you use the component props, the router uses React.createElement to create a new React element from the given component. That means if you provide an inline function to the component attribute, you would create a new component every render. This results in the existing component unmounting and the new component mounting instead of just updating the existing component."
+
+```js
+<Route path="/dashboard" component={() => <Dashboard isAuthed={true} />} />
+```
+
+### Correct - using render="" prop
+
+So if you’re not supposed to pass a function to component, what’s the solution? Turns out the React Router team predicted this problem and gave us a handy solution. Instead of using component, use the render prop. render accepts a functional component and that function won’t get unnecessarily remounted like with component. That function will also receive all the same props that component would receive. So you can take those and pass those along to the rendered component.
+
+```js
+<Route
+	path="/dashboard"
+	render={props => <Dashboard {...props} isAuthed={true} />}
+/>
+```
+
+So to recap, if you need to pass a prop to a component being rendered by React Router, instead of using Routes component prop, use its render prop passing it an inline function then pass along the arguments to the element you’re creating.
