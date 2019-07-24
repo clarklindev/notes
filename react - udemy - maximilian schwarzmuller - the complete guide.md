@@ -3221,3 +3221,47 @@ export default input;
 }
 
 ```
+
+### Setting Up a JS Config for the Form.mp4
+
+* creating form dynamically
+* define how each element should look
+* handling form shape in state - js object which defines all form fields, configuration, values
+* the state object props should have elementType key and its value should be the name of html dom element without angle brackets
+* the idea is to loop through the state object and create the form elements dynamically
+* the Input Components in ContactData receive props `<Input elementType="..." elementConfig="..." value="..." />`
+
+```js 
+// ContactData.js
+
+orderForm: {
+  name: {
+    elementType: 'input',
+    elementConfig: { type: 'text', placeholder: 'your name' },
+    value: ''
+  },
+  email: {
+    elementType: 'input',
+    elementConfig: { type: 'email', placeholder: 'Your email' },
+    value: ''
+  },
+  deliveryMethod: {
+    elementType: 'select',
+    elementConfig: {
+      type: 'email',
+      options: [
+        { value: 'fastest', displayValue: 'Fastest' },
+        { value: 'cheapest', displayValue: 'cheapest' }
+      ]
+    },
+    value: ''
+  }
+}
+
+let form =( <form>
+    <Input elementType="..." elementConfig="..." value="..." />
+ </form>)
+
+```
+
+### Dynamically Create Inputs based on JS Config.mp4
