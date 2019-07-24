@@ -2555,6 +2555,8 @@ render(){
   - 'hash' tag is jumping to a id specific point eg. hash:'#submit'
   - 'search' allows query params eg. submit:'?quick-submit=true'
 
+NOTE: react-router-dom wraps react-router and includes it as a dependency
+
 ```js
 // <a href="/">Home</a>
 <Link to="/">Home</Link>
@@ -2825,7 +2827,7 @@ render (){
 import {Switch } from 'react-router-dom';
 
 ```
-* wrap with Switch so only single path is called
+* wrap with Switch so only single path is called from set
 * the nested routes should be relative ie. path should be appended to whatever the current route is responsible for the nested route (Posts Component)
 * Posts.js adjust the nested <Route path="/:id" by getting the current path dynamically <Route path={this.path.match.url+'/:id'}> exact component={FullPost}/>
 
@@ -3124,3 +3126,5 @@ class App extends Component{
 
 * by default `<BrowserRouter>` points to basename="/"
 * configure <BrowserRouter basename="/my-app">
+
+---
