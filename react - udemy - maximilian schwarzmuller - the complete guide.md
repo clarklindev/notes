@@ -3392,3 +3392,39 @@ I reassign the key back to the copy of the form `updatedOrderForm[inputIdentifie
   }
 
   ```
+### 08. Handling Form Submission.mp4
+
+* there is an onSubmit event handler on `<form onSubmit={}>`, so dont use the handler on the submit button
+* in the handler, need to event.preventDefault(); so you can handle manually
+* want to extract data, but eveything is already managed by the state,
+* create formData object
+* for each of state.orderForm, get key/value 
+* add formData to order as prop
+
+```js
+  orderHandler =(event)=>{
+    event.preventDefault();
+    this.setState({loading: true});
+    const formData = {} //get key/value data from state eg. email:value, name:value
+    for(let formElementIdentifier in this.state.orderForm){
+      formData[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value;
+    }
+    const order = {
+      ingredients: this.props.ingredients,
+      price: this.props.price,
+      orderData: formData
+    }
+    axios.post('orders.json', order)
+    .then(response=>{
+      this.setState({loading:false});
+      this.props.history.push('/');
+    })
+    .catch(error=>{
+      this.setState({loading:false});
+      
+    })
+  }
+
+  <form onSubmit={this.orderHandler}>
+  </form>
+```
