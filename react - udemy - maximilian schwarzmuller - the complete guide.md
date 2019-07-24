@@ -3265,3 +3265,28 @@ let form =( <form>
 ```
 
 ### Dynamically Create Inputs based on JS Config.mp4
+
+* creating `<Input>` components dynamically from state
+* with the state setup, we can create an array from the state then loop through each element and create the component
+
+```js
+render(){
+  let formElementsArray = [];
+
+  for (let key in this.state.orderForm) {
+    formElementsArray.push({ id: key, config: this.state.orderForm[key] });
+  }
+
+  let form = (
+  <form>
+    {formElementsArray.map(formElement => (
+      <Input
+        key={formElement.id}
+        elementType={formElement.config.elementType}
+        elementConfig={formElement.config.elementConfig}
+        value={formElement.config.value}
+      />
+    ))}
+
+}
+```
