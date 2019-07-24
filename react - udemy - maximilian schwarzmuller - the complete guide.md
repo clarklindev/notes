@@ -2461,6 +2461,10 @@ import {BrowswerRouter} from 'react-router-dom';
 ```
 
 - wrap the part of app which should be able to render routes with `<BrowserRouter>`
+- react-router-dom gives us access to route information via props (history, location, match) via '<BrowserRouter>' BUT route information is given only to components loaded directly via '<Route>'
+- so only direct components loaded via a Route will get route information via props
+- to make props avaible in any component with higher order component (hoc), import 'withRouter' from 'react-router-dom' and in the export, export default withRouter(class name) see below (The withRouter HOC & Route Props)
+
 ```js
 <BrowserRouter>
   <div class="App"><Blog/></div>
@@ -3128,3 +3132,92 @@ class App extends Component{
 * configure <BrowserRouter basename="/my-app">
 
 ---
+
+## Forms and Form Validation
+
+### Analyzing the App.mp4
+
+* validation
+* handling user input
+
+* decide what data we need, store this in the state
+* dynamically generate form
+* validation of form, with styling based on validation
+
+* moving input elements into custom components
+
+### Creating a Custom Dynamic Input Component.mp4
+
+```js
+// <!-- usage: -->
+	<Input
+    inputtype="input"
+    type="text"
+    name="postal"
+    placeholder="postal code"
+  />
+```
+
+```js 
+// Input.js
+
+import React from 'react';
+import classes from './Input.css';
+
+const input = props => {
+	let inputElement = null;
+
+	switch (props.inputtype) {
+		case 'input':
+			inputElement = <input className={classes.InputElement} {...props} />;
+			break;
+		case 'inputarea':
+			inputElement = <textarea className={classes.InputElement} {...props} />;
+			break;
+		// dropdown, select
+		default:
+			inputElement = <input className={classes.InputElement} {...props} />;
+	}
+
+	return (
+		<div className={classes.Input}>
+			<label className={classes.Label}>{props.label}</label>
+			{inputElement}
+		</div>
+	);
+};
+
+export default input;
+
+```css
+// Input.css
+
+.Input {
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.Label {
+	font-weight: bold;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.InputElement {
+	outline: none;
+	border: 1px solid #ccc;
+	background-color: white;
+	font: inherit;
+	padding: 6px 10px;
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.InputElement:focus {
+	outline: none;
+	background-color: #ccc;
+}
+
+```
