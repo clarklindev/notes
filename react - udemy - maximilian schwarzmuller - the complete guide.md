@@ -3233,31 +3233,31 @@ export default input;
 
 ```js 
 // ContactData.js
-
-orderForm: {
-  name: {
-    elementType: 'input',
-    elementConfig: { type: 'text', placeholder: 'your name' },
-    value: ''
-  },
-  email: {
-    elementType: 'input',
-    elementConfig: { type: 'email', placeholder: 'Your email' },
-    value: ''
-  },
-  deliveryMethod: {
-    elementType: 'select',
-    elementConfig: {
-      type: 'email',
-      options: [
-        { value: 'fastest', displayValue: 'Fastest' },
-        { value: 'cheapest', displayValue: 'cheapest' }
-      ]
+state={
+  orderForm: {
+    name: {
+      elementType: 'input',
+      elementConfig: { type: 'text', placeholder: 'your name' },
+      value: ''
     },
-    value: ''
+    email: {
+      elementType: 'input',
+      elementConfig: { type: 'email', placeholder: 'Your email' },
+      value: ''
+    },
+    deliveryMethod: {
+      elementType: 'select',
+      elementConfig: {
+        type: 'email',
+        options: [
+          { value: 'fastest', displayValue: 'Fastest' },
+          { value: 'cheapest', displayValue: 'cheapest' }
+        ]
+      },
+      value: ''
+    }
   }
 }
-
 let form =( <form>
     <Input elementType="..." elementConfig="..." value="..." />
  </form>)
@@ -3270,6 +3270,8 @@ let form =( <form>
 * with the state setup, we can create an array from the state then loop through each element and create the component
 
 ```js
+// ContactData.js
+
 render(){
   let formElementsArray = [];
 
@@ -3290,3 +3292,45 @@ render(){
 
 }
 ```
+
+### 06. Adding a Dropdown Component.mp4
+```js
+//ContactData.js
+	state = {
+		orderForm: {
+      // ...other form content...
+
+      //drop down select
+      deliveryMethod: {
+        elementType: 'select',
+        elementConfig: {
+          type: 'email',
+          options: [
+            { value: 'fastest', displayValue: 'Fastest' },
+            { value: 'cheapest', displayValue: 'cheapest' }
+          ]
+        },
+        value: ''
+      }
+
+    }
+  }
+```
+
+```js
+// Input.js
+
+case 'select':
+  inputElement = (
+    <select className={classes.InputElement} value={props.value}>
+      {props.elementConfig.options.map(option => (
+        <option key={option.value} value={option.value}>
+          {option.displayValue}
+        </option>
+      ))}
+    </select>
+  );
+
+
+  ```
+  
