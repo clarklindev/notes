@@ -3333,4 +3333,62 @@ case 'select':
 
 
   ```
-  
+  ### Handling User Input.mp4
+
+  * Input component, each input element gets onChange listener
+  * in the section using the Input component, pass in as a prop 
+  * changed={(event) => this.inputChangedHandler(event, )}
+  but make it an anonymouse function that calls our handler so we can pass in arguments
+  * the second param is a unique identifier to ref the specific input (inputIdentifier) this is the keys of orderForm in the state...
+  * this value came from formElementsArray {id:key} value pair
+  * mutate state with setState()
+  * make deep copy of state data in inputChangedHandler(), note ...this.state.orderForm only makes a deep copy of the state orderForm, does not make a deep copy the nested keys' objects
+* updateOrderKeyObject is now a clone, note: elementConfig is still not a clone,
+* update a prop value of updateOrderKeyObject
+* reassign back to the key's value `updatedOrderForm[inputIdentifier] = updatedOrderKeyObject`
+* set state
+
+#### summary
+* form built from state,
+* has handler for input
+* make a deep copy of the values in the state, 
+* make copy of object value of key
+* spread to new object 
+* update specific value
+* and update a value property of this new object to the event.target.value
+I reassign the key back to the copy of the form `updatedOrderForm[inputIdentifier] = updatedOrderKeyObject`
+* set state
+
+  ```js
+  //Input.js definition
+  <Input onChange={props.changed}>
+
+  //ContactData.js //usage
+	inputChangedHandler = (event, inputIdentifier) => {
+		const updatedOrderForm = {
+			...this.state.orderForm
+		};
+		const updatedOrderKeyObject = {
+			...updatedOrderForm[inputIdentifier]
+		};
+		updatedOrderKeyObject.value = event.target.value;
+		updatedOrderForm[inputIdentifier] = updatedOrderKeyObject;
+		this.setState({ orderForm: updatedOrderForm });
+	};
+
+
+
+  const formElementsArray = [];
+  for(let key in this.state.orderForm){
+    formElementsArray.push({id:key, config: this.state.orderForm[key]})
+  } 
+
+  let form = (
+    <form>
+      {formElementsArray.map(formElement)=> {
+      <Input key={formElement.id} changed={()=>this.inputChangedHandler(event, formElement.id)}/>
+    </form>
+  );
+  }
+
+  ```
