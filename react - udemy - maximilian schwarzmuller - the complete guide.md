@@ -3704,7 +3704,7 @@ console.log(store.getState());
 ### Passing and Retrieving Data with Action.mp4
 
 * we can add additional data to the dispatch object, in addition to 'type', 
-* like a payload object payload:{} which stores all additional data,
+* like a payload object,eg. payload:{} which stores all additional data,
 
 ```js
 // index.js
@@ -3781,3 +3781,37 @@ export default connect(mapStateToProps, mapDispatchToProps)(Counter)
 
 ```
 
+### Switch-Case in the Reducer.mp4
+
+* using switch(action.type) instead of if() 
+
+```js
+//reducer.js
+
+
+const reducer = (state = initialState, action)=>{
+  switch(action.type){
+    //only returning single object like below because there is only single item counter in state
+    case 'INCREMENT':
+      return {
+      counter: state.counter + 1
+    }
+    case 'DECREMENT':
+      return {
+      counter: state.counter - 1
+    }
+    case 'ADD':
+      return {
+      counter: state.counter + action.val
+    },
+    case 'SUBTRACT':
+      return {
+      counter: state.counter - action.val
+    }
+  }
+  return state;
+};
+
+export default reducer;
+
+```
