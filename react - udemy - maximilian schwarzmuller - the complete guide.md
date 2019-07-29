@@ -3656,3 +3656,72 @@ store.dispatch({type:'ADD_COUNTER', value:10});
 console.log(store.getState());
 
 ```
+
+### Connecting React to Redux.mp4
+
+* npm install --save redux //allows us to create a store
+* import {createStore} from 'redux';
+* import reducer from './store/reducer';
+* const store = createStore(reducer);   passing reducer into createStore()
+
+### Connecting the Store to React.mp4
+
+* npm install --save react-redux //ties redux to react
+* import {Provider } from 'react-redux'; 
+* wrap our `<App>` component with `<Provider>` which is a helper which injects store into components
+* to hook up the store, we pass the store created with createStore() to Provider store={} prop.
+* to connect the store to the component... we want to subscribe to the store to connect them...
+* still a container component (stateful component) that receives the store   
+* import {connect} from 'react-redux';   
+* export default connect()(Counter)
+* connect is a Higher order function we use on export
+* it is a function connect() that returns a function that takes a component eg. Counter (Counter) as an input
+* we pass some configuration to connect(), 
+* 2 pieces information...
+  - which part of whole app state (which slice of the state you want in a specific container)
+  - which actions to dispatch
+
+* `const mapStateToProps = ` mapStateToProps - stores how state managed by redux should be mapped to props we can use in the component
+- it actually stores a function which expects the state (given to you) stored in redux as an input 
+- and returns an object, a map of prop names and slices of the state stored in redux
+- this function will eventually be passed to redux and executed by redux, 
+- this is a way of configuring which kind of information we need
+- eg. return { ctr : state.counter } , ctr is a prop we name, state.counter is from the state in redux
+- we pass to connect(mapStateToProps)(Counter) so we are connecting section of state to our Counter component
+- now we have access to ctr via {this.props.ctr}
+
+```js
+// index.js
+import {createStore} from 'redux';
+import reducer from './store/reducer';
+const store = createStore(reducer);
+
+ReactDOM.render(<Provider store={store}><App/></Provider>);
+```
+
+```js
+//store/reducer.js
+const initialState = {
+  counter:0
+}
+
+const reducer = (state = initialState, action)=>{
+  return state;
+}
+
+export default reducer;
+```
+
+```js
+//counter.js
+
+const mapStateToProps = (state) => {
+  return {
+    ctr : state.counter
+  }
+}
+
+export default connect(mapStateToProps)(Counter)
+
+```
+
