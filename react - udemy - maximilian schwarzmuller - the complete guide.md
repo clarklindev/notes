@@ -3541,3 +3541,15 @@ this.setState({orderForm:updatedOrderForm, formIsValid:formIsValid});
 
 ---
 
+## Redux
+
+* 3rd party libary for state management
+* used for authentication
+* ui state
+
+### The Complexity of Managing State.mp4
+
+* state management can get complex as application grows
+* fixes issue of passing data around
+* cannot use just a global variable js object, stores entire application state because reacts reactivity system doesnt react to changes in some global variable
+* but the idea of a global store is what redux is about
