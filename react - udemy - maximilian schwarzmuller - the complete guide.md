@@ -3606,7 +3606,9 @@ Subscription model
 
 ### Adding Subscriptions.mp4
 
-
+* subscriptions make sure you dont have to manually call getState(), it informs me whenever state updates,
+* store.subscribe() takes an argument, function that gets executed when state gets updated.
+* added after store is created with CreateStore to listen to future dispatches,
 
   
 RUNNING THE JS
@@ -3643,11 +3645,14 @@ const rootReducer = (state = initialState, action) = {
 const store = createStore(rootReducer);    //executes store
 console.log(store.getState());
 
+//Subscription
+store.subscribe(()=>{
+  console.log('[Subscription]', store,getState());
+})
 
 //Dispatching Action
 store.dispatch({type:'INC_COUNTER'});
 store.dispatch({type:'ADD_COUNTER', value:10});
 console.log(store.getState());
 
-//Subscription
 ```
