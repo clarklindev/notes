@@ -3149,6 +3149,7 @@ class App extends Component{
 ### Creating a Custom Dynamic Input Component.mp4
 
 ```js
+// ContactDetails.js
 // <!-- usage: -->
 	<Input
     inputtype="input"
@@ -3248,7 +3249,6 @@ state={
     deliveryMethod: {
       elementType: 'select',
       elementConfig: {
-        type: 'email',
         options: [
           { value: 'fastest', displayValue: 'Fastest' },
           { value: 'cheapest', displayValue: 'cheapest' }
@@ -3268,6 +3268,7 @@ let form =( <form>
 
 * creating `<Input>` components dynamically from state
 * with the state setup, we can create an array from the state then loop through each element and create the component
+* save orderForm key/value in formElementsArray
 
 ```js
 // ContactData.js
@@ -3421,10 +3422,122 @@ I reassign the key back to the copy of the form `updatedOrderForm[inputIdentifie
     })
     .catch(error=>{
       this.setState({loading:false});
-      
+
     })
   }
 
   <form onSubmit={this.orderHandler}>
   </form>
+``` 
+
+### adding validation feedback
+
+* Input component should get validation css classes if invalid
+* change className={classes.InputElement} to css module reference like className={inputClasses}
+* inputClasses is an array to hold all associated classes
+* then we are checking against the input type we are creating if its invalid or not
+* add to Input component form element (where its being used eg. ContactData.js)
+* inside the formElementsArray.map(formElement=>{<Input invalid={!formElement.config.valid}/>})
+the json data is 'valid' but we have invalid={} prop, so pass-in the opposite 
+* this makes everything invalid, for dropdowns we should cater for a shouldValidate property which the json for dropdown does not have, so check for shouldValidate={check on if validation object exists} ie. shouldValidate={formElement.config.validation}
+
+
+```js
+// Input.js
+const inputClasses = [classes.InputElement].join(' ');
+
+if(props.invalid && props.shouldValidate){
+  inputClasses.push(classes.Invalid);
+}
 ```
+
+```css
+.Invalid {
+  /* set up styling */
+  border: 1px solid red;
+  background-color: salmon;
+}
+```
+```js
+// CotactData.js
+//reminder: formElementsArray 
+const formElementsArray = [];
+for(let key in this.state.orderForm){
+  formElementsArray.push({id:key, config: this.state.orderForm[key]})
+} 
+
+//reminder: orderForm[key] - formElement
+email:{
+  elementType:'input',
+  elementConfig: {
+    type:'email',
+    placeholder:'your-email'
+  },
+  value:'',
+  validation:{required:true},
+  valid:false
+}
+
+// inside the formElementsArray.map(formElement=>{<Input/>})
+<Input invalid={!formElement.config.valid} shouldValidate={formElement.config.validation}
+```
+
+### Improving Visual Feedback.mp4
+* form should have 'touched' check,
+* add 'touched: false' to json
+* and only check validity if touched changed to true
+* inside input(),
+```js
+// ContactData.js
+inputChangedHandler = (event, inputIdentifier)=>{
+updatedFormElement.touched = true;
+} 
+
+<Input touched={formElement.config.touched}>
+
+```
+```js
+// Input.js
+if(props.invalid && props.shouldV && props.touched)
+```
+
+### Handling Overall Form Validity.mp4
+
+* checking overall validity, we can use this to turn order button on/off
+* can add formIsValid property to state
+* the for-loop iterates trhough all inputs, including the drop-down which doesnt have a valid prop, which makes it undefined,
+* hence formIsValid is always undefined, fix by adding .valid to the dropdown and set always true
+```js 
+//ContactData.js
+let formIsValid = true;
+for(let inputIdentifier in updatedOrderForm){
+  formIsValid - updatedOrderForm[inputIdentifier].valid && formIsValid
+}
+this.setState({orderForm:updatedOrderForm, formIsValid:formIsValid});
+
+<Button btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
+```
+```js
+//Button.js
+<button disabled={props.disabled}>
+```
+```css
+/* Button.css */
+.Button:fisabled{
+  color: #CCC;
+  cursor: not-allowed;
+}
+```
+
+### Working on an Error
+
+* form validation error on dropdown because it doesnt have a validation:{} prop whereas the others do
+* fix by adding it
+
+### 16. Fixing a Bug.mp4
+
+* drop down select default value, if never set, the default is ''
+* fix by adding default value to one of the options
+
+---
+
