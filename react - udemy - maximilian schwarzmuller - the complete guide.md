@@ -3553,3 +3553,101 @@ this.setState({orderForm:updatedOrderForm, formIsValid:formIsValid});
 * fixes issue of passing data around
 * cannot use just a global variable js object, stores entire application state because reacts reactivity system doesnt react to changes in some global variable
 * but the idea of a global store is what redux is about
+
+### Understanding the Redux Flow.mp4
+
+* Central Store - think about Redux like a giant js Object.
+* A Component - it wants to manipulate and gain state, but doesnt do it directly, store will be difficult to track and react wont pick it up
+* Actions - a messenger - dispatched from components, action is infomation with a type.. possible includes payload (other data)
+* Reducer - pure function (no side effects) that changes the store -> action reachs reducer, reducer can check actions type, then define code for the action in the reducer.4
+
+Reducer
+
+* receives action as INPUT
+* receives old state as INPUT
+* OUTPUT updated state
+* NB: Synchronos code ONLY (NO ASYNC CODE, NO side effects, NO HTTP requests)
+* STATE is updated in immutable way (New object)
+
+Subscription model
+* to get updated state back to the component
+* store triggers ALL subscription when state changes
+* component subscribes to store for updates and it then receives that update automatically
+
+### Setting Up Reducer and Store.mp4
+
+* npm install --save redux
+* create new file in root redux-basics.js to be executed with node.js to show independent of react
+* redux.createStore; is a function allows us to create a new redux store
+* store needs to be initialized with a reducer, pass reducer into createStore()
+* so create Reducer first, reducer receives 2 functions current state (state, action)=>{ return state;} and it needs to return the updated state
+* simplest reducer you can create is return state
+* store.getState();
+* setup state const initialState = {} with initial prop
+* using ES6 can initialize function with default value
+* with initial state created, use as default value for state
+
+### Dispatching Actions.mp4
+
+* dispatch with store.dispatch({type:''}) takes 
+1. an object argument with 'type' prop that stores type of action (CONVENTION IS UPPERCASE STRING), 
+  * other properties can also be added to the object.
+
+2. and what we should do in reducer
+
+* need to add logic to react to the actions, we do this in Reducer, 
+```js
+  if(action.type === 'INC_COUNTER'){
+    return {
+      ...state, counter: state.counter + 1
+    }; 
+  }
+```
+
+### Adding Subscriptions.mp4
+
+
+
+  
+RUNNING THE JS
+```
+// to run with node
+node redux-basics.js
+```
+
+```js
+//redux-basics.js
+const redux = require('redux');   //node.js syntax
+const createStore = redux.createStore;
+
+const initialState = {
+  counter:0
+}
+
+// Reducer
+const rootReducer = (state = initialState, action) = {
+  if(action.type === 'INC_COUNTER'){
+    return {
+      ...state, counter: state.counter + 1
+    }
+  }
+  if(action.type === 'ADD_COUNTER'){
+    return {
+      ...state, counter: state.counter + action.value
+    }
+  }
+  return state;
+}; 
+
+//Store
+const store = createStore(rootReducer);    //executes store
+console.log(store.getState());
+
+
+//Dispatching Action
+store.dispatch({type:'INC_COUNTER'});
+store.dispatch({type:'ADD_COUNTER', value:10});
+console.log(store.getState());
+
+//Subscription
+```
