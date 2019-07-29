@@ -3690,6 +3690,17 @@ console.log(store.getState());
 - we pass to connect(mapStateToProps)(Counter) so we are connecting section of state to our Counter component
 - now we have access to ctr via {this.props.ctr}
 
+### Dispatching Actions from within the Component.mp4
+
+* dispatching within component, we have acccess to the store via connect()
+* a second configuration mapDispatchToProps, will receive dispatch as an argument, return a object {} 
+* mapDispatchToProps = dispatch => { return {}}
+* in this object, we can define prop names `onIncrementCounter` : that will hold reference to anonymous function that returns a call to dispatch ()=>dispatch({}) 
+* we can use this prop onClick={this.onIncrementCounter}
+* in dispatch we pass an object with type eg.. {type:'INCREMENT'}
+* add mapDispatchToProps as second parameter, connect( mapStateToProps, mapDispatchToProps) 
+* in reducer listen for the action
+
 ```js
 // index.js
 import {createStore} from 'redux';
@@ -3706,6 +3717,12 @@ const initialState = {
 }
 
 const reducer = (state = initialState, action)=>{
+  if(action.type === "INCREMENT"){
+    //only returning single object like below because there is only single item counter in state
+    return {
+      counter: state.counter + 1
+    }
+  }
   return state;
 }
 
@@ -3715,13 +3732,26 @@ export default reducer;
 ```js
 //counter.js
 
+  render(){
+    <div>
+    <CounterOutput value={this.props.ctr}/>
+    <CounterControl label="Increment" clicked={()=> this.props.onIncrementCounter }>
+    </div>
+  }
+
 const mapStateToProps = (state) => {
   return {
     ctr : state.counter
+  } 
+}
+
+const mapDispatchToProps = (dispatch)=> {
+  return {
+    onIncrementCounter : ()=> dispatch({type:'INCREMENT'})
   }
 }
 
-export default connect(mapStateToProps)(Counter)
+export default connect(mapStateToProps, mapDispatchToProps)(Counter)
 
 ```
 
