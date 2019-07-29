@@ -3701,6 +3701,11 @@ console.log(store.getState());
 * add mapDispatchToProps as second parameter, connect( mapStateToProps, mapDispatchToProps) 
 * in reducer listen for the action
 
+### Passing and Retrieving Data with Action.mp4
+
+* we can add additional data to the dispatch object, in addition to 'type', 
+* like a payload object payload:{} which stores all additional data,
+
 ```js
 // index.js
 import {createStore} from 'redux';
@@ -3721,6 +3726,24 @@ const reducer = (state = initialState, action)=>{
     //only returning single object like below because there is only single item counter in state
     return {
       counter: state.counter + 1
+    }
+  },
+  if(action.type === "DECREMENT"){
+    //only returning single object like below because there is only single item counter in state
+    return {
+      counter: state.counter - 1
+    }
+  },
+  if(action.type === "ADD"){
+    //only returning single object like below because there is only single item counter in state
+    return {
+      counter: state.counter + action.val
+    }
+  },
+  if(action.type === "SUBTRACT"){
+    //only returning single object like below because there is only single item counter in state
+    return {
+      counter: state.counter - action.val
     }
   }
   return state;
@@ -3747,7 +3770,10 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch)=> {
   return {
-    onIncrementCounter : ()=> dispatch({type:'INCREMENT'})
+    onIncrementCounter : ()=> dispatch({type:'INCREMENT'}),
+    onDecrementCounter : ()=> dispatch({type:'DECREMENT'}),
+    onAddCounter : ()=> dispatch({type: 'ADD', val: 10}),
+    onSubtractCounter : ()=> dispatch({type: 'SUBTRACT', val: 15})
   }
 }
 
