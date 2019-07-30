@@ -3726,9 +3726,26 @@ console.log(store.getState());
   OR
   - return a js object, return all props of old state distributed these values in new object, and if we define new prop in new state, add this property to the object, or if it already exists, overwrite this prop.
 * onStoreResult dispatches 'STORE_RESULT' which executes return {...state, results: state.results.concat(state.counter) 
-* concat() returns a new array whereas push() manipulates old value (touching properties of original array - not good practice)
+* javascript method - concat() returns a new array whereas push() manipulates old value (touching properties of original array - not good practice)
+* es6 method - {...state, results:[...state.results, state.counter];
 * in a component, we now have access to the state via `storedResults` by adding it to mapStateToProps, storedResults: state.results
 * call with this.props.storedResults
+
+### Updating Arrays Immutably.mp4
+
+Normal Method of updating
+* create a copy of array, distribute all props eg. `new Array = [...state.results]` into the new array
+* manipulate the new copied array by adjusting prop values or removing item, `newArray.splice(id, 1)`
+* return spread state, override the prop, eg. `return {...state, results: newArray}`
+
+Filter Method of updating
+
+* remove with handle onClick={()=>this.props.onDeleteResult(strResult.id)} and handle event with anonymous function so we can pass in id
+* the .id property comes from when we set with reducer() STORE_RESULT, where we save date id:new Date() as the id.
+* we have access to onDeleteResult from mapDispatchToProps, this cause the reducer to execute,
+* in the reducer function, const updatedArray = state.results.filter((result)=> return result.id !== action.resultElId );
+* filter() returns a new array, takes a function and checks against certain condition if it makes it into new array, return true/false
+* so pass into the reducer additional info, the resultElId, on mapDispatchToProps = return { onDeleteResult : (id)=> dispatch({type:'DELETE_RESULT', resultElId:id) } 
 
 ```js
 // index.js
@@ -3770,6 +3787,21 @@ const reducer = (state = initialState, action)=>{
         ...state,
         results: state.results.concat({id:new Date(), value: state.counter}) //push manipulates old value, concat returns a new array
       }
+    },
+    case 'DELETE_RESULT':
+      
+        // const id = 2;
+        // const newArray = [...state.results];
+        // newArray.splice(id,1)
+        // return {    
+        //   ...state, results: newArray
+        // }
+
+        const updatedArray = state.results.filter(result => result.id !== action.resultElId);
+        return {
+          ...state,
+          results: updatedArray
+        }
     }
   }
   return state;
@@ -3789,7 +3821,7 @@ export default reducer;
     <button onClick={this.props.onStoreResult}>Store result</button>
     <ul>
       {this.props.storedResults.map(strResult => {
-        <li key={strResult.id} onClick={this.props.onDeleteResult}></li>
+        <li key={strResult.id} onClick={()=> this.props.onDeleteResult(strResult.id)}>{strResult.value}</li>
       })}      
     </ul>
     </div>
@@ -3809,7 +3841,7 @@ const mapDispatchToProps = (dispatch)=> {
     onAddCounter : ()=> dispatch({type: 'ADD', val: 10}),
     onSubtractCounter : ()=> dispatch({type: 'SUBTRACT', val: 15}),
     onStoreResult : ()=> dispatch({type:'STORE_RESULT'}),
-    onDeleteResult : ()=> dispatch({type:'DELETE_RESULT'})
+    onDeleteResult : (id)=> dispatch({type:'DELETE_RESULT', resultElId:id)
   }
 }
 
