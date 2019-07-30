@@ -3849,6 +3849,44 @@ export default connect(mapStateToProps, mapDispatchToProps)(Counter)
 
 ```
 
+### Outsourcing Action Types.mp4
 
+* to avoid spelling errors and mismatched action strings with redux action types, we externalize the definition to external file
+* store/actions.js
+* export const ACTIONTYPE = 'STRING'; note the name and value are the same
+* now we can import the actions into the reducer and also the component using the actions for dispatching...
 
+```js
+// store/actions.js
+export const INCREMENT = 'INCREMENT';
+export const DECREMENT = 'DECREMENT';
+export const ADD = 'ADD';
+export const SUBTRACT = 'SUBTRACT';
+export const STORE_RESULT = 'STORE_RESULT';
+export const DELETE_RESULT = 'DELETE_RESULT';
 
+```
+
+```js
+//store/reducer.js
+import * as actionTypes from './actions';
+
+case actionTypes.INCREMENT:
+case actionTypes.DECREMENT:
+case actionTypes.ADD;
+case actionTypes.SUBTRACT;
+case actionTypes.STORE_RESULT;
+case actionTypes.DELETE_RESULT;
+
+```
+
+```js
+//Counter.js
+import * as actionTypes from '../../store/actions';
+
+mapDispatchToProps = dispatch => {
+  return {
+    onIncrementCounter: ()=> dispatch({type: actionTypes.INCREMENT}),
+  }
+}
+```
