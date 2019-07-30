@@ -3706,6 +3706,30 @@ console.log(store.getState());
 * we can add additional data to the dispatch object, in addition to 'type', 
 * like a payload object,eg. payload:{} which stores all additional data,
 
+### Switch-Case in the Reducer.mp4
+
+* using switch(action.type) instead of if() 
+
+### Updating State Immutably.mp4
+* add a new prop to state, results:[]
+* our example will add `<button>Store result</button>` and 
+* when button clicked, dispatch an action
+* add counter value to result list `<ul>`
+* when `<li>` clicked, remove that item from the array
+* we add 2 extra props to map dispatchToProps
+  - onStoreResult : ()=> dispatch({type:'STORE_RESULT'}),
+  - onDeleteResult : ()=> dispatch({type:'DELETE_RESULT'})
+* add to `<button onClick={this.props.onStoreResult}>`
+* `<ul><li onClick={this.props.onDeleteResult}></li></ul>`
+* handle the action in the reducer immutably by taking old value in store and spreading it in a new object 
+  - either by const newState = Object.assign({}, state);  update the prop on this new obj, return new object
+  OR
+  - return a js object, return all props of old state distributed these values in new object, and if we define new prop in new state, add this property to the object, or if it already exists, overwrite this prop.
+* onStoreResult dispatches 'STORE_RESULT' which executes return {...state, results: state.results.concat(state.counter) 
+* concat() returns a new array whereas push() manipulates old value (touching properties of original array - not good practice)
+* in a component, we now have access to the state via `storedResults` by adding it to mapStateToProps, storedResults: state.results
+* call with this.props.storedResults
+
 ```js
 // index.js
 import {createStore} from 'redux';
@@ -3718,76 +3742,9 @@ ReactDOM.render(<Provider store={store}><App/></Provider>);
 ```js
 //store/reducer.js
 const initialState = {
-  counter:0
+  counter:0,
+  results: []
 }
-
-const reducer = (state = initialState, action)=>{
-  if(action.type === "INCREMENT"){
-    //only returning single object like below because there is only single item counter in state
-    return {
-      counter: state.counter + 1
-    }
-  },
-  if(action.type === "DECREMENT"){
-    //only returning single object like below because there is only single item counter in state
-    return {
-      counter: state.counter - 1
-    }
-  },
-  if(action.type === "ADD"){
-    //only returning single object like below because there is only single item counter in state
-    return {
-      counter: state.counter + action.val
-    }
-  },
-  if(action.type === "SUBTRACT"){
-    //only returning single object like below because there is only single item counter in state
-    return {
-      counter: state.counter - action.val
-    }
-  }
-  return state;
-}
-
-export default reducer;
-```
-
-```js
-//counter.js
-
-  render(){
-    <div>
-    <CounterOutput value={this.props.ctr}/>
-    <CounterControl label="Increment" clicked={()=> this.props.onIncrementCounter }>
-    </div>
-  }
-
-const mapStateToProps = (state) => {
-  return {
-    ctr : state.counter
-  } 
-}
-
-const mapDispatchToProps = (dispatch)=> {
-  return {
-    onIncrementCounter : ()=> dispatch({type:'INCREMENT'}),
-    onDecrementCounter : ()=> dispatch({type:'DECREMENT'}),
-    onAddCounter : ()=> dispatch({type: 'ADD', val: 10}),
-    onSubtractCounter : ()=> dispatch({type: 'SUBTRACT', val: 15})
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Counter)
-
-```
-
-### Switch-Case in the Reducer.mp4
-
-* using switch(action.type) instead of if() 
-
-```js
-//reducer.js
-
 
 const reducer = (state = initialState, action)=>{
   switch(action.type){
@@ -3807,11 +3764,59 @@ const reducer = (state = initialState, action)=>{
     case 'SUBTRACT':
       return {
       counter: state.counter - action.val
+    },
+    case 'STORE_RESULT':
+      return {
+        ...state,
+        results: state.results.concat({id:new Date(), value: state.counter}) //push manipulates old value, concat returns a new array
+      }
     }
   }
   return state;
-};
+}
 
 export default reducer;
+```
+
+```js
+//counter.js
+
+  render(){
+    <div>
+    <CounterOutput value={this.props.ctr}/>
+    <CounterControl label="Increment" clicked={()=> this.props.onIncrementCounter }>
+    <hr/>
+    <button onClick={this.props.onStoreResult}>Store result</button>
+    <ul>
+      {this.props.storedResults.map(strResult => {
+        <li key={strResult.id} onClick={this.props.onDeleteResult}></li>
+      })}      
+    </ul>
+    </div>
+  }
+
+const mapStateToProps = (state) => {
+  return {
+    ctr : state.counter,
+    storedResults: state.results
+  } 
+}
+
+const mapDispatchToProps = (dispatch)=> {
+  return {
+    onIncrementCounter : ()=> dispatch({type:'INCREMENT'}),
+    onDecrementCounter : ()=> dispatch({type:'DECREMENT'}),
+    onAddCounter : ()=> dispatch({type: 'ADD', val: 10}),
+    onSubtractCounter : ()=> dispatch({type: 'SUBTRACT', val: 15}),
+    onStoreResult : ()=> dispatch({type:'STORE_RESULT'}),
+    onDeleteResult : ()=> dispatch({type:'DELETE_RESULT'})
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Counter)
 
 ```
+
+
+
+
