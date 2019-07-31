@@ -3811,7 +3811,7 @@ export default reducer;
 ```
 
 ```js
-//counter.js
+//Counter.js
 
   render(){
     <div>
@@ -3821,8 +3821,7 @@ export default reducer;
     <button onClick={this.props.onStoreResult}>Store result</button>
     <ul>
       {this.props.storedResults.map(strResult => {
-        <li key={strResult.id} onClick={()=> this.props.onDeleteResult(strResult.id)}>{strResult.value}</li>
-      })}      
+       })}      
     </ul>
     </div>
   }
@@ -3889,4 +3888,113 @@ mapDispatchToProps = dispatch => {
     onIncrementCounter: ()=> dispatch({type: actionTypes.INCREMENT}),
   }
 }
+```
+
+### Combining Multiple Reducers.mp4
+
+* possible to have multiple reducers
+* all actions in the end get funnelled through a single reducer, 
+* redux gives us utility map to combine multiple reducers into one
+* can split up by feature by part the state manages
+* create store/reducers/*file* and split up respective actions
+* in index.js , import respective reducers separately
+* import combineReducers, `import { createStore, combineReducers} from 'redux';`
+* create a new const give prop names to sections and map reducers to it,
+* eg. `const rootReducer = combineReducers({ctr:counterReducer, res:resultReducer})`
+* we then pass this rootReducer to createStore(rootReducer)
+ 
+ERRORS:
+//Counter.js - the component using reducer (does the state mapping )
+```js
+const mapStateToProps = (state) => {
+  return {
+    ctr : state.ctr.counter,
+    storedResults: state.res.results
+  } 
+}
+```
+* the reference to state.counter needs to be adjusted to state.ctr.counter
+* redux has one state object, but to avoid naming conflicts, redux adds one level of nesting with keys as properties that gives access to the sub states
+* in result.js, case actionTypes.STORE_RESULT: , it tries to access  state.counter, but it needs to get it from an action payload...
+* fix by adding to the component Counter.js, mapDispatchToProps the onStoreResult: (result)=> dispatch function receives result so we can dispatch it as part of action result: result.
+ * to send the action, `<button onClick={()=>this.props.onStoreResult(this.props.ctr)}>` 
+ 
+```js
+// index.js
+import { createStore, combineReducers } from 'redux';
+import counterReducer from './store/reducers/counter';
+import resultReducer from './store/reducers/result';
+
+const rootReducer = combineReducers({ctr:counterReducer, res:resultReducer})
+
+const store = createStore(rootReducer);
+ReactDOM.render(<Provider store={store}><App/></Provider>)
+```
+
+//containers/Counter/Counter.js
+```js
+mapStateToProps = state=>{ return {ctr:state.ctr.counter, storedResults:state.res.results}}
+```
+
+```js
+//store/reducers/counter.js
+import * as actionTypes from '../actions';
+
+
+const initialState = {
+  counter: 0
+};
+
+const reducer = (state=initialState, action) => {
+  switch(action.type){
+    //only returning single object like below because there is only single item counter in state
+    case actionTypes.INCREMENT:
+      const newState = Object.assign({}, state);
+      newState.counter = state.counter + 1;
+      return newState;
+
+    case actionTypes.DECREMENT:
+      return {
+        ...,
+      counter: state.counter - 1
+    }
+    case actionTypes.ADD:
+      return {
+      counter: state.counter + action.val
+    },
+    case actionTypes.SUBTRACT:
+      return {
+        ...state,
+      counter: state.counter - action.val
+    }
+  }
+  return state;
+}
+export default reducer;
+```
+```js
+//store/reducers/result.js
+import * as actionTypes from '../actions';
+const initialState = {
+  results: []
+};
+
+const reducer = (state=initialState, action) => {
+  switch(action.type){
+    case actionTypes.STORE_RESULT:
+      return {
+        ...state,
+        results: state.results.concat({id:new Date(), value: state.counter})
+      }
+    case actionTypes.DELETE_RESULT:
+      const updatedArray = state.results.filter(result => result.id !== action.resultElId);
+      return {
+        ...state,
+        results: updatedArray
+      }
+    }
+  }
+  return state;
+}
+export default reducer;
 ```
