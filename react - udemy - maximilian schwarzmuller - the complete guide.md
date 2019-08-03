@@ -2397,6 +2397,60 @@ instance.defaults.headers.common['Authorization'] = 'AUTH TOKEN FROM INSTANCE';
 
 export default instance;
 ```
+# Burger Builder Project Accessing a Server
+
+### 
+
+# Multi-Page-Feeling in a Single-Page-App Routing
+
+* firebase from google, free based on usage
+* goto console
+* create new project
+* firebase automatically gives REST api end points and mongodb like / json structure database 
+* firebase does the mapping from http request to database where api endpoints directly map to tables in database
+* NB: Choose Realtime Database
+* under RULES -> change read and write to true (setting skips authentication)
+* when using firebase paths to end points need '.json'
+
+### Creating the Axios Instance
+
+* sending Http requests require axios
+* npm install --save axios
+* create a file to host the import eg. axios-contact.js 
+* import axios from 'axios';
+* const instance = axios.create({baseURL: 'https://test-aruba-fe3a6.firebaseio.com/'});
+ the base url is the link from firebase for the project
+
+```js
+// axios-orders.js
+import axios from 'axios';
+const instance = axios.create({
+  baseURL: 'https://test-aruba-fe3a6.firebaseio.com/'
+});
+export default instance;
+```
+
+### Sending a POST Request
+* using axios to post data to server
+* use the axios instance because it has the  baseURL set up
+* axios.post('/path.json'), path will create the node on the db
+* and gets appended to baseURL
+* firebase requires that the .json be added to the path
+
+```js
+// BurgerBuilder.js
+import axios from '../../axios-orders'
+
+purchaseContinueHandler = ()=>{
+  const order = {
+    ingredients: this.state.ingredients,
+    price: this.state.totalPrice,
+
+  }
+  axios.post('/orders.json');
+}
+
+```
 
 ## Routing
 
@@ -3559,7 +3613,7 @@ this.setState({orderForm:updatedOrderForm, formIsValid:formIsValid});
 * Central Store - think about Redux like a giant js Object.
 * A Component - it wants to manipulate and gain state, but doesnt do it directly, store will be difficult to track and react wont pick it up
 * Actions - a messenger - dispatched from components, action is infomation with a type.. possible includes payload (other data)
-* Reducer - pure function (no side effects) that changes the store -> action reachs reducer, reducer can check actions type, then define code for the action in the reducer.4
+* Reducer - pure function (no side effects) that changes the store -> action reachs reducer, reducer can check actions type, then define code for the action in the reducer
 
 Reducer
 
@@ -3671,7 +3725,7 @@ console.log(store.getState());
 * wrap our `<App>` component with `<Provider>` which is a helper which injects store into components
 * to hook up the store, we pass the store created with createStore() to Provider store={} prop.
 * to connect the store to the component... we want to subscribe to the store to connect them...
-* still a container component (stateful component) that receives the store   
+* in a container component (stateful component) that receives the store   
 * import {connect} from 'react-redux';   
 * export default connect()(Counter)
 * connect is a Higher order function we use on export
@@ -3789,19 +3843,19 @@ const reducer = (state = initialState, action)=>{
       }
     },
     case 'DELETE_RESULT':
-      
-        // const id = 2;
-        // const newArray = [...state.results];
-        // newArray.splice(id,1)
-        // return {    
-        //   ...state, results: newArray
-        // }
+    
+      // const id = 2;
+      // const newArray = [...state.results];
+      // newArray.splice(id,1)
+      // return {    
+      //   ...state, results: newArray
+      // }
 
-        const updatedArray = state.results.filter(result => result.id !== action.resultElId);
-        return {
-          ...state,
-          results: updatedArray
-        }
+      const updatedArray = state.results.filter(result => result.id !== action.resultElId);
+      return {
+        ...state,
+        results: updatedArray
+      }
     }
   }
   return state;
@@ -3872,10 +3926,10 @@ import * as actionTypes from './actions';
 
 case actionTypes.INCREMENT:
 case actionTypes.DECREMENT:
-case actionTypes.ADD;
-case actionTypes.SUBTRACT;
-case actionTypes.STORE_RESULT;
-case actionTypes.DELETE_RESULT;
+case actionTypes.ADD:
+case actionTypes.SUBTRACT:
+case actionTypes.STORE_RESULT:
+case actionTypes.DELETE_RESULT:
 
 ```
 
@@ -3998,3 +4052,242 @@ const reducer = (state=initialState, action) => {
 }
 export default reducer;
 ```
+
+## Adding Redux to our Project
+
+* data to store vs state for conditional UI
+
+### Basic Redux Setup
+
+* import {Provider} from 'react-redux';
+* import {createStore} from 'redux';
+* import reducer from '';
+* `<Provider>` wraps everything including `<BrowserRouter>`
+* to gain access to the store, import {connect} from react-redux and wrap export, if an export wrap already exists, wrap that with connect()(oldwrap)
+
+### Finishing the Reducer for Ingredients
+### Connecting the Burger Builder Container to our Store.mp4
+* import {connect} from 'react-redux'  to connect anything to store
+* wrap the export with connect(mapStateToProps)(ComponentName)
+
+```js
+import {Provider, connect} from 'react-redux';
+import {createStore} from 'redux';
+import reducer from '';
+const store = createStore(reducer);
+const app = (<Provider store={store}><App/></Provider>)
+import * as actionTypes from '';
+
+const mapStateToProps = state=>{
+  return {
+    ing: state.ingredients
+  }
+}
+
+const mapDispatchToProps = dispatch =>{
+  return {
+    onIngredientAdded: (ingName)=> dispatch({type:actionTypes.ADD_INGREDIENT, ingredientName:ingName})
+    onIngredientRemoved: (ingName)=> dispatch({type:actionTypes.REMOVE_INGREDIENT, ingredientName:ingName})
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(withErrorHandler(BurgerBuilder, axios));
+```
+
+## Redux Advanced
+
+### Adding Middleware
+
+* between `action dispatch` and `reaching reducer`, we can add middleware
+* middleware - term for functions or code hooked into a process without stopping it
+* ie can do something with action before it reaches reducer, eg. adding logging, 
+
+#### Middleware
+  1. logger takes a function and receives store as input
+  2. return another function where it receives the next argument 'next', we call next to allow the function to continue its way
+  3. it returns the action as another function
+  4. inside that function we have access to everything above it eg. store, next and action
+  5. next(action) allows it to continue to the reducer, and it needs action as an argument
+  6. we store the result of the call 'result' and we return this...
+  7. allows us to make calls between
+
+* import {applyMiddleware} from 'redux' allows us to add middleware to store
+* connect middleware, createStore(reducer, enhancer ) add second argument which can be an enhancer (middleware)
+* we get additional output, and we can use Redux dev tools to look into store.
+
+```js
+  //index.js
+import {Provider} from 'react-redux';
+import {createStore, combineReducers, applyMiddleware} from 'redux';
+import counterReducer from '';
+import resultReducer from '';
+const rootReducer = combineReducers({ctr:counterReducer, res:resultReducer})
+
+  const logger = store => next => action => {
+    console.log('[Middleware] Dispatching', action);
+    console.log('[Middleware] next state', store.getState());
+    return next(action);
+  };
+  
+  const store = createStore(rootReducer, applyMiddleware(logger);
+
+
+```
+
+### Using the Redux Devtools.mp4
+
+* install redux dev-tools chrome extension,
+* this is wiring it up to the dev-tools extension github redux-devtools-extension
+* https://github.com/zalmoxisus/redux-devtools-extension
+* chrome developer tools -> redux
+* add additional code to createStore()
+* import {createStore, applyMiddleware, compose} from 'redux';
+* compose() combines enhancers()
+* time travelling by clicking on that specific state, has skip, jump functions to debug
+
+```js
+// index.js
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(reducer, /* preloadedState, */ composeEnhancers(
+  applyMiddleware(thunk)
+));
+```
+
+### Creating Action Creators to prepare for asynchronous code
+
+* In Redux, action creators are functions that simply return an action
+* so instead of calling dispatch({type:actionTypes.INCREMENT}), an action creator is a function call that returns this action
+* ie. dispatch(increment())
+* moving logic related to component out into store/actions/ , store/reducers/
+* moving to store/actions/ actionTypes.js, 
+* store/actions/ create index.js file to export all in the same directory
+* where you using it, import * as whatevernameyouwant from '../../store/actions/index';
+
+```js
+//index.js
+export {
+  addIngredient, removeIngredient
+} from './burgerBuilder';
+export {} from '';
+```
+
+<!-- component using the actions -->
+```js
+import * as whatevernameyouwant from '../../store/actions/index';
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onIngredientAdded: (ingName)=> dispatch(whatevernameyouwant.addIngredient(ingName)),
+    onIngredientRemoved: (ingName)=>dispatch(whatevernameyouwant.removeIngredient(ingName))
+  }
+}
+
+```
+### Executing Asynchronous Code
+
+* putting async code into redux world
+* install redux-thunk, `npm install --save redux-thunk`
+* import {createStore, applyMiddleware, compose} from 'redux';
+* compose allows us to compose our own set of enhancers, middleware is just one kind of enhancer
+
+### Adding Thunk as middleware
+```js
+import {createStore, applyMiddleware, compose} from 'redux';
+import thunk from 'redux-thunk';
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const store = createStore(reducer, /* preloadedState, */ composeEnhancers(
+  applyMiddleware(logger, thunk)
+));
+```
+### introduction to action creators 
+* externalizing the dispatch action to a function,
+* dispatch(actioncreator()), eg. dispatch(increment())
+
+```js
+//action creator
+export const increment = () => {
+  return {type:INCREMENT}
+}
+```
+
+### Action Creators & Async Code
+* payloads get passed into the action creator as arguments
+* eg. onIncrement(val)=> dispatch(increment(val));
+* import * as actionCreators from '';
+* then in the dispatch(actionCreators.increment())
+
+### Handling Asynchronous Code
+* what thunk does for redux, instead of the reducer returning an action, it returns a function
+which will eventually dispatch an action
+* we create async action creators which will eventually dispatch synchronous ones
+* the dispatch of synchronous should be executing function passing on from the async any arguments
+* eg. async function, storeResult = (res)=>{ return dispatch=> {dispatch(saveResult(res))}}, 
+* NB: the function receives dispatch as an argument,
+* the async calls synchronous - saveResult=(res)=>{return {}}
+* for async redux, import thunk from 'redux-thunk';    //this will be applied as middleware
+* advanced store setup section under redux-devtools-exention on github
+
+### Restructuring Actions
+* separation of action creator functions from action types
+* creating an index.js and exporting with `export {} from ''` syntax 
+* now only need to `import * as actionCreators from 'somepath/index` 
+* actions and reducers need access to the common actionTypes `import * as actionTypes from './actionsTypes';`
+
+### Where to Put Data Transforming Logic
+* up to you reducer or action creator is both okay
+
+### Using Action Creators and Get State
+* sometimes in your action creator you want access to state, 
+* this actually is received as part of async action creator, 
+* function receives dispatch BUT ALSO access to state function eg getState which we then call () to get state
+
+```js
+export const storeResult = (res)=>{
+  return (dispatch, getState) => {
+    const someCounter = getState().counter
+    dispatch( somesyncfunction(res));
+  }
+}
+```
+### Using Utility Functions
+
+* cleaning up reducers regarding imutability
+* outsourcing the creating of oldstate/update property to utility function
+* usage, `updateObject(state, { phoneBook: updatedArray });` pass in state, and object of prop we want to update 
+
+```js
+//store/utility.js
+
+const updateObject = (oldObject, updateValues) => {
+  return {
+    ...oldObject, 
+    ...updateValues
+  }
+}
+```
+
+### A Leaner Switch Case Statement.mp4
+
+* externalizing the switch statement content to its own function, but still passing through the arguments it originally received,
+* convention is to use same name as argument list but camelcase
+
+```js
+const addContact = (state, action) => {
+  //logic handled here
+}
+const reducer = (state = initialState, action) => {
+	switch (action.type) {
+    case actionTypes.ADD_CONTACT:
+      addContact(state, action);
+  }
+```
+
+### An Alternative Folder Structure
+* our current project uses a central store, it is possible to have alternatives
+* each container can have its own store folder with its actions and reducers js files,
+* they are then combined later with combineReducers()
+
+### Diving Much Deeper
+* redux.js.org
+* read immutable update patterns
