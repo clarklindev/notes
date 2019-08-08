@@ -4524,7 +4524,7 @@ STEPS SIGN UP:
 ### Logging Users Out.mp4
 * logout after token will expire, 
 * after AUTH_SUCCESS (response.data.expiresIn)
-* create action creator checkAuthTimeout = (expirationTime) { return dispatch=>{ setTimeout(()=>{ dispatch(logout()) }, expirationTine)};}
+* create action creator checkAuthTimeout = (expirationTime) { return dispatch=>{ setTimeout(()=>{ dispatch(logout()) }, expirationTime)};}
 * actionTypes.AUTH_LOGOUT
 * export const logout = ()=>{ return {type: actionTypes.AUTH_LOGOUT}}
 * reducer, handle logout by setting token:null, userId:null
@@ -4723,7 +4723,7 @@ case actionTypes.SET_AUTH_REDIRECT_PATH: return setAuthRedirectPath(state, actio
 * App.js - import { connect } from 'react-redux';
 * import * as actions from './store/actions/index';
 * App.js - const create mapDispatchToProps = dispatch => { return {onTryAutoSignup:()=> dispatch(actions.authCheckState()) }} 
-* App.js - connect(null, mapDispatchToProps)(App);
+* App.js - connect(null, mapDispatchToProps)(App);  //note this is FIXED in next lesson
 * App.js call this.props.onTryAutoSignup(); in ComponentDidMount()
 
 * //store/actions/auth.js
@@ -4749,3 +4749,21 @@ case actionTypes.SET_AUTH_REDIRECT_PATH: return setAuthRedirectPath(state, actio
 
 #### inspecting localStorate
 * chrome developer tools -> application -> local Storage
+
+
+### Fixing Connect + Routing Errors
+* problem with router not working with connect() 
+* solution: import {withRouter} from 'react-router-dom'
+* wrap connect with withRouter(connect(null, mapDispatchToProps)(App))
+
+#### fixing logout being called
+* store/actions/auth.js export const authCheckState = () =>{}
+* use.getTime() instead of using .getSeconds(), which returns time in milliseconds
+* in checkAuthTimeOut = (expirationTime)=>{} we multiply by 1000, so in authCheckState we need to divide calculated answer by 1000
+```js
+export const authCheckState = () =>{
+  ...
+
+  dispatch(checkAuthTimeout( (expirationDate.getTime()- new Date().getTime() )/1000 ));
+}
+```
