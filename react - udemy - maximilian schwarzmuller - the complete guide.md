@@ -4767,3 +4767,63 @@ export const authCheckState = () =>{
   dispatch(checkAuthTimeout( (expirationDate.getTime()- new Date().getTime() )/1000 ));
 }
 ```
+
+### Ensuring App Security
+* localStorage can be accessed with cross-scripting attacks
+* react and angular prevent cross-scripting attacks by default
+* local storage should be safe, token expiry after 60min also helps
+* firebase has a refreshToken which doesnt expire,
+* on firebase site -> exchange a refresh token for an ID token ->, sending refresh token to api endpoint and you get back a new token
+* this means you can check for the token being valid, if it isnt, take the refresh token and get a new one, 
+but because it is a security risk to have never expiring token... and possible cross-scripting attacks, we dont do it.
+
+### Guarding Routes
+
+1. storing userId in any order we place, storing userId, this allows us to fetch orders by that user
+2. only allowed access to the orders page, and checkout page, if you are logged in (cant access route manually via url unless logged in)
+
+#### Guarding orders page so unauthenticated users cant access it
+* because of the way React works, if we dont have the `<Route>` to the component, then we cant access that page
+* with isAuthenticated setup in mapStateToProps, 
+* redirect users for unknown routes, use import {Redirect} from 'react-router-dom' 
+* add to unauthenticated users route `<Redirect to="/"/>`
+
+```js
+render(){
+  let routes = (
+    // unauthenticated users
+    <Switch>
+      <Route path="/auth" component={Auth}/>
+      <Route path="/" exact component={BurgerBuilder}/>
+      <Redirect to="/"/>
+    </Switch>
+  );
+  if(this.props.isAuthenticaed){
+    //authenticated users
+    routes = (
+    <Switch>
+      <Route path="/checkout" component={Checkout}/>
+      <Route path="/orders" component={Orders}/>
+      <Route path="/logout" component={Logout}/>
+      <Route path="/" exact component={BurgerBuilder}/>
+      <Redirect to="/"/>
+    </Switch>
+    );
+  }
+
+  return (
+    <div>
+      <Layout>
+        {routes}
+      </Layout>
+    </div>
+  )
+}
+const mapStateToProps = state => {
+  return {
+    isAuthenticated: state.auth.token !== null
+  }
+}
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps))
+```
