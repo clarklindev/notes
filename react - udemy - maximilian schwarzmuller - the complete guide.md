@@ -4291,3 +4291,461 @@ const reducer = (state = initialState, action) => {
 ### Diving Much Deeper
 * redux.js.org
 * read immutable update patterns
+
+---
+
+## Adding Authentication to our Burger Project
+
+```js
+//action types
+//store/actions/actionTypes.js
+export const AUTH_START = 'AUTH_START';
+export const AUTH_SUCCESS = 'AUTH_SUCCESS';
+export const AUTH_FAIL = 'AUTH_FAIL';
+```
+```js
+//action creators
+//store/actions/auth.js
+import * as actionTypes from './actionsTypes';
+export const authStart = () => {
+	return {
+		type: actionTypes.AUTH_START
+	};
+};
+export const authSuccess = authData => {
+	return {
+		type: actionTypes.AUTH_SUCCESS,
+		authData: authData
+	};
+};
+
+export const authFail = error => {
+	return {
+		type: actionTypes.AUTH_FAIL,
+		error: error
+	};
+};
+
+//async
+export const auth = (email, password) => {
+	return dispatch => {
+		dispatch(authStart());
+	};
+};
+
+```
+```js
+//containers/Auth/Auth.js
+import React, { Component } from 'react';
+import Input from '../../components/UI/Input/Input';
+import Button from '../../components/UI/Button/Button';
+import classes from './Auth.module.scss';
+import * as actions from '../../store/actions/index';
+import { connect } from 'react-redux';
+class Auth extends Component {
+	state = {
+		controls: {
+			email: {
+				elementType: 'input',
+				elementConfig: {
+					type: 'email',
+					placeholder: 'Mail Address'
+				},
+				value: '',
+				validation: {
+					required: true,
+					isEmail: true
+				},
+				valid: false,
+				touched: false
+			},
+			password: {
+				elementType: 'input',
+				elementConfig: {
+					type: 'password',
+					placeholder: 'Password'
+				},
+				value: '',
+				validation: {
+					required: true,
+					minLength: 6
+				},
+				valid: false,
+				touched: false
+			}
+		}
+	};
+
+	checkValidity(value, rules) {
+		let isValid = true;
+		if (!rules) {
+			return true;
+		}
+
+		if (rules.required) {
+			isValid = value.trim() !== '' && isValid;
+		}
+
+		if (rules.minLength) {
+			isValid = value.length >= rules.minLength && isValid;
+		}
+
+		if (rules.maxLength) {
+			isValid = value.length <= rules.maxLength && isValid;
+		}
+
+		if (rules.isEmail) {
+			const pattern = /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+			isValid = pattern.test(value) && isValid;
+		}
+
+		if (rules.isNumeric) {
+			const pattern = /^\d+$/;
+			isValid = pattern.test(value) && isValid;
+		}
+
+		return isValid;
+	}
+
+	inputChangedHandler = (event, controlName) => {
+		const updatedControls = {
+			...this.state.controls,
+			[controlName]: {
+				...this.state.controls[controlName],
+				value: event.target.value,
+				valid: this.checkValidity(
+					event.target.value,
+					this.state.controls[controlName].validation
+				),
+				touched: true
+			}
+		};
+		this.setState({ controls: updatedControls });
+	};
+
+	submitHandler = event => {
+		event.preventDefault(); //prevents reloading of page and event bubbling
+		this.props.onAuth(
+			this.state.controls.email.value,
+			this.state.controls.password.value
+		);
+	};
+
+	render() {
+		const formElementsArray = [];
+		for (let key in this.state.controls) {
+			formElementsArray.push({
+				id: key,
+				config: this.state.controls[key]
+			});
+		}
+		const form = formElementsArray.map(formElement => (
+			<Input
+				key={formElement.id}
+				elementType={formElement.config.elementType}
+				elementConfig={formElement.config.elementConfig}
+				value={formElement.config.value}
+				invalid={!formElement.config.valid}
+				shouldValidate={formElement.config.validation}
+				touched={formElement.config.touched}
+				changed={event => this.inputChangedHandler(event, formElement.id)}
+			/>
+		));
+
+		return (
+			<div className={classes.Auth}>
+				<form onSubmit={this.submitHandler}>
+					{form}
+					<Button btnType="Success">Submit</Button>
+        </form>
+      
+			</div>
+		);
+	}
+}
+
+const mapDispatchToProps = dispatch => {
+	return {
+		onAuth: (email, password) => dispatch(actions.auth(email, password))
+	};
+};
+export default connect(
+	null,
+	mapDispatchToProps
+)(Auth);
+
+```
+
+### Getting a Token from the Backend
+
+* goal: Getting a Token from the Backend
+* using firebase, have access to a token via api
+* firebase gives us authentication out the box, which we can reach certain api endpoints
+* in firebase, under authentication => sign-in method ->enable email/password, 
+* this allows user to sign up using their email address and password, and get a token
+* where to send the email address and password details to get token? https://firebase.google.com/docs/reference/rest/auth
+* note the different version numbers, google docs uses v1, the tutorials use v3...
+* sign up with email/password https://firebase.google.com/docs/reference/rest/auth#section-create-email-password
+  POST request to https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]
+* sign in with email/password https://firebase.google.com/docs/reference/rest/auth#section-sign-in-email-password
+  POST request to https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]
+
+STEPS SIGN UP:
+* we use the sign in instructions
+* in the action creators, async function make the axios POST request
+* the [API_KEY] should be replaced with the API key of the firebase project
+* project --> next to project overview, options -> project settings -> web api key
+* from the documentation, Request Body Payload (json like) 
+  - email (string), password (string), returnSecureToken (boolean) should always be true
+* the axios request returns a promise, 
+* the response has: idToken, refreshToken and expiresIn, email
+* and we handle that with .then() and .catch(err)
+* a successful post with valid credentials will save user data under project -> authentication -> users
+
+### Adding Sign-In
+* adding a toggle to switch views between sign-up and sign-in
+* manage state in the Components local state
+* set default isSignup: true
+* `<Button>` use a clicked={this.switchAuthModeHandler} and toggle this.state.isSignup
+* add clicked={this.switchAuthModeHandler} handler
+* form onSubmit={this.SubmitHandler}
+* pass through isSignUp as argument in submitHandler 
+* mapDispatchToProps() gets `onAuth: (email, password, isSignup) => dispatch(actions.auth(email, password, isSignup))`
+
+### Storing the Token.mp4
+
+* store the token
+* token allows us to access resources on server which are protected
+* create a reducer reducers/auth.js
+* reducer initalState = {token:null,userId:null, error:null, loading: false}p
+* from the axios.post() get the response.data.idToken, and response.dat.localId
+* pass on the response data to action creators: dispatch(authSuccess(response.data.idToken, response.data.localId)
+
+### Logging Users Out.mp4
+* logout after token will expire, 
+* after AUTH_SUCCESS (response.data.expiresIn)
+* create action creator checkAuthTimeout = (expirationTime) { return dispatch=>{ setTimeout(()=>{ dispatch(logout()) }, expirationTine)};}
+* actionTypes.AUTH_LOGOUT
+* export const logout = ()=>{ return {type: actionTypes.AUTH_LOGOUT}}
+* reducer, handle logout by setting token:null, userId:null
+
+```js
+//containers/Auth/Auth.js
+  submitHandler = (event) => {
+    event.preventDefault();
+    this.props.onAuth(this.state.controls.email.value, this.state.controls.password.value, this.state.isSignUp)
+  }
+  switchAuthModeHandler = () => {
+		this.setState(prevState => {
+			return { isSignUp: !prevState.isSignUp };
+		});
+  };
+  
+  <form onSubmit={this.submitHandler}>
+    <Button btnType="Success">Submit</Button>
+  </form>
+  <Button clicked={this.switchAuthModeHandler}>switch to {this.state.isSignup ? 'SIGNIN' : 'SIGNUP'}</Button>
+```
+```js
+// store/actions/auth.js
+//async
+export const auth = (email, password, isSignUp) => {
+	return dispatch => {
+		dispatch(authStart());
+		const authData = {
+			email: email,
+			password: password,
+			returnSecureToken: true
+		};
+
+		let url =
+			'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAJzYSyjWZ0D45Prfs_8h1BjuL_PWh_bOY';
+		if (!isSignUp) {
+			url =
+				// note firebase v3 is diff from v1, v3: /identitytoolkit/v3/relyingparty/verifyPassword?key=[API_KEY]
+				'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAJzYSyjWZ0D45Prfs_8h1BjuL_PWh_bOY';
+		}
+		axios
+			.post(url, authData)
+			.then(response => {
+				console.log(response);
+				dispatch(authSuccess(response.data));
+			})
+			.catch(err => {
+				console.log(err);
+				dispatch(authFail(err));
+			});
+	};
+};
+
+```
+```js
+//reducers/auth.js
+import * as actionTypes from '../actions/actionTypes';
+import {updateObject} from '../utility';
+const initialState = {
+  token: null,
+  userId: null,
+  error: null,
+  loading: false
+}
+const reducer = (state, action)=>{
+  switch(action.type){
+    case actionTypes.AUTH_START:
+      return {}
+  }
+}
+export default reducer;
+
+```
+
+
+### Accessing Protected Resources
+* certain parts of pages need authentication to access specific resources
+* using token to access protected resources
+* in firebase -> database -> rules we originally set read and write access to true, update:
+* giving access to ingredients but limiting access to orders.
+* using tokens for authentication to gain access
+* axios.get('/orders.json?auth=' + token)
+* pass token in action creator
+* token is stored in redux, mapStateToProps = (state)=>{
+  token: state.auth.token
+}
+* class Orders, componentDidMount(){ this.props.onFetchOrders(this.props.token)}
+
+```json
+{
+  "rules":{
+    "ingredients":{
+      ".read":"true",
+      ".write":"true",
+    },
+    "orders":{
+      ".read":"auth != null",
+      ".write":"auth != null"
+    }
+  }
+}
+```
+
+```js
+//store/actions/order.js
+
+export const fetchOrders = (token)=>{
+  return dispatch => {
+    dispatch(fetchOrdersStart());
+    axios.get('/orders.json?auth='+token).
+    then(res=>{})
+  }
+}
+```
+### Updating the UI Depending on Auth State
+* if authenthicated, show logout
+* else show authentication link
+* NavigationItems is a functional component, and not container,
+* use token as check if its null for authenticated or not
+* add state to Layout (container) using mapStateToProps = state=>{
+  return isAuthenticated : state.auth.token !== null
+}
+* which loads NavigationItems and pass into these nav components as props
+* then render authenticate or logout button nav selectively depending on if props.isAuth or not
+
+### Adding a Logout Link
+
+* when clicked, clear token, dispatch action creator logout()
+* redirect to starting page
+
+### Forwarding Unauthenticated Users
+
+* make it so that a check is done on some prop if navigation is shown or not, then show that menu item
+* when logged in successfully (authenticated), redirect away from auth page
+* connect Auth.js container to store with import {connect} from 'react-redux'
+* containers/Auth/Auth.js import {Redirect} from 'react'; 
+* in Auth container, render a redirect whenever authenticated with if(this.props.isAuthenticated){authRedirect = <Redirect to="/"/>} check
+
+### Redirecting the User to the Checkout Page
+
+* use a state like 'building' for checking whether user was building a burger, if so, redirect to checkout, otherwise to redirect to burgerbuilder
+* add action type SET_AUTH_REDIRECT_PATH
+* action creator setAuthRedirectPath= (path)=>{
+  return {
+    type: actionTypes.SET_AUTH_REDIRECT_PATH,
+    path: path
+  }
+}
+* export method in the index of actions
+* auth Reducer 
+```js
+const setAuthRedirectPath = (state, action) => {
+  return updateObject(state, authRedirectPath: action.path)
+}
+```
+* add to switch action.types
+case actionTypes.SET_AUTH_REDIRECT_PATH: return setAuthRedirectPath(state, action)
+
+### Persistent Auth State with localStorage
+
+* trying to fix problem of losing logged in state if you refresh page, 
+* using localStorage to persist state across sessions
+* we need to track the token and when it expires (expirationDate)
+* localStorage is baked into the browser so after axios post, 
+* store/actions/auth.js auth action creator, axios.post() then(response=>) where we dispatch authSuccess use localStorage to set token and expiry date
+* localStorage.setItem('token', response.data.idToken)
+* const expirationDate = new Date(new Date().getTime() + response.data.expiresIn * 1000)
+* and we re-wrap in new Date() to turn our calculation into a new Date() object
+* note: new Date() without arguments give us current date, new Date() with arguments, gives us date we pass as argument
+* note: use current time (.getTime()),
+* note: we X1000 because javascript works in milliseconds, so we are converting to seconds here...
+* localStorage.setItem('expirationDate', expirationDate)
+* with this local storage set, we can check them to log user in if we have a token and it has not expired yet
+* otherwise we clean up with the logout dispatch action
+* store/actions/auth.js export const logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('expirationDate');
+  return {
+    type: actionTypes.AUTH_LOGOUT
+  }
+}
+
+#### fetching token when you log in
+* should check this when application loads to log user in if we have token and still valid expirationDate
+* App.js good for checking authentication status
+* need a new action, we want to dispatch authSuccess() when we are logged in, but also execute checkAuthTimeout()
+* note: what we retrieve from localStorage will be a string for expiration date, wrap with new Date() to work with date,
+* note: authSuccess(response.data.idToken, response.data.localId) takes in these arguments
+* localId we can get from firebase under 'Get user data', getAccountInfo endpoint
+* POST method, request body payload idToken, response payload (kind - request type, users (array) - account associated with given firebase id token), first element (user) -> localId is the prop,
+* we can also store it in local storage from the auth response from axios.post() call, localStorage.setItem('userId', response.data.localId);
+* and remove it on logout() too localStorage.removeItem('userId')
+* dispatch(checkAuthTimeout(expirationDate.getSeconds() - new Date().getSeconds() )) - furture date minus current date all calc in seconds and the difference is expiry time
+* now we can dispatch authCheckState if we have a valid user token
+* export authCheckState in the store/actions/index.js 
+* App.js - import { connect } from 'react-redux';
+* import * as actions from './store/actions/index';
+* App.js - const create mapDispatchToProps = dispatch => { return {onTryAutoSignup:()=> dispatch(actions.authCheckState()) }} 
+* App.js - connect(null, mapDispatchToProps)(App);
+* App.js call this.props.onTryAutoSignup(); in ComponentDidMount()
+
+* //store/actions/auth.js
+  export const authCheckState = (){
+  return dispatch=>{
+    const token = localStorage.getItem('token');
+    if(!token){
+      dispatch(logout());
+    }else{
+      const expirationDate = new Date(localStorage.getItem('expirationDate'));
+    }
+    if (expirationDate > new Date()){
+      const userId = localStorage.getItem('userId');
+      dispatch(authSuccess(token, userId));
+      dispatch(checkAuthTimeout(expirationDate.getSeconds() - new Date().getSeconds() ))
+    }
+    else{
+      dispatch(logout())
+    }
+  }
+}
+
+
+#### inspecting localStorate
+* chrome developer tools -> application -> local Storage
