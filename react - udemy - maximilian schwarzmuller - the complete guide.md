@@ -4827,3 +4827,43 @@ const mapStateToProps = state => {
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps))
 ```
+
+### Displaying User Specific Orders
+* can display user specific data on frontend by filtering user id, but then security flaw as u can inspect other orders,
+* adjust orders so we attach userId to order then fetch specific orders from backend
+* firebase has a '&orderBy="userId"&equalTo=' query param which allows us to order and filter by "userId"
+* note: the "" for "userId" is neccessary
+* &equalTo always referes to the key we are filtering by
+* fix: add queryparams to store/actions/order.js fetchOrders() add queryParams 
+* make sure you pass userId through from mapStateToProps and also dispatch via mapDispatchToProps
+* also note: referencing props between mapStateToProps and mapDispatchToProps does not need the reference `this.props.[propname]`
+
+* firebase side, we have to adjust our rules, to make a certain field indexible so firebase can search through it,
+* adding ".indexOn": ["userId"]   //and in the array all the fields we want to let firebase search through
+
+
+```js
+export const fetchOrders = (token, userId)=>{
+  return dispatch=>{
+    dispatch(fetchOrdersStart());
+    const queryParams = '?auth=' + token + '&orderBy="userId"&equalTo="' + userId + '"'; 
+    axios.get('/orders.json'+ queryParams)
+  }
+}
+```
+
+```firebase
+{
+  "rules":{
+    "ingredients": {
+      ".read":"true",
+      ".write":"true"
+    },
+    "orders":{
+      ".read":"auth != null",
+      ".write":"auth != null",
+      ".indexOn": ["userId"] 
+    }
+  }
+}
+```
