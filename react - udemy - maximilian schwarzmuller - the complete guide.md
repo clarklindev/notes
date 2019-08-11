@@ -4867,3 +4867,139 @@ export const fetchOrders = (token, userId)=>{
   }
 }
 ```
+
+## Testing
+
+* what to test 
+
+1. isolated units (reducer function, component functions)
+2. conditional output, testing based on conditional output)
+
+### Writing our First Test
+
+* make sure jest is part of the package
+* npm install --save enzyme react-test-renderer enzyme-adapter-react-16
+
+#### testing functional components
+* dependant mostly only on props it receives
+* file extension .test.js this gets picked up by create-react-app
+* describe(), takes 2 arguments (1. console output, 2. testing function)
+* enzyme allows us to render standalone items for unit tests
+* import {configure, shallow} from 'enzyme'; 
+* shallow is way to render component without deeply rendering their nested content... helps with isolated tests
+* import Adapter from 'enzyme-adapter-react-16'
+* tests can be written with beforeEach() and afterEach helpers
+* enzyme has helper setProps(), wrapper.setProps({isAuthenticated:true})
+* each test runs independently of each other
+* write tests based on what would break the behavior of the app
+
+```js
+//NavigationItems.test.js
+import React from 'react';
+import {configure, shallow} from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16'
+import NavigationItems from './NavigationItems';
+import NavigationItem from './NavigationItem/NavigationItem';
+
+configure({adapter:new Adapter()});
+
+decribe('<NavigationItems/>', ()=>{
+  let wrapper;
+
+  beforeEach(()=>{
+    wrapper = shallow(<NavigationItems/>);  
+  });
+
+  it('should render two <NavigationItem/> elements if not authenticated', ()=>{
+    expect(wrapper.find(NavigationItem)).tohaveLength(2);
+  });
+
+  it('should render three <NavigationItem/> elements if authenticated', ()=>{
+    //wrapper = shallow(<NavigationItems isAuthenticated/>);  
+    wrapper.setProps({isAuthenticated:true});
+    expect(wrapper.find(NavigationItem)).tohaveLength(3);
+  });
+});
+```
+
+### Jest and Enzyme Documentations
+
+* testing reading official documentation
+* jest facebook.github.io/jest
+* enzyme airbnb.io/enzyme/
+
+### testing containers
+* containers are connected to store
+* dont need to test connection of connect()
+* just simulate props
+* export the container class so we can import it and this will 'strip' the connection to the store
+* BurgerBuilder.test.js, import {BurgerBuilder} from './BurgerBuilder',
+it now strips out the connection to store,
+* shallow testing, requires you to receive all props as well used in the class,
+ie. passing in  onIngredients={()=>{}} as a function to the component at beforeEach
+
+```js
+import React from 'react';
+import {configure, shallow} from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import {BurgerBuilder} from './BurgerBuilder';
+import {BuilderControls} from '../../components/Burger/BuildControls/BuildControls';
+
+configure({adapter:new Adapter()});
+describe('<BurgerBuilder}/>', ()=>{
+  let wrapper;
+  beforeEach(()=>{
+    wrapper = shallow(<BurgerBuilder onIngredients={()=>{}}/>)
+  });
+
+  it('should render BuildControls when receiving ingredients', ()=>{
+    wrapper.setProps({ings:{salad:0}});
+    expect(wrapper.find(BuildControls)).toHaveLength(1);
+  })
+})
+```
+
+### How to Test Redux
+* mostly testing reducers if not putting too much logic in action creators
+* reducers are pure functions so easy to test as there are not side effects
+
+```js
+//auth.test.js
+import reducer from './auth';
+import * as actionTypes from '../actions/actionTypes';
+
+describe('auth reducer', ()=>{
+  
+  //testing that reducer should initialize to initial state
+  it('should return the intial state', ()=>{
+    expect(reducer(undefined, {})).toEqual({
+      token:null,
+      userId:null,
+      error:null,
+      loading:false,
+      authRedirectPath:'/'
+    })
+  });
+
+  it('should store the token upon login', ()=>{
+    expect(reducer({
+      token:null,
+      userId:null,
+      error:null,
+      loading:false,
+      authRedirectPath:'/'
+    },{
+      type:actionTypes.AUTH_SUCCESS,
+      idToken:'some-token',
+      userId: 'some-user-id'
+    })).toEqual({
+      token:'some-token',
+      userId:'some-user-id',
+      error:null,
+      loading:false,
+      authRedirectPath:'/'
+    })
+  });
+  
+})
+```
