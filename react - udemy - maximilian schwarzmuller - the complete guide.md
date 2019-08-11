@@ -5003,3 +5003,34 @@ describe('auth reducer', ()=>{
   
 })
 ```
+---
+## Deploying React Apps
+
+### Deployment Steps
+1. check and adjust Basepath if not serving from root path
+  - this is importing when setting the router with <BrowserRouter basename="/my-app/">
+
+2. Build and optimize Project
+  - npm run build in create-react-app project
+
+3. Server must always serve index.html (always in 404 cases)
+  - returning index.html for unknown routes
+
+4. upload to static server
+  - aws server
+  - github pages
+  - firebase 
+
+### Deploying on Firebase
+* firebase has hosting 
+* (need to npm install -g firebase-tools)
+* firebase login
+* firebase init
+  - selecting features you want to use, select hosting
+  - choose the project
+  - choose public directory 'build'
+  - configure as a SPA? /index.html - yes
+  - build/index.html already exists, overwrite? - no
+  - .firebaserc contains information about project
+  - .firebase.json contains setup configuration
+* firebase deploy
