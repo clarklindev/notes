@@ -5212,4 +5212,244 @@ const asyncComponent = (importComponent) =>{
 }
 export default asyncComponent;
 ```
+### Installing Production Dependencies
 
+* npm install --save react react-dom react-router-dom
+
+### Setting Up the Basic Webpack Config
+
+* install as dev-dependencies webpack and webpack-dev-server
+* package.json "scripts":{
+  "start": "webpack-dev-server"
+}
+* webpack.config.js webpack will automatically look for this SPECIFIC file
+* entry points to where journey starts, point to index.js
+* devtool define which kind of sourcemaps webpack should generate
+* const path = require('path'); // resolve() allows us to generate absolute path
+* path.resolve(__dirname, 'dist'), __dirname refers to directory this is run in, ie the project folder, and append 'dist' folder
+
+### Adding File Rules
+
+* making sure webpack appends .js to imports, use resolve:{
+  extensions: ['.js','.jsx']
+}
+* loaders are configured for different file types using module:{}
+* module test specific file types with regular expression to apply certain loaders
+
+### introduction to Babel
+* babel for js npm install --save-dev babel-loader babel-core babel-preset-react babel-preset-env
+* create file in root folder .babelrc, babel configuration file webpack will automatically read, it has a json configuration,
+* here we define presets
+
+### Adding CSS File Support
+* test:/\.css$/,
+* 'loader' is shortform, 'use' is for multiple loaders or loader with config
+* 'use' takes an array of loaders we want to apply
+* npm install --save-dev css-loader style-loader
+* css loaders are applied from right-to-left (bottom-up)
+* 'style-loader' is used to extracts code from css and inject into top of html
+* loader:'css-loader', {loader:'css-loader', options: {
+    modules: true,
+    localIdentName:'[name]__[local]__[hash:base64:5]'
+  }},
+* 'localIdentName' is how to name the files uniquely
+* 'postcss-loader' is for adding auto prefixing, npm install --save-dev autoprefixer
+* const autoprefixer = require('autoprefixer'); autoprefixer() takes a list of browsers to configure, we can get this from .babelrc and auto add pre-fixing
+* if we load any loaders before css-loader, css-loader needs to know about this, options:{importLoaders:1}
+
+### Creating Rules for Images
+* npm install --save-dev url-loader
+* url-loader, if images are below a certain threshold we define, it will convert them into data-64 urls we can inline, 
+* files above the limit(bytes), will be copied to our output folder and a link will be generated that we can use for our components
+* we use query params because then we call use a fallback loader for files larger than the threshold we specify
+* npm install --save-dev file-loader
+* &name= is the path to put images inside dist folder,
+
+### Lazy Loading / Code Splitting
+* under module.exports = {}, output:{ chunkFilename:''}
+* npm install --save-dev babel-plugin-syntax-dynamic-import , this will make sure Babel understands the chunking syntax
+* in .babelrc add "plugins":["syntax-dynamic-import"]
+* npm install --save-dev babel-preset-stage-2, and add "stage-2" as a preset
+
+### Injecting the Script into the index.html File
+* npm install --save-dev html-webpack-plugin will help us inject our bundled .js into the html
+* webpack.config.js, const HtmlWebpackPlugin = require('html-webpack-plugin')
+* plugins:[
+    new HtmlWebpackPlugin(
+      {
+        template: __dirname+'/src/index.html',
+        filename:'index.html',
+        inject:'body'
+      }
+    )
+  ]
+
+```.babelrc
+{
+  "presets":[
+    ["env",{
+      "targets":{
+        "browsers":[
+          "> 1%",
+          "last 2 versions"
+        ]
+      }
+    }],
+    "stage-2",
+    "react"
+  ],
+  "plugins":[
+    "syntax-dynamic-import"
+  ]
+}
+```
+```js
+const path = require('path');
+
+module.exports = {
+  devtool: 'cheap-module-eval-source-map',
+  entry:'./src/index.js',
+  output: {
+    path:path.resolve(__dirname, 'dist'),   //important for webpack to know if root or nested folder
+    filename:'bundle.js',     //how our file should be named 'bundle.js'
+    chunkFilename:'[id].js',
+    publicPath: '',         //where assets should be stored
+  },
+  resolve:{
+    extensions: ['.js','.jsx']
+  },
+  module:{
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader' ,
+        exclude:/node_modules/
+      },
+      {
+        test:/\.css$/,
+        exclude: /node_modules/
+        use: [
+          {loader:'style-loader'},
+          {loader:'css-loader', options: {
+            importLoaders:1,
+            modules: true,
+            localIdentName:'[name]__[local]__[hash:base64:5]'
+          }},
+          {
+            loader:'postcss-loader',
+            options:{
+              ident:'postcss',
+              plugins:()=>[
+                autoprefixer({
+                  browsers:["> 1%",
+          "last 2 versions"]
+                })
+              ]
+            }
+          },
+          {
+            test:/\.(png|jpe?g|gif)$/,
+            loader:'url-loader?limit=8000&name=images/[name].[ext]'
+          }
+
+        ]
+      }
+    ]
+  },
+  plugins:[
+    new HtmlWebpackPlugin(
+      {
+        template: __dirname+'src/index.html',
+        filename:'index.html',
+        inject:'body'
+      }
+    )
+  ]
+
+};
+```
+### Creating the Production Workflow
+* npm run build build production version.
+* create a file webpack.prod.config.js
+* need to configure to point to this file,
+* adjustments:
+  - devtool: remove '-eval'
+  - plugins: add uglify which is built into webpack by import webpack into webpack.prod.config.js, 
+  - new webpack.optimize.UglifyJsPlugin()
+* add build script in package.json "build":"webpack --config webpack.prod.config.js --progress --profile --color"
+* npm install --save-dev rimraf, this allows us to delete file/files /folder at start of build process, 
+* add 'rimraf dist' to build command
+
+```js
+//webpack.prod.config.js
+const path = require('path');
+const webpack = require('webpack');
+
+module.exports = {
+  devtool: 'cheap-module-source-map',
+  entry:'./src/index.js',
+  output: {
+    path:path.resolve(__dirname, 'dist'),   //important for webpack to know if root or nested folder
+    filename:'bundle.js',     //how our file should be named 'bundle.js'
+    chunkFilename:'[id].js',
+    publicPath: '',         //where assets should be stored
+  },
+  resolve:{
+    extensions: ['.js','.jsx']
+  },
+  module:{
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader' ,
+        exclude:/node_modules/
+      },
+      {
+        test:/\.css$/,
+        exclude: /node_modules/
+        use: [
+          {loader:'style-loader'},
+          {loader:'css-loader', options: {
+            importLoaders:1,
+            modules: true,
+            localIdentName:'[name]__[local]__[hash:base64:5]'
+          }},
+          {
+            loader:'postcss-loader',
+            options:{
+              ident:'postcss',
+              plugins:()=>[
+                autoprefixer({
+                  browsers:["> 1%",
+          "last 2 versions"]
+                })
+              ]
+            }
+          },
+          {
+            test:/\.(png|jpe?g|gif)$/,
+            loader:'url-loader?limit=8000&name=images/[name].[ext]'
+          }
+
+        ]
+      }
+    ]
+  },
+  plugins:[
+    new HtmlWebpackPlugin(
+      {
+        template: __dirname+'src/index.html',
+        filename:'index.html',
+        inject:'body'
+      }
+    ),
+    new webpack.optimize.UglifyJsPlugin()
+  ]
+
+};
+```
+```json
+"scripts":{
+  "build":"rimraf dist && webpack --config webpack.prod.config.js"
+}
+```
