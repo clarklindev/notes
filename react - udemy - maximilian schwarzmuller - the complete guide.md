@@ -5034,3 +5034,182 @@ describe('auth reducer', ()=>{
   - .firebaserc contains information about project
   - .firebase.json contains setup configuration
 * firebase deploy
+
+---
+
+## Bonus Working with Webpack
+
+* create react app is recommended for SPA's
+* Webpack is a bundler / optimization / hook-in loaders / transform by transpile javascript
+
+### How webpack works
+
+* root entry point (webpack analyzes dependencies)
+* loader for specific file type help with transformations
+* output into a bundle
+
+### Basic workflow requirements
+* next gen js support
+* jsx support
+* css auto prefixing
+* image imports
+* optimize code
+
+### Project & npm Setup
+* npm init
+* npm install --save-dev webpack webpack-dev-server
+
+### Creating a Basic Folder & File Structure
+
+src/index.html (html5 boilerplate)
+src/index.css
+src/index.js
+src/App.js
+src/assets/
+src/containers/
+src/components/
+
+### Creating the Basic React Application
+
+```js
+// index.html
+<body>
+  <div id="root"></div>
+</body>
+
+//index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import './index.css';
+import App from './App';
+import { BrowserRouter } from 'react-router-dom';
+
+const app = (
+  <BrowserRouter>
+    <App/>
+  </BrowserRouter>
+);
+
+ReactDOM.render(app, document.getElementById('root'));
+
+//index.css
+body{
+  margin: 0;
+  padding: 0;
+  font-family:sans-serif;
+}
+
+//App.js
+//routing
+//lazy loading
+components/PizzaImage/PizzaImage.css
+components/PizzaImage/PizzaImage.js
+containers/Pizza.js
+containers/Users.js
+hoc/asyncComponent.js       //lazy loading
+
+//components/PizzaImage/PizzaImage.js
+import React from 'react';
+import classes from './PizzaImage.css';
+import PizzaImage from '../../assets/pizza.jpg';
+
+const pizzaImage = (props)=>{
+  <div className={classes.PizzaImage}>
+    <img src={PizzaImage} className={classes.PizzaImg}/>
+  </div>
+}
+
+//components/PizzaImage/PizzaImage.css
+.PizzaImage{
+  text.align: center;
+  margin: 20px auto;
+  height:300px;
+  width: 80%;
+}
+
+.PizzaImg{
+  max-width:100%;
+  max-height:100%;
+}
+
+//containers/Pizza.js
+import React, {Component} from 'react';
+import PizzaImage from '../components/PizzaImage/PizzaImage';
+class Pizza extends Component{
+  render(){
+    return (
+      <div>
+        <h1>The Pizza</h1>
+        <PizzaImage/>
+      </div>
+    )
+  }
+}
+export default Pizza;
+
+//containers/Users.js
+import React, {Component} from 'react';
+class Users extends Component{
+  render(){
+    return (
+      <div>
+        <h1>The Users</h1>
+        <p>users copy</p>
+      </div>
+    )
+  }
+}
+export default Users;
+
+//src/App.js
+import React,{Component} from 'react';
+import {Link} from 'react-router-dom';
+
+import Users from '../containers/Users';
+import asyncComponent from './hoc/asyncComponent';
+// import Pizza from '../containers/Pizza'; //will use lazy loading with asyncComponent
+
+const AsyncPizza = asyncComponent(()=>{
+  return import('./containers/Pizza.js');
+});
+
+class App extends Component{
+  render(){
+    return (
+      <div>
+        <div>
+          <Link to="/">Users</Link>|
+          <Link to="/pizza">Pizza></Link>
+        </div>
+        <div>
+          <Route path="/" exact component={Users}/>
+          <Route path="/pizza" component={AsyncPizza}/>
+        </div>
+      </div>
+    );
+  }
+}
+
+//hoc/asyncComponent.js
+import React, {Component} from 'react';
+const asyncComponent = (importComponent) =>{
+  return class extends Component{
+    state={
+      component:null
+    }
+    componentDidMount (){
+      importComponent()
+      .then(cmp=>{
+        this.setState({component:cmp.default})
+      });
+    }
+
+    render () {
+      const C = this.state.component;
+      return C ? <C {...this.props} /> : null;
+    } 
+  }
+}
+export default asyncComponent;
+```
+
