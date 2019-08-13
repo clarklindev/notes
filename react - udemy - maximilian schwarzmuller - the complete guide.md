@@ -5656,3 +5656,17 @@ eg. whatever you name here, eg 'fade-slide',
   
 }
 ```
+### Customizing CSS Classnames
+
+* passing a js object to CSSTransition classNames={{
+  enter: ''
+  enterActive: 'ModalOpen'
+  exit: ''
+  exitActive: 'ModalClosed' 
+  
+  //used for first time rendered to dom...
+  appear:
+  appearActive:
+}}
+
+* defining your own classes to be used for transition
