@@ -5670,3 +5670,52 @@ eg. whatever you name here, eg 'fade-slide',
 }}
 
 * defining your own classes to be used for transition
+
+### Animating Lists
+* animating the adding and removing of items
+* import TransitionGroup from 'react-transition-group/TransitionGroup';
+* can be used where you output dynamic lists
+* replace list element with `<TransitionGroup component="ul">`
+* TransitionGroup only works in conjunction with CSSTransition or Transition
+* TransitionGroup automatically manages the in={} property on the CSSTransition
+
+```js
+// List.js
+import TransitionGroup from 'react-transition-group/TransitionGroup';
+import CSSTransition from 'react-transition-group/CSSTransition';
+
+render(){
+  let listItems = this.state.items.map((item,index)=>(
+    <CSSTransition key={index} classNames="fade" timeout={300}>
+    <li></li>
+    </CSSTransition>
+  ));
+  
+  return (
+    <div>
+      <TransitionGroup component="ul" className="List">
+        {listItems}
+      </TransitionGroup>
+    </div>
+  );
+}
+
+
+```
+```css
+/* List.css */
+.fade-enter{
+  opacity:0;
+}
+.fade-enter-active{
+  opacity:1;
+  transition:opacity 0.3s ease-out;
+}
+.fade-exit{
+  opacity:1;
+}
+.fade-exit-active{
+  opacity:0;
+  transition:opacity 0.3s ease-out;
+}
+```
