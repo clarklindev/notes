@@ -5719,3 +5719,8 @@ render(){
   transition:opacity 0.3s ease-out;
 }
 ```
+### Alternative Animation Packages
+
+* react-motion
+* react-move
+* react-router-transition (animations between routes)
