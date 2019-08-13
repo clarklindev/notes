@@ -5453,3 +5453,206 @@ module.exports = {
   "build":"rimraf dist && webpack --config webpack.prod.config.js"
 }
 ```
+---
+## NextJS
+* enforced folder structure so routes generated automatically
+* automatic code splitting
+* we dont use react-router with NextJS, every .js file becomes a route in 'pages' folder, you can have 'index.js' files to point to a folder in the url
+* we typically use functional, stateless components that dont manage state,
+* server side rendering out the box for SEO
+* find nextJS on github - requires react16
+
+### Setting Up a Project
+* npm init
+* npm install --save next react react-dom
+* add next scripts to package.json
+```
+"scripts":{
+  "dev":"next",
+  "build":"next build",
+  "start":"next start"
+}
+```
+### Understanding the Basics
+* links, import Link from 'next/link';
+* to add a link `<Link href="/auth"><a>Auth</a></Link>`, note we use Link element AND `<a>` element, behind the scenes `<a>` receives href from `<Link>`
+* if we have an index.js file NextJS will automatically load that
+* imperatively navigating, import Router from 'next/router';
+```js
+import Router from 'next/router';
+import Link from 'next/link';
+
+<p> goto <Link href="/auth"><a>Auth</a></Link></p>
+<button onClick={()=>Router.push('/auth')}>Go to Auth</button>
+```
+
+### Next.js & Components & Pages
+* pages folder gets routes,
+* can still have 'components' folder
+* still import components to 'pages' folder
+
+```js
+//components/User.js
+import React from 'react';
+const user = (props)=>(
+  <div>
+    <h1>{props.name}</h1>
+    <p>Age:{props.age}</p>
+  </div>
+)
+export default user;
+```
+### Styling our App in Next.js
+* nextJs has its own way of styling REACT
+* but it doesnt have access to CSSModules, but you can have scoped styling using styled-jsx
+* create style element tags with the opening tag a jsx attribute and content starting with {``}
+
+```js
+<style jsx>{`
+  div{
+    border:1px solid #eee;
+  }
+`}
+</style>
+```
+### Handling (404) Errors
+
+* github under custom error handling
+* create your own error handler file with _error.js
+
+```js
+// pages/_errors.js
+const error = ()=>{
+
+}
+export default error;
+```
+
+### A Special Lifecycle Hook
+* classed based component has special lifecycle hook getInitialProps()
+* getInitialProps() is static async function, that receives an argument that describes context of application
+* the function runs on the server, (we dont see on console of browser), but wee see it on the server console, 
+* can be used to initialize app before it loads
+eg. fetch data from database, and then prepopulate the props the component will receive
+* context has the following properties: 
+  - pathname, 
+  - query, 
+  - asPath, 
+  - req, 
+  - res, 
+  - jsonPageRes, 
+  - err
+
+```js
+import React, {Component} from 'react';
+class IndexPage extends Component{
+  static async getInitialProps(context){
+    console.log(context);
+    return {appName: "Super App"};
+  }
+
+  render(){
+    return ();
+  }
+}
+export default IndexPage;
+```
+### Deploying our App
+* need a hosting service that uses node.js,
+* elastic beanstalk, heroko 
+* deploy whole project on node ready server,
+* execute npm start on server
+
+---
+## Animations in React Apps
+
+* react-transition-group is an animation package (3rd party)
+* npm install --save react-transition-group 
+* import Transition from 'react-transition-group/Transition';
+* makes use of `<Transition>` tag and wrap what we want to animate
+* set in={} prop, and the result whether true/false de cides if elements should be shown or not
+* timeout={} how long animation should be played (ms), time it takes to switch between the 4 states
+* transition component manages 4 internal states: ENTERING, ENTERED, EXITING, EXITED
+* withint the `<Transition>` tag, we have access to 'state' via anonymous function received as a prop, states `entering, entered, exiting, exited` and it basically loops through these states taking the timeout into account
+* mountOnEnter
+* unmountOnExit
+* then showing or hidding based on props.show === "entering" or props.show==="exiting"
+* can move the whole `<Transition>` into the component
+
+### Animation Timings
+* pass an animation object with enter and exit props
+* animationTimings = {enter:300, exit:1000}
+* then plug into <Transition timeout={animationTimings}>
+
+```js
+state = {
+  showBlock: false
+}
+<button onClick={()=>{this.setState(prevState=>{
+  showBlock = !prevState.showBlock
+})}}>Toggle</button>
+<br />
+
+<Transition 
+  in={this.state.showBlock} 
+  timeout={300} 
+  mountOnEnter 
+  unmountOnExit>
+{
+  state=>(
+  <div style={{
+    width:100; 
+    height:100; 
+    backgroundColor:red, 
+    transition:'opacity 1s ease-out', 
+    opacity: state=== 'exiting'? 0:1 }}>
+  </div>
+  )
+}
+</Transition>
+```
+
+### The CSSTransition Component
+* sometimes you dont want to use state to control/manage transition animation
+* we will be using prefined css classes for animation state, 
+* import CSSTransition from 'react-transition-group/CSSTransition';
+* CSSTransition doesnt use a function {state=>{}} , it only receives JSX between `<CSSTransition>`
+* we add 'classNames' where we define what classes should be added to the wrap JSX element, depending on the state of the transition, 
+* new classes get merged with the wrapping class
+* the CSSTransition component adds classname classes to the 'classNames',
+eg. whatever you name here, eg 'fade-slide', 
+* CSSTransition, if we name it: fade-slide
+* then these classes get added as CSS to which we can use them to define what happens in this state
+  * fade-slide-enter          
+  * fade-slide-enter-active
+  * fade-slide-exit
+  * fade-slide-exit-active
+* -enter and -exit are only available for 1 frame, so they can be used for initialization
+* put animation transitions on the -active classes eg. animation: openModal 0.4s ease-out forwards;
+* this removes the need to manually add classes manually and then .join(' ') the classes
+
+```js
+<CSSTransition classNames="">
+  <div className="Modal">
+  </div>
+</CSSTransition>
+```
+
+```css
+/* Modal.css */
+.fade-slide-enter{
+
+}
+
+.fade-slide-enter-active{
+  animation: openModal 0.4s ease-out forwards;
+}
+
+.fade-slide-exit{
+
+}
+
+.fade-slide-exit-active{
+  
+}
+```
