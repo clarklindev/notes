@@ -5724,3 +5724,103 @@ render(){
 * react-motion
 * react-move
 * react-router-transition (animations between routes)
+
+---
+## A Brief Introduction to Redux Saga
+
+* Redux-saga is a redux middleware library, that is designed to make handling side effects in your redux app nice and simple
+* achieves this by using generators (new gen js function that allows asynchronous code that looks synchronous)
+* alternative to redux-thunk (thunk creates action creators where we run async code then dispatch other actions when done)
+* saga working with async code
+
+### Installing Redux Saga
+* npm install --save redux-saga
+
+### Creating our First Saga
+* Saga, you create sagas which are like functions that run up on actions that handle side effect logic
+* folder structure store/sagas, diff files for diff types of sagas
+* sagas uses Generators (function*) functions that can execute incrementally, with pauses for async code
+* in saga, we dispatch with put() import {put} from 'redux-saga/effects'
+* in generators we prefix each step with 'yield'
+
+```js 
+// store/sagas/auth.js
+import {put} from 'redux-saga/effects';
+
+export function* logoutSaga(action){
+  yield localStorage.removeItem('token');
+  yield localStorage.removeItem('expirationDate');
+  yield localStorage.removeItem('userId');
+  yield put({
+    type: actionTypes.AUTH_LOGOUT
+  });
+}
+```
+### Hooking the Saga Up (to the Store and Actions)
+
+* import createSagaMiddleware from 'redux-saga';
+* import {logoutSaga} from './store/sagas/auth';
+* const sagaMiddleware = createSagaMiddleware();
+* register sagas to the store, 
+* sagaMiddleware.run(logoutSaga); to execute, but we want to dispatch an action that is recognized by saga and then saga will execute the code required
+
+```js
+// index.js
+import createSagaMiddleware from 'redux-saga';
+import {logoutSaga} from './store/sagas/auth';
+
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(rootReducer, composeEnhancers(
+  applyMiddleware(thunk, sagaMiddleware);
+));
+
+//now we can use our saga by run() a saga
+sagaMiddleware.run(logoutSaga);
+```
+
+### Moving Logic from the Action Creator to a Saga
+* create a file store/saga/index.js
+* this file will act as a mapping from action creators to the saga
+* in auth.js action creator, dispatch an action to initiate handling with saga AUTH_INITIATE_LOGOUT;
+* listen to AUTH_INITIATE_LOGOUT from store/sagas/index 
+* takeEvery() receives action we want to listen to, and what function to execute (reference) when this action occurs
+
+
+```js
+//store/actions/actionTypes.js
+export const AUTH_INITIATE_LOGOUT = 'AUTH_INITIATE_LOGOUT';
+```
+
+```js
+//store/actions/auth.js
+export const logout = ()=>{
+  return {
+    type: actionTypes.AUTH_INITIATE_LOGOUT;
+  }
+}
+```
+```js
+// store/sagas/index.js
+import {takeEvery} from 'redux-saga/effects';
+import * as actionTypes from '../actions/actionTypes';
+import {logoutSaga} from './auth';
+
+export function* watchAuth() {
+  yield takeEvery(actionTypes.AUTH_INITIATE_LOGOUT, logoutSaga);
+}
+```
+```js
+//index.js
+
+// index.js
+import createSagaMiddleware from 'redux-saga';
+// import {logoutSaga} from './store/sagas/auth'; use via watchAuth
+import {watchAuth} from './store/sagas'
+
+const sagaMiddleware = createSagaMiddleware();
+const store = createStore(rootReducer, composeEnhancers(
+  applyMiddleware(thunk, sagaMiddleware);
+));
+
+sagaMiddleWare.run(watchAuth);
+```
