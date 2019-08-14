@@ -5784,7 +5784,7 @@ sagaMiddleware.run(logoutSaga);
 * in auth.js action creator, dispatch an action to initiate handling with saga AUTH_INITIATE_LOGOUT;
 * listen to AUTH_INITIATE_LOGOUT from store/sagas/index 
 * takeEvery() receives action we want to listen to, and what function to execute (reference) when this action occurs
-
+* takeLatest() takes the latest action only
 
 ```js
 //store/actions/actionTypes.js
@@ -5824,3 +5824,155 @@ const store = createStore(rootReducer, composeEnhancers(
 
 sagaMiddleWare.run(watchAuth);
 ```
+---
+## React Hooks
+
+* react hooks comes with react 16.8 
+* new way of writing components with only functional components
+* allows you to manage state in these components
+
+### What are Hooks
+* tries to only use functional components 
+* single way of handling state, side-effects
+* hooks replace class-only functionality
+
+### Enabling hooks
+```json 
+//package.json
+
+"react":"^16.8.0"
+```
+
+### The useState() Hook
+
+* import React, {useState} from 'react';
+* useState() takes in a arg of what we want to manage, the initial state
+* useState() returns 2 elements, 
+  1.  the first value is the latest state,
+  2.  the second value is a function we can use to update the state 
+
+### adding array destructuring
+
+* using array destructuring to name the functions that are returned by useState()
+* from the above, instead of const inputState = useState('');
+we can give out destructued array functions names const [currState, updateState] = useState('');
+
+### Using Multiple State
+
+* each useState() call should manage single idea
+
+```js
+//component/Todo.js
+
+import React, {useState} from 'react';
+
+const todo = props =>{
+  const [todoName, setTodoName] = useState('');
+  const [todoList, setTodoList] = useState([]);
+  const inputChangeHandler = (event)=>{
+    setTodoName(event.target.value);
+  };
+
+  const todoAddHandler = ()=>{
+    setTodoList(todoList.concat(todoName))
+  }
+
+  return <React.fragment>
+    <input type="text" placeholder="Todo" value={todoName} onChange={inputStateHandler}/>
+    <button type="button" onClick={todoAddHandler}>Add</button>
+    <ul>
+      {
+        todoList.map(todo=><li key={todo}>{todo}</li>)
+      }
+    </ul>
+  </React.fragment>
+};
+export default todo;
+```
+
+### Using One State Instead (NOT OPTIMAL)
+* NO AUTOMATIC MERGING, NOT IDEAL METHOD TO IMPLEMENT
+* merging states into single object
+* this does not merge in, but rather replace the whole state object
+
+```js
+const[todoState, setTodoState] = useState({userInput:'', todoList:[]}) 
+
+const inputChangeHandler = (event)=>{
+  setTodoState({
+    userInput: event.target.value,
+    todoList: todoState.todoList
+  })
+}
+```
+### The Rules of Hooks
+* only use Hooks at the top-level of component function
+* it has to be a component function, ie a function react can take to return a component
+* must only call useState() at toplevel,  cant be called inside function, or if() or forloop or any type of nesting
+
+### Sending Data via Http
+
+* making http request via hooks, 
+* firebase eg. realtime firebase, no rules, 
+* npm install --save axios
+
+```js
+import axios from 'axios';
+
+const todoAddHandler = ()=>{
+  //dummy firebase url 
+  axios.post('http://fsdfsdf.firebaseio.com/todos.json', {name:todoName})
+  .then(res=>{
+    console.log(res);
+  }).catch(res=>{
+    console.log(res);
+  })
+}
+```
+### The useEffect() Hook
+* fetching data when component is loaded with useEffect() hook
+* import {useEffect} from 'react';
+* you pass a function that should be executed to useEffect, and put code when component loads for first time
+* instead of putting code inside the root function (ie putting it in render cycle), we put it in useEffect()
+
+```js
+useEffect(()=>{
+  axios.get('http://fsdfsdf.firebaseio.com/todos.json')
+  .then(res=>{
+    console.log(res);
+    const todoData = result.data;
+    const todos = [];      
+    for(const key in todoData){
+      todos.push({id:key, name: todoData[key].name})
+    }
+    setTodoList(todos);
+
+  }).catch(res=>{
+    console.log(res);
+  })
+})
+
+render(){
+  <ul>{todolList.map(todo=><li key={todo}>{todo}</li>)}
+  </ul>
+}
+```
+
+### Controlling Effect Execution
+* preventing infinite loops, useEffect() gets executed after every render cycle
+* useEffect() actually takes 2 arguments, an array of values to look at before the useEffect() function executes, and only if any of the values changes, then execute function again,
+* to only execute an effect once on mounting the array should be empty [], it replicates componentDidMount()
+
+### effect Cleanup
+* running something when component unmounts, or cleanup is required 
+* good for removing eventListeners
+* returning a function from useEffect()
+* to execute cleanup only on unmount, pass empty array [] as second parameter to useEffect()
+```js
+useEffect(()=>{
+  document.addEventListener('mousemove', mouseMoveHandler);
+  return ()=>{
+    //cleanup listeners
+    document.removeEventListener('mousemove', mouseMoveHandler);
+  }
+});
