@@ -5976,3 +5976,69 @@ useEffect(()=>{
     document.removeEventListener('mousemove', mouseMoveHandler);
   }
 });
+```
+
+### Converting the App Component
+* convert the App to functional component with useState()
+
+### The useContext() Hook
+* there is another important hook related to contextAPI. it allows you to pass state without having to pass props all the time
+* .createContext() receives a default value, here.. false,
+* use this in App.js, by importing and wrapping everything that should receive context with Provider
+* use useContext() to get access to the context
+
+```js
+//auth-context.js
+import React from 'react';
+const authContext = React.createContext({status:false, login:()=>{}});
+export default authContext;
+```
+
+```js
+//App.js
+import AuthContext from './auth-context';
+const [page, setPage] = useState('auth');
+const [authStatus, setAuthStatus] = useState(false);
+
+const switchPage = pageName=>{
+  setPage(pageName);
+}
+
+const login = ()=>{
+  setAuthStatus(true);
+};
+
+return
+<div>
+  <AuthContext.Provider value={{status: authStatus, login: login}}>
+  </AuthContext.Provider>
+</div>
+```
+
+```js
+//Auth.js
+import React, {useContext} from 'react';
+import AuthContext from '../auth-context';
+
+const auth = props =>{
+  const auth = useContext(AuthContext);
+  return <button onClick={auth.login}></button>
+}
+export default auth;
+```
+
+```js
+// Header.js
+import React, {useContext} from 'react';
+import AuthContext from '../auth-context';
+const header = props =>{
+  const auth = useContext(AuthContext);
+  return (
+    <header>
+      {auth.status? <button onClick={props.onLoadTodos}>Todo</button> | null}
+      <button onClick={props.onLoadAuth}>Auth</button>
+    </header>
+  );
+}
+export default header;
+```
