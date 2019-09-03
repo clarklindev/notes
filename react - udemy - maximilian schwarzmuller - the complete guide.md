@@ -5924,6 +5924,8 @@ const todoAddHandler = ()=>{
   axios.post('http://fsdfsdf.firebaseio.com/todos.json', {name:todoName})
   .then(res=>{
     console.log(res);
+    const todoItem = {id:res.data.name, name:todoName};
+    setTodoList(todoList.concat(todoItem));
   }).catch(res=>{
     console.log(res);
   })
@@ -6041,4 +6043,129 @@ const header = props =>{
   );
 }
 export default header;
+```
+
+### State and Effects Gotchas
+
+* UI not updating because the data the function receives is 'locked-in'
+* fix using a new state const [submittedTodo, setSubmittedTodo] = useState(null);
+
+```js
+//Todo.js
+const [submittedTodo, setSubmittedTodo] = useState(null);
+
+axios.post().then(res=>{
+  const todoItem = {id:res.data.name, name:todoName};
+  setSubmittedTodo(todoItem);
+})
+
+//called on every render cycle
+useEffect(()=>{
+  //update todolist
+  if(submittedTodo){
+    setTodoList(todoList.concat(submittedTodo))
+  }
+}, [submittedTodo])
+```
+
+### The useReducer() Hook
+* helps rid of items
+* import React, {useReducer} from 'react';  
+* useReducer is independant of redux
+* useReducer arguments: reducer, starting state, initial action
+* returns array with 2 elements [state, dispatch]
+
+```js
+const todoListReducer = (state, action)=>{
+  switch(action.type){
+    case 'ADD':
+      return state.concat(action.payload);
+
+    case 'SET':
+      return action.payload;
+
+    case 'REMOVE':
+      return state.filter((todo)=>todo.id !== action.payload);
+    
+    default:
+      return state; 
+  }
+}
+
+//reducer, starting state, initial action
+//returns array with 2 elements
+const [todoList, dispatch] = useReducer(todoListReducer, []);
+
+dispatch({type:'SET', payload:todos})
+
+dispatch({type:'ADD', payload: submittedTodo})
+```
+
+### useReducer() vs useState()
+* making items clickable, to remove items
+* bind to pass in argument todo.id
+
+```js
+<li onClick={todoRemoveHandler.bind(this, todo.id)}>{todo.name}</li>
+
+const todoRemoveHandler = todoId =>{
+  axios.delete('url/${todoId}.json').then(res=>{
+      dispatch({type:'REMOVE',payload:todoId})
+  })
+  .catch(err);
+}
+```
+
+### Working with References and useRef()
+* giving references to elements on page in functional components
+* import {useRef} from 'react';
+* change input to use ref={}
+* to reference use .current.value;
+
+```js
+import {useRef} from 'react';
+const todoInputRef = useRef();
+
+// <input type="text" placeholder="todo" onChange={} value={}/>
+<input type="text" placeholder="todo" ref={todoInputRef}/>
+
+const todoAddHandler = ()=>{
+  const todoName = todoInputRef.current.value;
+
+}
+```
+
+### Avoiding Unnecessary Re-Rendering
+* useMemo is caching values we want to memorize
+* the second argument [] receives all arguments we want react to watch out for, and only update if the item in [] changes
+
+```js
+  {
+    useMemo(()=> <List/>, [])
+  }
+```
+
+### creating your own hooks
+* extracting functionality out of a component and share it across all components
+* your own functions that use hooks should start with 'use'
+
+```js
+//hooks/forms
+import {useState } from 'react';
+
+export const useFormInput = ()=>{
+  const [value, setValue] = useState('');
+  const [validity, setValidity] = useState(false);
+
+  const inputChangeHandler = event => {
+    setValue(event.target.value);
+    if(event.target.value.trim() === ''){
+      setValidity(false);
+    }else{
+      setValidity(true);
+    }
+  }
+
+  return {value:value, onChange:inputChangeHandler, validity};
+}
 ```
