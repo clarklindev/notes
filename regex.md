@@ -6,7 +6,103 @@
 - that can be used to match that pattern inside another string
 
 - regular expressions are state aware,
-- if you try match first time, it finds first instance, running regex again will find the second match
+- if you try match first time, it finds first instance, running regex again will find the second match if there is a global /g match pattern
+
+## regex testing environment
+
+- regex101.com
+
+## definitions
+
+```
+/ninj/gi //simple regex patterns - /word searching - global,ignore case
+```
+
+### character sets[] match single character that occur before 000
+
+```
+/[a-z]000/
+```
+
+### exclude these characters f,d
+
+```
+/[^fd]/
+```
+
+### ranges
+
+```
+/[a-zA-z0-9]/
+```
+
+### repeating characters
+
+```
+/[0-9]+/       //match between one and unlimited times
+/[0-9]{10}/   //match 0-9  10 times (ie 10 digit number)
+/[a-z]{4,8}/   //match between 4,8 letters
+/[a-z]{4,}/   //match atleast 4 character long
+
+```
+
+### metacharacters
+
+```
+\d      //matches any digit character same as [0-9]
+\w      //any word character (a-z,A-Z, 0-9, _)
+\s      //matches spaces, tabs
+\t      //matches tabs
+
+\d\s\w  //first character digit, then whitespace, then any word character
+```
+
+### Special characters
+
+```
++     //one or more quantifier
+\     //escape character (comes before char we want to escape)
+[]    //character set
+[^]   //negate (ie. not these characters that come after ^)
+?     //zero-or-one quantifier (preceding char becomes optional)
+.     //any character except newline
+*     //zero-or-more quantifier (similar to +)
+
+//examples
+.+    //any character atleast one or more characters long
+[a-z]* //any word char, as many times
+```
+
+### starting and ending patterns
+
+```
+^   //carrat symbo without character set means: at the start
+$   //$ means at the end
+^[a-z]{5}$      //matches 5 chars that start and end (exact length)
+^[a-z]{5}     //must start with 5 letter word
+[a-z]{5}$     //must end with 5 letter word
+```
+
+### alternate characters
+
+```
+(p|t)yre    //use () with |, matches either pyre OR tyre
+```
+
+### email RegEx
+
+- (1. yourname) @ (2. domain) . (3. extension)(4. .again)
+
+1. any letters, numbers, dots and/or hyphens
+   //@
+2. any letters, numbers and/or hyphens
+   //.
+3. any letters
+4. OPTIONAL: a dot(.) then any letters
+
+```
+/^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,8})(\.[a-z]{2,8})?$/
+```
 
 ```js
 var str = `Is this This?`;
@@ -44,6 +140,7 @@ var regex = /is/g;
 output(str, regex, document.querySelector('pre'));
 
 //--------------------------------------------------------------------------------
+
 //returning an array for all .matches
 console.log(str.match(regex));
 
