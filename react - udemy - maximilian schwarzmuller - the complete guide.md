@@ -210,6 +210,7 @@ filter, map, sort, reduce returns new array
 - requires npm 5.2+
 - requires node >= 8.10 (development)
 
+
 #### OPTIONAL: adding typescript
 
 - to add typescript to the app https://facebook.github.io/create-react-app/docs/adding-typescript
@@ -225,6 +226,13 @@ yarn add typescript @types/node @types/react @types/react-dom @types/jest
 ```
 
 #### Quick start NEW APP
+
+```
+npm install create-react-app -g
+create-react-app *projectname*
+npm start
+
+```
 
 ```
 <!-- using npx -->
