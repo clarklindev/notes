@@ -1,31 +1,27 @@
-MONGO DB
+# MONGODB
 
+- MongoDB is a schema-less NoSQL document database. It means you can store JSON documents in it, and the structure of these documents can vary as it is not enforced like SQL databases. This is one of the advantages of using NoSQL as it speeds up application development and reduces the complexity of deployments.
+
+- noSQL, data stored in objects
+- M in MEAN stack
 - download the community version of mongodb
 - we are interested in basic CRUD operations - CREATE, READ, UPDATE, DELETE
 - MOCHA (testing)
 
-OR
-
-installation (can install anywhere(edit INSTALLLOCATION=) from cmd)
-
-```
-msiexec.exe /q /i mongodb-win32-x86_64-2008plus-ssl-3.6.2-signed.msi ^
-INSTALLLOCATION="C:\Program Files\MongoDB\Server\3.6.2\" ^
-ADDLOCAL="all"
-```
+---
 
 mkdir c:\data\db  
 mkdir c:\data\log
 
 ---
 
-add to path:  
+add to path (\* note: here version 3.6):  
 c:\Program Files\MongoDB\Server\3.6\bin\
 
 ---
 
 always start mongodb  
-c:\Program Files\MongoDB\Server\3.6\bin\mongod.exe
+mongod.exe
 
 ---
 
@@ -51,6 +47,8 @@ npm init --yes
 ---
 
 ## install dependencies
+
+Mongoose is an Object Data Modeling (ODM) library for MongoDB and Node.js. It manages relationships between data, provides schema validation, and is used to translate between objects in code and the representation of those objects in MongoDB.
 
 mongoose is a package that makes it easier to interact with mongodb.
 
@@ -86,6 +84,48 @@ dbPath: c:\data\db
 ```
 
 ---
+
+## Connecting to MongoDB
+
+- .connect() if testaroo does not exist, it will create it
+- listen for when connection is successfully made
+
+```js
+//test/connection.js
+const mongoose = require('mongoose');
+//connect to mongodb database testaroo
+mongoose.connect('mongodb://localhost/testaroo');
+
+//listen to event once, listen for all errors
+mongoose.connection
+  .once('open', function() {
+    console.log('Connection has been made');
+  })
+  .on('error', function(error) {
+    console.log('Error: ', error);
+  });
+```
+
+## Models and Collections
+
+```js
+//models/mariochar.js
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+//create schema and model
+const MarioCharSchema = new Schema({
+  name: String,
+  weight: Number
+});
+
+//'mariochar' is the collection (the model) and its based on MarioCharSchema,
+
+const MarioChar = mongoose.model('mariochar', MarioCharSchema);
+module.exports = MarioChar;
+
+var myChar = new MarioChar({});
+```
 
 ## using mocha for testing
 
