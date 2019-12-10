@@ -92,17 +92,17 @@ dbPath: c:\data\db
 
 ```js
 //test/connection.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 //connect to mongodb database testaroo
-mongoose.connect('mongodb://localhost/testaroo');
+mongoose.connect("mongodb://localhost/testaroo");
 
 //listen to event once, listen for all errors
 mongoose.connection
-  .once('open', function() {
-    console.log('Connection has been made');
+  .once("open", function() {
+    console.log("Connection has been made");
   })
-  .on('error', function(error) {
-    console.log('Error: ', error);
+  .on("error", function(error) {
+    console.log("Error: ", error);
   });
 ```
 
@@ -110,7 +110,7 @@ mongoose.connection
 
 ```js
 //models/mariochar.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 //create schema and model
@@ -121,7 +121,7 @@ const MarioCharSchema = new Schema({
 
 //'mariochar' is the collection (the model) and its based on MarioCharSchema,
 
-const MarioChar = mongoose.model('mariochar', MarioCharSchema);
+const MarioChar = mongoose.model("mariochar", MarioCharSchema);
 module.exports = MarioChar;
 
 var myChar = new MarioChar({});

@@ -41,31 +41,6 @@ import AuthContext from '../context/auth-context';
 
 - first import the auth-context file
 
-#### METHOD2 (preferred method)
-
-- creating a static property called `static contextType = AuthContext;`
-- this auto connects component to context behind the scenes
-- gives us a new property this.context property from React
-
-```js
-//person.js is a class based component
-import AuthContext from '../../../context/auth-context';
-class Person extends Component {
-  static contextType = AuthContext;
-
-  componentDidMount() {
-    this.inputElementRef.current.focus();
-    console.log(this.context.authenticated); //access to context property
-  }
-
-  render() {
-    return ({
-      this.context.authenticated ? <p>Authenticated</p> : <p>Please log in</p>
-    });
-  }
-}
-```
-
 #### METHOD1
 
 - here this method, context API only available on classes in the JSX via AuthContext.Consumer element
@@ -83,6 +58,31 @@ render(){
     }
     </AuthContext.Consumer>
   )
+}
+```
+
+#### METHOD2 (preferred method)
+
+- creating a static property called `static contextType = AuthContext;`
+- this auto connects component to context behind the scenes
+- gives us a new property this.context property from React
+
+```js
+//person.js is a class based component
+import AuthContext from '../../../context/auth-context';
+class Person extends Component {
+  static contextType = AuthContext;
+
+  componentDidMount() {
+    // this.inputElementRef.current.focus();
+    console.log(this.context.authenticated); //access to context property
+  }
+
+  render() {
+    return ({
+      this.context.authenticated ? <p>Authenticated</p> : <p>Please log in</p>
+    });
+  }
 }
 ```
 
