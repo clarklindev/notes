@@ -1,14 +1,19 @@
 C#
 
-- C# files end in .cs
-- variables, in JS are setup with 'let' 'const' and 'var'
-- C# is strongly typed language and variables are setup with type as prefix: 'int', 'float', 'double', 'decimal','char','string', 'string[]', 'bool'
+## C# vs .NET
 
-- array syntax in javascript is [], in C# {}
-- "" and '' is context specific in C#
-- C# is actually an object oriented language, so everything I learnt about inheritance, encapsulation, namespacing, is similar in C#.
+- C# is a programming language vs .NET framework
 
-- C# file structure:
+* C# files end in .cs
+* variables, in JS are setup with 'let' 'const' and 'var'
+* C# is strongly typed language and variables are setup with type as prefix: 'int', 'float', 'double', 'decimal','char','string', 'string[]', 'bool'
+
+* array syntax in javascript is [], in C# {}
+* "" and '' is context specific in C#
+* C# is actually an object oriented language, so everything I learnt about inheritance, encapsulation, namespacing, is similar in C#.
+
+* to run C# file, CTRL+F5
+* C# file structure:
 
 ```C#
 using System;
@@ -21,7 +26,10 @@ namespace _NAME_{
     }
   }
 }
+
 ```
+
+# variables
 
 - method names are PascalCase
 - Console
