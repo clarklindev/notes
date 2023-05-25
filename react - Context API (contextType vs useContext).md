@@ -12,7 +12,7 @@ import React from 'react';
 
 const authContext = React.createContext({
   authenticated: false,
-  login: () => {}
+  login: () => {},
 });
 
 export default authContext;
@@ -32,7 +32,8 @@ export default authContext;
 import AuthContext from '../context/auth-context';
 
 <AuthContext.Provider
-  value={{ authenticated: this.state.authenticated, login: this.loginHandler }}>
+  value={{ authenticated: this.state.authenticated, login: this.loginHandler }}
+>
   //some jsx
 </AuthContext.Provider>;
 ```
@@ -99,14 +100,12 @@ class Person extends Component {
 import AuthContext from '../../context/auth-context';
 import React, { useContext } from 'react';
 
-const cockpit = props => {
+const cockpit = (props) => {
   const authContext = useContext(AuthContext);
 
   //using the context
   console.log(authContext.authenticated);
 };
 
-return (
-  <button onClick={authContext.login}>Log-in</button>}
-);
+return <button onClick={authContext.login}>Log-in</button>;
 ```
