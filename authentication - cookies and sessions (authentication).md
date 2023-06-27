@@ -100,3 +100,70 @@ exports.postLogout = async (req, res, next) => {
   });
 };
 ```
+
+---
+
+# authentication in nodejs
+
+## CREATE USER - SIGNUP
+
+```shell
+npm i bcryptjs
+```
+
+```js
+const bcrypt = require('bcryptjs');
+
+exports.postSignup = async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const confirmPassword = req.body.confirmPassword;
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (user) {
+      return res.json({ status: 'FAIL', data: 'User already exists' });
+    }
+    const hashedPassword = await bcrypt.hash(password, 12); //12 is the salt (rounds of hashing to be applied (12) is a secure number)
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      cart: { items: [] },
+    });
+    await newUser.save();
+    res.json({ status: 'OK', data: 'successfully created new user' });
+  } catch (err) {
+    console.log(err);
+  }
+};
+```
+
+## LOGIN USER
+
+- take password entered in form and let bcrypt "hash" it and see if it will equal the stored hash value
+
+```js
+const user = await User.findOne({ email: email });
+if (!user) {
+  return res.json({ error: 'user does not exist' });
+}
+
+try {
+  const result = await bcrypt.compare(password, user.password); //compare password user entered..
+  //the result of compare() is a promise where it returns 'true' if equal and 'false' if not equal.
+  if (result) {
+    req.session.isLoggedIn = true;
+    req.session.user = user;
+
+    return req.session.save((err) => {
+      console.log(err);
+      //ensure session was created before redirect()
+      // res.redirect('/');
+      res.json({ status: 'LOGGED IN', done: true });
+    });
+  }
+  res.json({ status: 'ERROR', message: 'incorrect credentials' });
+} catch (err) {
+  console.log(err);
+}
+```

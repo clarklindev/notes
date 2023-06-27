@@ -5,12 +5,31 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 //this hook renders. This function has no specific dependencies (So an empty array is added as a second argument to use callback).
 //this function never gets recreated and we never have inefficient render cycles or infinite loops.
 
+/*
+NOTE: POST requests
+
+- JSON.stringify() converts js object into json
+
+fetch('url/api', {
+  method: "POST",
+  body: JSON.stringify({title:"a codepen post", content:"created via codepen"}),
+  headers:{"Content-Type":"application/json"}
+})
+
+sendRequest(
+  url/api, 
+  "POST", 
+  JSON.stringify({title:"a codepen post", "content":"created via codepen"}),
+  {"Content-Type":"application/json"}
+)
+
+*/
+
 // usage
 /*
   import { useHttpClient } from '../../shared/hooks/http-hook';
 
   const { isLoading, error, sendRequest, clearError } = useHttpClient();
-
 
 */
 
