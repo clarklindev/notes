@@ -46,11 +46,10 @@ npm i cors
 
 - on the server
 
-```
+```js
 const cors = require('cors');
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
-
 ```
