@@ -1,5 +1,9 @@
 # MARKDOWN
 
+### youtube videos
+- [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/youtube-video-id-here/0.jpg)](https://www.youtube.com/watch?v=youtube-video-id-here)
+- replace "youtube-video-id-here" with the actual youtube video id
+
 - in github click 'RAW' for source
 - Open in VisualStudio Code for live preview
 - vscode has a extension called "Auto Open Markdown Previewer" used for Github readme files
