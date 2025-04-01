@@ -20,3 +20,11 @@ to publish as public
 ```shell
 npm publish --access=public
 ```
+
+# the correct order
+
+## 1. auto version incrementing
+- npm version patch
+
+## 2. publish the package
+- npm publish
